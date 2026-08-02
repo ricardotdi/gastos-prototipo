@@ -475,13 +475,88 @@ document.querySelectorAll('.cat-chip').forEach(chip=>{
   };
 });
 
+let nativeStream = null;
+let nativeVideoEl = null;
+let nativeDetectLoop = null;
+
+function onQrDecodedText(decodedText){
+  const resultado = parseFaturaQR(decodedText);
+  if(resultado.valido){
+    pararScanner();
+    document.getElementById('qr-reader').innerHTML = '';
+    scanStatus.textContent = '✓ Fatura lida com sucesso';
+    confirmFields.style.display = 'block';
+    document.getElementById('valorDetetado').value = resultado.total.toFixed(2);
+    document.getElementById('comercianteInput').value = '';
+  } else {
+    scanStatus.textContent = 'QR lido mas sem valor total reconhecido — tenta manual.';
+  }
+}
+
 function iniciarScanner(){
+  scanStatus.textContent = 'A abrir câmara…';
+  if('BarcodeDetector' in window){
+    iniciarScannerNativo();
+  } else {
+    iniciarScannerHtml5Qrcode();
+  }
+}
+
+// Deteção via BarcodeDetector nativo do browser (ML Kit no Chrome/Android),
+// muito mais robusta que o decoder JS puro para QR reais/degradados.
+async function iniciarScannerNativo(){
+  let detector;
+  try{
+    detector = new BarcodeDetector({ formats: ['qr_code'] });
+  } catch(e){
+    iniciarScannerHtml5Qrcode();
+    return;
+  }
+  try{
+    nativeStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
+    });
+  } catch(err){
+    scanStatus.textContent = 'Sem acesso à câmara. Usa a opção manual.';
+    console.error(err);
+    return;
+  }
+
+  const reader = document.getElementById('qr-reader');
+  reader.innerHTML = '';
+  nativeVideoEl = document.createElement('video');
+  nativeVideoEl.setAttribute('playsinline', '');
+  nativeVideoEl.setAttribute('muted', '');
+  nativeVideoEl.style.width = '100%';
+  nativeVideoEl.style.display = 'block';
+  nativeVideoEl.srcObject = nativeStream;
+  reader.appendChild(nativeVideoEl);
+  await nativeVideoEl.play();
+
+  const detectFrame = async () => {
+    if(!nativeStream) return;
+    try{
+      const codes = await detector.detect(nativeVideoEl);
+      if(codes.length > 0){
+        onQrDecodedText(codes[0].rawValue);
+        if(!nativeStream) return; // já parou o scanner com sucesso
+      }
+    } catch(e){ /* erro de deteção por frame, ignorar */ }
+    nativeDetectLoop = requestAnimationFrame(detectFrame);
+  };
+  nativeDetectLoop = requestAnimationFrame(detectFrame);
+}
+
+// Fallback para browsers sem BarcodeDetector nativo (ex: iOS Safari).
+function iniciarScannerHtml5Qrcode(){
   html5QrCode = new Html5Qrcode("qr-reader", {
     formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
-    experimentalFeatures: { useBarCodeDetectorIfSupported: false },
     verbose: false
   });
-  scanStatus.textContent = 'A abrir câmara…';
   html5QrCode.start(
     { facingMode: "environment" },
     {
@@ -494,19 +569,7 @@ function iniciarScanner(){
         height: { ideal: 1080 }
       }
     },
-    (decodedText) => {
-      const resultado = parseFaturaQR(decodedText);
-      if(resultado.valido){
-        pararScanner();
-        document.getElementById('qr-reader').innerHTML = '';
-        scanStatus.textContent = '✓ Fatura lida com sucesso';
-        confirmFields.style.display = 'block';
-        document.getElementById('valorDetetado').value = resultado.total.toFixed(2);
-        document.getElementById('comercianteInput').value = '';
-      } else {
-        scanStatus.textContent = 'QR lido mas sem valor total reconhecido — tenta manual.';
-      }
-    },
+    (decodedText) => onQrDecodedText(decodedText),
     () => { /* erro de leitura por frame, ignorar */ }
   ).catch(err=>{
     scanStatus.textContent = 'Sem acesso à câmara. Usa a opção manual.';
@@ -515,6 +578,15 @@ function iniciarScanner(){
 }
 
 function pararScanner(){
+  if(nativeDetectLoop){
+    cancelAnimationFrame(nativeDetectLoop);
+    nativeDetectLoop = null;
+  }
+  if(nativeStream){
+    nativeStream.getTracks().forEach(t=>t.stop());
+    nativeStream = null;
+  }
+  nativeVideoEl = null;
   if(html5QrCode){
     html5QrCode.stop().catch(()=>{});
     html5QrCode = null;
