@@ -483,8 +483,17 @@ function iniciarScanner(){
   });
   scanStatus.textContent = 'A abrir câmara…';
   html5QrCode.start(
-    { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
-    { fps: 10, qrbox: 250, aspectRatio: 1.0 },
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: 250,
+      aspectRatio: 1.0,
+      videoConstraints: {
+        facingMode: "environment",
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
+    },
     (decodedText) => {
       const resultado = parseFaturaQR(decodedText);
       if(resultado.valido){
