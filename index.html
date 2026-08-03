@@ -6,6 +6,9 @@
 <title>Gastos — Protótipo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --ink:#12202E;
@@ -250,29 +253,115 @@
     color:var(--navy);
     min-height:16px;
   }
+
+  .login-screen{
+    position:fixed;inset:0;
+    background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:100;
+  }
+  .login-card{
+    max-width:340px;
+    text-align:center;
+    color:#fff;
+  }
+  .login-card .eyebrow{
+    color:var(--gold-soft);
+    margin-bottom:8px;
+  }
+  .login-title{
+    font-size:28px;
+    margin:0 0 10px;
+  }
+  .login-sub{
+    font-size:14px;
+    color:rgba(255,255,255,.75);
+    margin:0 0 28px;
+    line-height:1.5;
+  }
+  .google-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:#fff;
+    color:var(--ink);
+    border:none;
+    border-radius:12px;
+    padding:13px 22px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .google-btn svg{width:18px;height:18px;}
+  .login-status{
+    margin-top:16px;
+    font-size:12px;
+    color:rgba(255,255,255,.65);
+    min-height:16px;
+  }
+  .user-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:2px;
+    font-size:12px;
+    color:rgba(255,255,255,.65);
+  }
+  .user-bar .sair-link{
+    color:var(--gold-soft);
+    text-decoration:underline;
+    cursor:pointer;
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="eyebrow">Protótipo · controlo pessoal</div>
-  <h1>Os meus gastos</h1>
-  <div class="total-card">
-    <div class="total-value" id="totalMes">0,00 €</div>
-    <div class="total-label" id="mesLabel">a carregar…</div>
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="eyebrow">Protótipo · controlo pessoal</div>
+    <h1 class="login-title">Os meus gastos</h1>
+    <p class="login-sub">Inicia sessão com o Google para guardares os teus gastos e os sincronizares entre dispositivos.</p>
+    <button class="google-btn" id="btnEntrarGoogle">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#FFC107" d="M43.6 20.5h-1.9V20.4H24v7.2h11.3c-1.6 4.6-6 7.9-11.3 7.9-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.1-5.1C34.6 6.2 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l5.9 4.3C13.8 15.1 18.5 12.4 24 12.4c3.1 0 5.8 1.1 8 3l5.1-5.1C34.6 6.2 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.1-5.1l-6.5-5.5C29.6 35.1 26.9 36 24 36c-5.2 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.5H24v7.2h11.3c-.8 2.3-2.2 4.1-4.1 5.4l6.5 5.5C42.1 34.9 44 29.9 44 24c0-1.2-.1-2.4-.4-3.5z"/>
+      </svg>
+      Entrar com Google
+    </button>
+    <div class="login-status" id="loginStatus"></div>
   </div>
-</header>
+</div>
 
-<main>
-  <div id="chart-wrap">
-    <canvas id="catChart" height="160"></canvas>
-  </div>
+<div id="appShell" style="display:none">
+  <header>
+    <div class="eyebrow">Protótipo · controlo pessoal</div>
+    <h1>Os meus gastos</h1>
+    <div class="user-bar">
+      <span id="userEmailLabel"></span>
+      <span class="sair-link" id="btnSair">Sair</span>
+    </div>
+    <div class="total-card">
+      <div class="total-value" id="totalMes">0,00 €</div>
+      <div class="total-label" id="mesLabel">a carregar…</div>
+    </div>
+  </header>
 
-  <div class="section-title">Movimentos recentes</div>
-  <div id="lista"></div>
-</main>
+  <main>
+    <div id="chart-wrap">
+      <canvas id="catChart" height="160"></canvas>
+    </div>
 
-<button class="fab" id="openScan">＋</button>
+    <div class="section-title">Movimentos recentes</div>
+    <div id="lista"></div>
+  </main>
+
+  <button class="fab" id="openScan">＋</button>
+</div>
 
 <div class="overlay" id="overlay">
   <div class="sheet">
@@ -317,20 +406,102 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'gastos_prototipo_v1';
-let gastos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+const firebaseConfig = {
+  apiKey: "AIzaSyBNoZFR1c-LlQZgIHql0Jy9nReO1p3QD7s",
+  authDomain: "gastos-prototipo-ef57a.firebaseapp.com",
+  projectId: "gastos-prototipo-ef57a",
+  storageBucket: "gastos-prototipo-ef57a.firebasestorage.app",
+  messagingSenderId: "203222474528",
+  appId: "1:203222474528:web:7b16a979ab7e7ddcc8c145"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+db.enablePersistence({ synchronizeTabs: true }).catch(()=>{ /* não crítico, ignora */ });
+
+let gastos = [];
 let html5QrCode = null;
 let catAtiva = 'Alimentação';
 let chart = null;
+let currentUser = null;
+let currentGroupId = null;
+let unsubscribeGastos = null;
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
 const confirmFields = document.getElementById('confirmFields');
 const manualFields = document.getElementById('manualFields');
+const loginScreen = document.getElementById('loginScreen');
+const appShell = document.getElementById('appShell');
+const loginStatus = document.getElementById('loginStatus');
 
-function salvar(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos));
+document.getElementById('btnEntrarGoogle').onclick = () => {
+  loginStatus.textContent = 'A abrir sessão…';
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(err => {
+      console.error(err);
+      loginStatus.textContent = 'Não foi possível iniciar sessão. Tenta novamente.';
+    });
+};
+
+document.getElementById('btnSair').onclick = () => {
+  auth.signOut();
+};
+
+// Cada utilizador começa num "grupo" pessoal (documento com o seu uid).
+// Mais tarde, um convite de parceiro pode juntar duas pessoas ao mesmo grupo.
+async function resolverGrupo(user){
+  const userRef = db.collection('users').doc(user.uid);
+  const userSnap = await userRef.get();
+  if(userSnap.exists && userSnap.data().groupId){
+    return userSnap.data().groupId;
+  }
+  const groupId = user.uid;
+  await db.collection('groups').doc(groupId).set({
+    members: [user.uid],
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+  await userRef.set({
+    email: user.email,
+    displayName: user.displayName,
+    groupId
+  }, { merge: true });
+  return groupId;
 }
+
+function ligarSincronizacao(groupId){
+  if(unsubscribeGastos) unsubscribeGastos();
+  unsubscribeGastos = db.collection('groups').doc(groupId).collection('gastos')
+    .orderBy('data', 'desc')
+    .onSnapshot(snapshot => {
+      gastos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      render();
+    }, err => {
+      console.error('Erro a sincronizar gastos:', err);
+    });
+}
+
+auth.onAuthStateChanged(async (user) => {
+  currentUser = user;
+  if(user){
+    loginScreen.style.display = 'none';
+    appShell.style.display = 'block';
+    document.getElementById('userEmailLabel').textContent = user.displayName || user.email || '';
+    try{
+      currentGroupId = await resolverGrupo(user);
+      ligarSincronizacao(currentGroupId);
+    } catch(err){
+      console.error('Erro a configurar conta:', err);
+    }
+  } else {
+    if(unsubscribeGastos){ unsubscribeGastos(); unsubscribeGastos = null; }
+    currentGroupId = null;
+    gastos = [];
+    loginScreen.style.display = 'flex';
+    appShell.style.display = 'none';
+    loginStatus.textContent = '';
+  }
+});
 
 function mesAtualLabel(){
   const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -371,7 +542,7 @@ function render(){
         </div>
         <div style="display:flex;align-items:center;">
           <span class="amount">${formatoEuro(g.valor)}</span>
-          <button class="del" onclick="removerGasto(${g.id})">✕</button>
+          <button class="del" onclick="removerGasto('${g.id}')">✕</button>
         </div>
       </div>`;
     }).join('');
@@ -415,9 +586,9 @@ function renderChart(doMes){
 }
 
 window.removerGasto = function(id){
-  gastos = gastos.filter(g=>g.id !== id);
-  salvar();
-  render();
+  if(!currentGroupId) return;
+  db.collection('groups').doc(currentGroupId).collection('gastos').doc(id).delete()
+    .catch(err => console.error('Erro a remover gasto:', err));
 };
 
 // ---- Parsing do QR Code das faturas portuguesas ----
@@ -599,19 +770,19 @@ document.getElementById('confirmAdd').onclick = () => {
     alert('Introduz um valor válido.');
     return;
   }
-  gastos.push({
-    id: Date.now(),
+  if(!currentGroupId || !currentUser) return;
+  db.collection('groups').doc(currentGroupId).collection('gastos').add({
     valor,
     categoria: catAtiva,
     comerciante: document.getElementById('comercianteInput').value.trim(),
-    data: new Date().toISOString()
+    data: new Date().toISOString(),
+    criadoPor: currentUser.uid
+  }).catch(err => {
+    console.error('Erro a adicionar gasto:', err);
+    alert('Não foi possível guardar o gasto. Tenta novamente.');
   });
-  salvar();
   overlay.classList.remove('open');
-  render();
 };
-
-render();
 </script>
 </body>
 </html>
