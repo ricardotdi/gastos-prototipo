@@ -360,6 +360,12 @@
       <canvas id="catChart" height="160"></canvas>
     </div>
 
+    <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Despesas fixas</span>
+      <span class="sair-link" id="btnAddRecorrente" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">+ adicionar</span>
+    </div>
+    <div id="listaRecorrentes"></div>
+
     <div class="section-title">Movimentos recentes</div>
     <div id="lista"></div>
   </main>
@@ -441,6 +447,36 @@
   </div>
 </div>
 
+<div class="overlay" id="recorrenteOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeRecorrenteSheet">✕</button>
+    <h2>Nova despesa fixa</h2>
+    <p class="hint">Para gastos que se repetem todo o mês (renda, subscrições, etc.), sem precisares de fatura.</p>
+
+    <div class="form-row">
+      <label>Descrição</label>
+      <input type="text" id="recDescricao" placeholder="Ex: Renda, Netflix, Ginásio">
+    </div>
+    <div class="form-row">
+      <label>Valor mensal (€)</label>
+      <input type="number" step="0.01" id="recValor" placeholder="0,00">
+    </div>
+    <div class="form-row">
+      <label>Categoria</label>
+      <div class="cats" id="catChipsRecorrente">
+        <div class="cat-chip active" data-cat="Casa">Casa</div>
+        <div class="cat-chip" data-cat="Alimentação">Alimentação</div>
+        <div class="cat-chip" data-cat="Transporte">Transporte</div>
+        <div class="cat-chip" data-cat="Saúde">Saúde</div>
+        <div class="cat-chip" data-cat="Lazer">Lazer</div>
+        <div class="cat-chip" data-cat="Outros">Outros</div>
+      </div>
+    </div>
+    <button class="confirm-btn" id="btnGuardarRecorrente">Guardar despesa fixa</button>
+    <div class="scan-status" id="recorrenteStatus"></div>
+  </div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBNoZFR1c-LlQZgIHql0Jy9nReO1p3QD7s",
@@ -456,12 +492,15 @@ const db = firebase.firestore();
 db.enablePersistence({ synchronizeTabs: true }).catch(()=>{ /* não crítico, ignora */ });
 
 let gastos = [];
+let recorrentes = [];
 let html5QrCode = null;
 let catAtiva = 'Alimentação';
+let catAtivaRecorrente = 'Casa';
 let chart = null;
 let currentUser = null;
 let currentGroupId = null;
 let unsubscribeGastos = null;
+let unsubscribeRecorrentes = null;
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -505,6 +544,40 @@ document.getElementById('btnAbrirJuntar').onclick = () => {
 
 document.getElementById('closeJoinSheet').onclick = () => {
   joinOverlay.classList.remove('open');
+};
+
+const recorrenteOverlay = document.getElementById('recorrenteOverlay');
+const recorrenteStatus = document.getElementById('recorrenteStatus');
+
+document.getElementById('btnAddRecorrente').onclick = () => {
+  document.getElementById('recDescricao').value = '';
+  document.getElementById('recValor').value = '';
+  recorrenteStatus.textContent = '';
+  recorrenteOverlay.classList.add('open');
+};
+
+document.getElementById('closeRecorrenteSheet').onclick = () => {
+  recorrenteOverlay.classList.remove('open');
+};
+
+document.getElementById('btnGuardarRecorrente').onclick = () => {
+  const descricao = document.getElementById('recDescricao').value.trim();
+  const valor = parseFloat(document.getElementById('recValor').value);
+  if(!descricao){ recorrenteStatus.textContent = 'Introduz uma descrição.'; return; }
+  if(isNaN(valor) || valor <= 0){ recorrenteStatus.textContent = 'Introduz um valor válido.'; return; }
+  if(!currentGroupId || !currentUser) return;
+  db.collection('groups').doc(currentGroupId).collection('recorrentes').add({
+    descricao,
+    valor,
+    categoria: catAtivaRecorrente,
+    criadoPor: currentUser.uid,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    recorrenteOverlay.classList.remove('open');
+  }).catch(err => {
+    console.error('Erro a guardar despesa fixa:', err);
+    recorrenteStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+  });
 };
 
 function gerarCodigoConvite(){
@@ -596,6 +669,15 @@ function ligarSincronizacao(groupId){
     }, err => {
       console.error('Erro a sincronizar gastos:', err);
     });
+
+  if(unsubscribeRecorrentes) unsubscribeRecorrentes();
+  unsubscribeRecorrentes = db.collection('groups').doc(groupId).collection('recorrentes')
+    .onSnapshot(snapshot => {
+      recorrentes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      render();
+    }, err => {
+      console.error('Erro a sincronizar despesas fixas:', err);
+    });
 }
 
 auth.onAuthStateChanged(async (user) => {
@@ -612,8 +694,10 @@ auth.onAuthStateChanged(async (user) => {
     }
   } else {
     if(unsubscribeGastos){ unsubscribeGastos(); unsubscribeGastos = null; }
+    if(unsubscribeRecorrentes){ unsubscribeRecorrentes(); unsubscribeRecorrentes = null; }
     currentGroupId = null;
     gastos = [];
+    recorrentes = [];
     loginScreen.style.display = 'flex';
     appShell.style.display = 'none';
     loginStatus.textContent = '';
@@ -638,14 +722,45 @@ function gastosDoMes(){
   });
 }
 
+// As despesas fixas contam sempre para o mês atual, sem precisares de as
+// registar manualmente todos os meses.
+function recorrentesVirtuais(){
+  const agora = new Date().toISOString();
+  return recorrentes.map(r => ({
+    id: 'rec-' + r.id,
+    valor: r.valor,
+    categoria: r.categoria,
+    comerciante: r.descricao,
+    data: agora,
+    recorrente: true
+  }));
+}
+
 function render(){
-  const doMes = gastosDoMes();
+  const recVirtuais = recorrentesVirtuais();
+  const doMes = gastosDoMes().concat(recVirtuais);
   const total = doMes.reduce((s,g)=>s+g.valor,0);
   document.getElementById('totalMes').textContent = formatoEuro(total);
   document.getElementById('mesLabel').textContent = 'gasto em ' + mesAtualLabel();
 
+  const listaRec = document.getElementById('listaRecorrentes');
+  if(recorrentes.length === 0){
+    listaRec.innerHTML = '<div class="empty">Sem despesas fixas.<br>Ex: renda, subscrições, ginásio.</div>';
+  } else {
+    listaRec.innerHTML = recorrentes.map(r => `<div class="entry">
+      <div class="meta">
+        <span class="cat">${r.categoria} · ${r.descricao}</span>
+        <span class="date">todos os meses</span>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <span class="amount">${formatoEuro(r.valor)}</span>
+        <button class="del" onclick="removerRecorrente('${r.id}')">✕</button>
+      </div>
+    </div>`).join('');
+  }
+
   const lista = document.getElementById('lista');
-  const ordenado = [...gastos].sort((a,b)=> new Date(b.data) - new Date(a.data));
+  const ordenado = [...gastos, ...recVirtuais].sort((a,b)=> new Date(b.data) - new Date(a.data));
   if(ordenado.length === 0){
     lista.innerHTML = '<div class="empty">Ainda sem movimentos.<br>Toca em + para registar a primeira fatura.</div>';
   } else {
@@ -654,12 +769,12 @@ function render(){
       const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
       return `<div class="entry">
         <div class="meta">
-          <span class="cat">${g.categoria}${g.comerciante ? ' · '+g.comerciante : ''}</span>
+          <span class="cat">${g.categoria}${g.comerciante ? ' · '+g.comerciante : ''}${g.recorrente ? ' · <span style="color:var(--gold);">fixo</span>' : ''}</span>
           <span class="date">${dataStr}</span>
         </div>
         <div style="display:flex;align-items:center;">
           <span class="amount">${formatoEuro(g.valor)}</span>
-          <button class="del" onclick="removerGasto('${g.id}')">✕</button>
+          ${g.recorrente ? '' : `<button class="del" onclick="removerGasto('${g.id}')">✕</button>`}
         </div>
       </div>`;
     }).join('');
@@ -706,6 +821,13 @@ window.removerGasto = function(id){
   if(!currentGroupId) return;
   db.collection('groups').doc(currentGroupId).collection('gastos').doc(id).delete()
     .catch(err => console.error('Erro a remover gasto:', err));
+};
+
+window.removerRecorrente = function(id){
+  if(!currentGroupId) return;
+  if(!confirm('Remover esta despesa fixa? Deixa de contar a partir de agora.')) return;
+  db.collection('groups').doc(currentGroupId).collection('recorrentes').doc(id).delete()
+    .catch(err => console.error('Erro a remover despesa fixa:', err));
 };
 
 // ---- Parsing do QR Code das faturas portuguesas ----
@@ -755,11 +877,19 @@ document.getElementById('manualValor').addEventListener('input', (e)=>{
   document.getElementById('valorDetetado').value = e.target.value;
 });
 
-document.querySelectorAll('.cat-chip').forEach(chip=>{
+document.querySelectorAll('#catChips .cat-chip').forEach(chip=>{
   chip.onclick = ()=>{
-    document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('#catChips .cat-chip').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
     catAtiva = chip.dataset.cat;
+  };
+});
+
+document.querySelectorAll('#catChipsRecorrente .cat-chip').forEach(chip=>{
+  chip.onclick = ()=>{
+    document.querySelectorAll('#catChipsRecorrente .cat-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    catAtivaRecorrente = chip.dataset.cat;
   };
 });
 
