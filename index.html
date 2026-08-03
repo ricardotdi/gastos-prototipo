@@ -633,6 +633,7 @@ let currentGroupId = null;
 let unsubscribeGastos = null;
 let unsubscribeRecorrentes = null;
 let unsubscribeGrupo = null;
+let nifDetetado = null;
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -1370,6 +1371,7 @@ document.getElementById('openScan').onclick = () => {
   confirmFields.style.display = 'none';
   manualFields.style.display = 'none';
   document.getElementById('dataInput').value = '';
+  nifDetetado = null;
   scanStatus.textContent = '';
   iniciarScanner();
 };
@@ -1387,6 +1389,7 @@ document.getElementById('manualToggle').onclick = () => {
   document.getElementById('valorDetetado').value = '';
   document.getElementById('comercianteInput').value = '';
   document.getElementById('dataInput').value = '';
+  nifDetetado = null;
   scanStatus.textContent = '';
 };
 
@@ -1427,6 +1430,7 @@ function onQrDecodedText(decodedText){
     confirmFields.style.display = 'block';
     document.getElementById('valorDetetado').value = resultado.total.toFixed(2);
     document.getElementById('comercianteInput').value = '';
+    nifDetetado = resultado.nifEmitente;
   } else {
     scanStatus.textContent = 'QR lido mas sem valor total reconhecido — tenta manual.';
   }
@@ -1539,6 +1543,18 @@ function dataInputParaISO(valorInput){
   return new Date(y, m - 1, d, 12, 0, 0).toISOString();
 }
 
+// Deteta se já existe um gasto com o mesmo NIF, valor e dia — só se aplica a
+// gastos vindos de QR (têm NIF do emitente); entradas manuais não são verificadas.
+function encontrarGastoDuplicado(nif, valor, dataISO){
+  if(!nif) return null;
+  const diaAlvo = new Date(dataISO).toDateString();
+  return gastos.find(g =>
+    g.nif === nif &&
+    Math.abs(g.valor - valor) < 0.005 &&
+    new Date(g.data).toDateString() === diaAlvo
+  ) || null;
+}
+
 document.getElementById('confirmAdd').onclick = () => {
   const valor = parseFloat(document.getElementById('valorDetetado').value);
   if(isNaN(valor) || valor <= 0){
@@ -1547,11 +1563,20 @@ document.getElementById('confirmAdd').onclick = () => {
   }
   if(!currentGroupId || !currentUser) return;
   const dataEscolhida = document.getElementById('dataInput').value;
+  const dataFinal = dataEscolhida ? dataInputParaISO(dataEscolhida) : new Date().toISOString();
+
+  const duplicado = encontrarGastoDuplicado(nifDetetado, valor, dataFinal);
+  if(duplicado){
+    const continuar = confirm(`Já tens um gasto igual registado (mesmo NIF, ${formatoEuro(valor)}, no mesmo dia). Queres adicionar mesmo assim?`);
+    if(!continuar) return;
+  }
+
   db.collection('groups').doc(currentGroupId).collection('gastos').add({
     valor,
     categoria: catAtiva,
     comerciante: document.getElementById('comercianteInput').value.trim(),
-    data: dataEscolhida ? dataInputParaISO(dataEscolhida) : new Date().toISOString(),
+    data: dataFinal,
+    nif: nifDetetado || null,
     criadoPor: currentUser.uid
   }).catch(err => {
     console.error('Erro a adicionar gasto:', err);
