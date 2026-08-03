@@ -308,6 +308,38 @@
     color:rgba(255,255,255,.65);
     min-height:16px;
   }
+  .login-divider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:22px 0;
+    color:rgba(255,255,255,.4);
+    font-size:12px;
+  }
+  .login-divider::before, .login-divider::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:rgba(255,255,255,.2);
+  }
+  .login-card .form-row label{
+    color:rgba(255,255,255,.6);
+  }
+  .login-toggle-mode, .login-forgot{
+    font-size:12px;
+    color:rgba(255,255,255,.6);
+    margin:14px 0 0;
+    cursor:pointer;
+  }
+  .login-forgot{
+    text-decoration:underline;
+    color:var(--gold-soft);
+  }
+  .login-toggle-mode .link-inline{
+    text-decoration:underline;
+    color:var(--gold-soft);
+    font-weight:600;
+  }
   .user-bar{
     display:flex;
     align-items:center;
@@ -378,7 +410,7 @@
     <img src="Fin_plus_logo_euro.png" alt="Fin+" style="height:64px; margin-bottom:16px;">
     <div class="eyebrow">Finanças Positivas</div>
     <h1 class="login-title">Os meus gastos</h1>
-    <p class="login-sub">Inicia sessão com o Google para guardares os teus gastos e os sincronizares entre dispositivos.</p>
+    <p class="login-sub">Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.</p>
     <button class="google-btn" id="btnEntrarGoogle">
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <path fill="#FFC107" d="M43.6 20.5h-1.9V20.4H24v7.2h11.3c-1.6 4.6-6 7.9-11.3 7.9-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.1-5.1C34.6 6.2 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/>
@@ -388,6 +420,22 @@
       </svg>
       Entrar com Google
     </button>
+
+    <div class="login-divider"><span>ou</span></div>
+
+    <div class="form-row" style="text-align:left;">
+      <label>Email</label>
+      <input type="email" id="emailInput" placeholder="o-teu-email@exemplo.com">
+    </div>
+    <div class="form-row" style="text-align:left;">
+      <label>Palavra-passe</label>
+      <input type="password" id="passwordInput" placeholder="••••••••">
+    </div>
+    <button class="confirm-btn" id="btnEntrarEmail" style="margin-top:14px;">Entrar</button>
+
+    <p class="login-toggle-mode" id="loginToggleMode">Ainda não tens conta? <span class="link-inline">Criar conta</span></p>
+    <p class="login-forgot" id="btnEsqueciPassword">Esqueci-me da password</p>
+
     <div class="login-status" id="loginStatus"></div>
   </div>
 </div>
@@ -662,6 +710,67 @@ document.getElementById('btnEntrarGoogle').onclick = () => {
       console.error(err);
       loginStatus.textContent = 'Não foi possível iniciar sessão. Tenta novamente.';
     });
+};
+
+// ---- Login por email + palavra-passe ----
+let modoAuthEmail = 'entrar';
+
+function mensagemErroAuth(codigo){
+  const mapa = {
+    'auth/invalid-email': 'Email inválido.',
+    'auth/user-not-found': 'Não existe conta com este email.',
+    'auth/wrong-password': 'Palavra-passe incorreta.',
+    'auth/invalid-credential': 'Email ou palavra-passe incorretos.',
+    'auth/email-already-in-use': 'Já existe uma conta com este email — experimenta entrar em vez de criar conta.',
+    'auth/weak-password': 'A palavra-passe precisa de pelo menos 6 carateres.',
+    'auth/missing-password': 'Introduz uma palavra-passe.',
+    'auth/too-many-requests': 'Demasiadas tentativas. Tenta mais tarde.'
+  };
+  return mapa[codigo] || 'Não foi possível concluir. Tenta novamente.';
+}
+
+function atualizarModoAuthEmail(){
+  document.getElementById('btnEntrarEmail').textContent = modoAuthEmail === 'entrar' ? 'Entrar' : 'Criar conta';
+  document.getElementById('loginToggleMode').innerHTML = modoAuthEmail === 'entrar'
+    ? 'Ainda não tens conta? <span class="link-inline">Criar conta</span>'
+    : 'Já tens conta? <span class="link-inline">Entrar</span>';
+  loginStatus.textContent = '';
+}
+
+document.getElementById('loginToggleMode').onclick = () => {
+  modoAuthEmail = modoAuthEmail === 'entrar' ? 'criar' : 'entrar';
+  atualizarModoAuthEmail();
+};
+
+document.getElementById('btnEntrarEmail').onclick = () => {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  if(!email || !password){
+    loginStatus.textContent = 'Preenche o email e a palavra-passe.';
+    return;
+  }
+  loginStatus.textContent = modoAuthEmail === 'entrar' ? 'A entrar…' : 'A criar conta…';
+  const acao = modoAuthEmail === 'entrar'
+    ? auth.signInWithEmailAndPassword(email, password)
+    : auth.createUserWithEmailAndPassword(email, password);
+  acao.catch(err => {
+    console.error(err);
+    loginStatus.textContent = mensagemErroAuth(err.code);
+  });
+};
+
+document.getElementById('btnEsqueciPassword').onclick = () => {
+  const email = document.getElementById('emailInput').value.trim();
+  if(!email){
+    loginStatus.textContent = 'Escreve o teu email em cima e toca aqui outra vez.';
+    return;
+  }
+  auth.sendPasswordResetEmail(email).then(() => {
+    loginStatus.textContent = 'Email de recuperação enviado — verifica a tua caixa de entrada.';
+  }).catch(err => {
+    console.error(err);
+    loginStatus.textContent = mensagemErroAuth(err.code);
+  });
 };
 
 const menuOverlay = document.getElementById('menuOverlay');
