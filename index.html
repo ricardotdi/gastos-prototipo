@@ -62,6 +62,11 @@
     color:var(--gold-soft);
     margin-top:2px;
   }
+  .comparacao-mensal{
+    font-size:12px;
+    color:rgba(255,255,255,.7);
+    margin-top:6px;
+  }
   .month-nav{
     display:flex;
     align-items:center;
@@ -394,6 +399,7 @@
     <div class="total-card">
       <div class="total-value" id="totalMes">0,00 €</div>
       <div class="total-label" id="mesLabel">a carregar…</div>
+      <div class="comparacao-mensal" id="comparacaoMensal"></div>
     </div>
   </header>
 
@@ -995,12 +1001,54 @@ function recorrentesVirtuais(){
   }));
 }
 
+// Total de um mês qualquer (ano, mes com mes 0-11), incluindo despesas fixas
+// que já existiam nessa altura — permite comparar meses de forma justa.
+function totalDoMes(ano, mes){
+  const totalReal = gastos.filter(g => {
+    const d = new Date(g.data);
+    return d.getFullYear() === ano && d.getMonth() === mes;
+  }).reduce((s, g) => s + g.valor, 0);
+
+  const inicioMesSeguinte = new Date(ano, mes + 1, 1);
+  const totalRecorrente = recorrentes.filter(r => {
+    if(!r.criadoEm || !r.criadoEm.toDate) return true; // ainda sem timestamp confirmado do servidor
+    return r.criadoEm.toDate() < inicioMesSeguinte;
+  }).reduce((s, r) => s + r.valor, 0);
+
+  return totalReal + totalRecorrente;
+}
+
+function totalMesAnterior(){
+  const agora = new Date();
+  let mes = agora.getMonth() - 1;
+  let ano = agora.getFullYear();
+  if(mes < 0){ mes = 11; ano -= 1; }
+  return totalDoMes(ano, mes);
+}
+
+function renderComparacaoMensal(totalAtual){
+  const el = document.getElementById('comparacaoMensal');
+  const totalAnterior = totalMesAnterior();
+  if(totalAnterior <= 0){
+    el.textContent = '';
+    return;
+  }
+  const diferenca = totalAtual - totalAnterior;
+  const percent = (diferenca / totalAnterior) * 100;
+  const subiu = diferenca > 0;
+  const cor = subiu ? '#E8A695' : '#8FCBAA';
+  const seta = subiu ? '▲' : (diferenca < 0 ? '▼' : '•');
+  const sinal = subiu ? '+' : '';
+  el.innerHTML = `<span style="color:${cor};">${seta} ${sinal}${percent.toFixed(0)}%</span> que o mês passado (${formatoEuro(totalAnterior)})`;
+}
+
 function render(){
   const recVirtuais = recorrentesVirtuais();
   const doMes = gastosDoMes().concat(recVirtuais);
   const total = doMes.reduce((s,g)=>s+g.valor,0);
   document.getElementById('totalMes').textContent = formatoEuro(total);
   document.getElementById('mesLabel').textContent = 'gasto em ' + mesAtualLabel();
+  renderComparacaoMensal(total);
 
   renderOrcamentos(doMes);
 
