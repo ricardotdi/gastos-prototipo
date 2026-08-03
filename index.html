@@ -450,6 +450,10 @@
         <input type="text" id="comercianteInput" placeholder="Nome da loja">
       </div>
       <div class="form-row">
+        <label>Data (opcional — em branco fica hoje)</label>
+        <input type="date" id="dataInput">
+      </div>
+      <div class="form-row">
         <label>Categoria</label>
         <div class="cats" id="catChips"></div>
       </div>
@@ -546,6 +550,19 @@
     <div class="manual-toggle" id="btnAddCategoriaRow">+ adicionar categoria</div>
     <button class="confirm-btn" id="btnGuardarCategorias">Guardar categorias</button>
     <div class="scan-status" id="categoriasStatus"></div>
+  </div>
+</div>
+
+<div class="overlay" id="editarDataOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeEditarDataSheet">✕</button>
+    <h2>Editar data do gasto</h2>
+    <div class="form-row">
+      <label>Data</label>
+      <input type="date" id="editarDataInput">
+    </div>
+    <button class="confirm-btn" id="btnGuardarDataEditada">Guardar</button>
+    <div class="scan-status" id="editarDataStatus"></div>
   </div>
 </div>
 
@@ -1014,7 +1031,7 @@ function render(){
       return `<div class="entry">
         <div class="meta">
           <span class="cat">${g.categoria}${g.comerciante ? ' · '+g.comerciante : ''}${g.recorrente ? ' · <span style="color:var(--gold);">fixo</span>' : ''}</span>
-          <span class="date">${dataStr}</span>
+          <span class="date">${dataStr}${g.recorrente ? '' : ` · <span style="text-decoration:underline; cursor:pointer;" onclick="abrirEditarData('${g.id}', '${g.data}')">editar</span>`}</span>
         </div>
         <div style="display:flex;align-items:center;">
           <span class="amount">${formatoEuro(g.valor)}</span>
@@ -1130,6 +1147,7 @@ document.getElementById('openScan').onclick = () => {
   overlay.classList.add('open');
   confirmFields.style.display = 'none';
   manualFields.style.display = 'none';
+  document.getElementById('dataInput').value = '';
   scanStatus.textContent = '';
   iniciarScanner();
 };
@@ -1146,6 +1164,7 @@ document.getElementById('manualToggle').onclick = () => {
   confirmFields.style.display = 'block';
   document.getElementById('valorDetetado').value = '';
   document.getElementById('comercianteInput').value = '';
+  document.getElementById('dataInput').value = '';
   scanStatus.textContent = '';
 };
 
@@ -1291,6 +1310,13 @@ function pararScanner(){
   }
 }
 
+// Converte um <input type="date"> (YYYY-MM-DD) num ISO string ao meio-dia local,
+// para evitar que a conversão para UTC empurre a data para o dia anterior/seguinte.
+function dataInputParaISO(valorInput){
+  const [y, m, d] = valorInput.split('-').map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0).toISOString();
+}
+
 document.getElementById('confirmAdd').onclick = () => {
   const valor = parseFloat(document.getElementById('valorDetetado').value);
   if(isNaN(valor) || valor <= 0){
@@ -1298,17 +1324,51 @@ document.getElementById('confirmAdd').onclick = () => {
     return;
   }
   if(!currentGroupId || !currentUser) return;
+  const dataEscolhida = document.getElementById('dataInput').value;
   db.collection('groups').doc(currentGroupId).collection('gastos').add({
     valor,
     categoria: catAtiva,
     comerciante: document.getElementById('comercianteInput').value.trim(),
-    data: new Date().toISOString(),
+    data: dataEscolhida ? dataInputParaISO(dataEscolhida) : new Date().toISOString(),
     criadoPor: currentUser.uid
   }).catch(err => {
     console.error('Erro a adicionar gasto:', err);
     alert('Não foi possível guardar o gasto. Tenta novamente.');
   });
   overlay.classList.remove('open');
+};
+
+let editarDataGastoId = null;
+const editarDataOverlay = document.getElementById('editarDataOverlay');
+const editarDataStatus = document.getElementById('editarDataStatus');
+
+window.abrirEditarData = function(id, dataISOAtual){
+  editarDataGastoId = id;
+  const d = new Date(dataISOAtual);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  document.getElementById('editarDataInput').value = `${yyyy}-${mm}-${dd}`;
+  editarDataStatus.textContent = '';
+  editarDataOverlay.classList.add('open');
+};
+
+document.getElementById('closeEditarDataSheet').onclick = () => {
+  editarDataOverlay.classList.remove('open');
+};
+
+document.getElementById('btnGuardarDataEditada').onclick = () => {
+  const valorInput = document.getElementById('editarDataInput').value;
+  if(!valorInput){ editarDataStatus.textContent = 'Escolhe uma data.'; return; }
+  if(!currentGroupId || !editarDataGastoId) return;
+  db.collection('groups').doc(currentGroupId).collection('gastos').doc(editarDataGastoId)
+    .update({ data: dataInputParaISO(valorInput) })
+    .then(() => {
+      editarDataOverlay.classList.remove('open');
+    }).catch(err => {
+      console.error('Erro a editar data:', err);
+      editarDataStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+    });
 };
 </script>
 </body>
