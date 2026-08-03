@@ -26,6 +26,15 @@ poupar tempo de configuração.
   O SDK compat foi escolhido de propósito porque o site não usa bundler nem
   `<script type="module">`, e mantém a API global `firebase.*` simples de
   integrar num script inline.
+  - **Decisão explícita do utilizador: nada de métodos de login pagos.**
+    Já foram testados e removidos/rejeitados: login por email+password (foi
+    implementado e depois removido a pedido — problema de fundo era entrega de
+    email em spam, não o código em si), Apple Sign-In (rejeitado por exigir
+    Apple Developer Program, 99 USD/ano), SMS/telefone (rejeitado por exigir
+    plano Blaze + custo por SMS). Microsoft e Facebook ficaram em aberto mas
+    exigem registo de app externo (Azure/Meta) da parte do utilizador — não
+    avançar com nenhum método novo de login sem confirmar primeiro que é
+    gratuito e sem assumir que o utilizador quer pagar por infraestrutura.
 - **Dados**: Cloud Firestore (plano gratuito Spark — dá para sempre neste tipo
   de app, ver conversa anterior sobre limites). Sincronização em tempo real via
   `onSnapshot`, sem `localStorage` como fonte de verdade (só cache offline do
@@ -107,13 +116,26 @@ Não há testes automatizados. Fluxo de verificação usado até agora:
 4. Pedir ao utilizador para testar em aba anónima no telemóvel (para evitar
    cache) e reportar o resultado.
 
+## Funcionalidades já implementadas
+
+Login Google + partilha de grupo (convites), despesas fixas/recorrentes,
+orçamento mensal por categoria com aviso visual, comparação com o mês anterior
+(geral e por categoria), ecrã de Histórico navegável por mês/trimestre/
+semestre/ano, categorias personalizáveis (criar/renomear com migração
+automática/remover), datas editáveis nos gastos, deteção de faturas
+duplicadas (mesmo NIF + valor + dia, só faz sentido em gastos vindos de QR),
+modal de confirmação próprio da app (não usar `confirm()`/`alert()` nativos do
+browser — mostram sempre o domínio do site e não são personalizáveis).
+
 ## Próximos passos identificados (backlog)
 
-- Deteção de duplicados (mesma fatura scaneada duas vezes)
 - Ler QR a partir de foto da galeria, não só câmara ao vivo
-- Comparação de gastos mês a mês
 - Empacotar como app Android instalável via TWA (Trusted Web Activity, usando
   Bubblewrap) — reaproveita este site sem reescrever nada; só nessa fase é que
   entra o SHA-256 do certificado de assinatura do APK (Digital Asset Links,
   `assetlinks.json`), não confundir com o SHA-1 do Firebase Google Sign-In
   nativo (que não é necessário para o caminho TWA).
+- Se algum dia se quiser melhorar a entrega de emails da Firebase (ex: reset de
+  password, se for reintroduzido), a causa da entrega em spam é a falta de
+  domínio próprio verificado — resolver isso implicaria o utilizador ter um
+  domínio (ex: para a marca Fin+) e configurá-lo na Firebase.
