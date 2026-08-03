@@ -618,7 +618,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 db.enablePersistence({ synchronizeTabs: true }).catch(()=>{ /* não crítico, ignora */ });
 
-const CATEGORIAS_DEFAULT = ['Alimentação', 'Casa', 'Transporte', 'Saúde', 'Lazer', 'Outros'];
+const CATEGORIAS_DEFAULT = ['Alimentação', 'Prestação da casa', 'Transporte', 'Saúde', 'Lazer', 'Seguro Multirriscos', 'Seguro de Vida', 'Outros'];
 
 let gastos = [];
 let recorrentes = [];
@@ -626,7 +626,7 @@ let orcamentos = {};
 let categoriasAtuais = CATEGORIAS_DEFAULT.slice();
 let html5QrCode = null;
 let catAtiva = 'Alimentação';
-let catAtivaRecorrente = 'Casa';
+let catAtivaRecorrente = 'Prestação da casa';
 let chart = null;
 let currentUser = null;
 let currentGroupId = null;
