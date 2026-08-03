@@ -364,6 +364,11 @@
     height:100%;
     border-radius:6px;
   }
+  .budget-comparacao{
+    font-size:11px;
+    color:#8a8478;
+    margin-top:4px;
+  }
 </style>
 </head>
 <body>
@@ -1018,28 +1023,59 @@ function totalDoMes(ano, mes){
   return totalReal + totalRecorrente;
 }
 
-function totalMesAnterior(){
+function anoMesAnterior(){
   const agora = new Date();
   let mes = agora.getMonth() - 1;
   let ano = agora.getFullYear();
   if(mes < 0){ mes = 11; ano -= 1; }
+  return { ano, mes };
+}
+
+function totalMesAnterior(){
+  const { ano, mes } = anoMesAnterior();
   return totalDoMes(ano, mes);
+}
+
+// Gasto por categoria de um mês qualquer, incluindo despesas fixas já existentes nessa altura.
+function gastoPorCategoriaDoMes(ano, mes){
+  const mapa = {};
+  gastos.filter(g => {
+    const d = new Date(g.data);
+    return d.getFullYear() === ano && d.getMonth() === mes;
+  }).forEach(g => { mapa[g.categoria] = (mapa[g.categoria] || 0) + g.valor; });
+
+  const inicioMesSeguinte = new Date(ano, mes + 1, 1);
+  recorrentes.filter(r => {
+    if(!r.criadoEm || !r.criadoEm.toDate) return true;
+    return r.criadoEm.toDate() < inicioMesSeguinte;
+  }).forEach(r => { mapa[r.categoria] = (mapa[r.categoria] || 0) + r.valor; });
+
+  return mapa;
+}
+
+function gastoPorCategoriaMesAnterior(){
+  const { ano, mes } = anoMesAnterior();
+  return gastoPorCategoriaDoMes(ano, mes);
+}
+
+// Texto "▲ +12% que o mês passado", com cores diferentes consoante subiu/desceu/igual.
+function textoComparacaoMensal(atual, anterior, corSubiu, corDesceu, corIgual){
+  if(anterior <= 0) return '';
+  const diferenca = atual - anterior;
+  const percent = (diferenca / anterior) * 100;
+  const subiu = diferenca > 0;
+  const desceu = diferenca < 0;
+  const cor = subiu ? corSubiu : (desceu ? corDesceu : corIgual);
+  const seta = subiu ? '▲' : (desceu ? '▼' : '•');
+  const sinal = subiu ? '+' : '';
+  return `<span style="color:${cor};">${seta} ${sinal}${percent.toFixed(0)}%</span> que o mês passado`;
 }
 
 function renderComparacaoMensal(totalAtual){
   const el = document.getElementById('comparacaoMensal');
   const totalAnterior = totalMesAnterior();
-  if(totalAnterior <= 0){
-    el.textContent = '';
-    return;
-  }
-  const diferenca = totalAtual - totalAnterior;
-  const percent = (diferenca / totalAnterior) * 100;
-  const subiu = diferenca > 0;
-  const cor = subiu ? '#E8A695' : '#8FCBAA';
-  const seta = subiu ? '▲' : (diferenca < 0 ? '▼' : '•');
-  const sinal = subiu ? '+' : '';
-  el.innerHTML = `<span style="color:${cor};">${seta} ${sinal}${percent.toFixed(0)}%</span> que o mês passado (${formatoEuro(totalAnterior)})`;
+  const texto = textoComparacaoMensal(totalAtual, totalAnterior, '#E8A695', '#8FCBAA', 'rgba(255,255,255,.6)');
+  el.innerHTML = texto ? `${texto} (${formatoEuro(totalAnterior)})` : '';
 }
 
 function render(){
@@ -1105,6 +1141,7 @@ function renderOrcamentos(doMes){
   doMes.forEach(g=>{
     gastoPorCategoria[g.categoria] = (gastoPorCategoria[g.categoria] || 0) + g.valor;
   });
+  const gastoPorCategoriaAnterior = gastoPorCategoriaMesAnterior();
 
   const lista = document.getElementById('listaOrcamentos');
   lista.innerHTML = categoriasAtuais.filter(cat => orcamentos[cat] != null).map(cat => {
@@ -1114,12 +1151,17 @@ function renderOrcamentos(doMes){
     let cor = 'var(--good)';
     if(gasto / limite >= 1) cor = 'var(--danger)';
     else if(gasto / limite >= 0.7) cor = 'var(--gold)';
+
+    const anteriorCat = gastoPorCategoriaAnterior[cat] || 0;
+    const textoComparacao = textoComparacaoMensal(gasto, anteriorCat, 'var(--danger)', 'var(--good)', '#8a8478');
+
     return `<div class="budget-row">
       <div class="budget-row-top">
         <span class="budget-cat">${cat}</span>
         <span class="budget-values">${formatoEuro(gasto)} / ${formatoEuro(limite)}</span>
       </div>
       <div class="budget-bar"><div class="budget-bar-fill" style="width:${(ratio*100).toFixed(0)}%; background:${cor};"></div></div>
+      ${textoComparacao ? `<div class="budget-comparacao">${textoComparacao} (${formatoEuro(anteriorCat)})</div>` : ''}
     </div>`;
   }).join('');
 }
