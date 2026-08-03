@@ -604,6 +604,15 @@
   </div>
 </div>
 
+<div class="overlay" id="confirmModalOverlay">
+  <div class="sheet">
+    <h2 id="confirmModalTitle">Confirmar</h2>
+    <p class="hint" id="confirmModalMessage"></p>
+    <button class="confirm-btn" id="confirmModalYes">Confirmar</button>
+    <div class="manual-toggle" id="confirmModalNo">Cancelar</div>
+  </div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBNoZFR1c-LlQZgIHql0Jy9nReO1p3QD7s",
@@ -765,6 +774,30 @@ document.querySelectorAll('.hist-modo-chip').forEach(chip => {
 
 document.getElementById('btnHistoricoAnterior').onclick = () => navegarHistorico(-1);
 document.getElementById('btnHistoricoSeguinte').onclick = () => navegarHistorico(1);
+
+// Modal de confirmação próprio da app (em vez de confirm() nativo do browser,
+// que mostra sempre o domínio do site no título e não se pode personalizar).
+const confirmModalOverlay = document.getElementById('confirmModalOverlay');
+let confirmModalResolve = null;
+
+function confirmarAcao(mensagem, tituloBotaoConfirmar){
+  document.getElementById('confirmModalMessage').textContent = mensagem;
+  document.getElementById('confirmModalYes').textContent = tituloBotaoConfirmar || 'Confirmar';
+  confirmModalOverlay.classList.add('open');
+  return new Promise(resolve => { confirmModalResolve = resolve; });
+}
+
+document.getElementById('confirmModalYes').onclick = () => {
+  confirmModalOverlay.classList.remove('open');
+  if(confirmModalResolve) confirmModalResolve(true);
+  confirmModalResolve = null;
+};
+
+document.getElementById('confirmModalNo').onclick = () => {
+  confirmModalOverlay.classList.remove('open');
+  if(confirmModalResolve) confirmModalResolve(false);
+  confirmModalResolve = null;
+};
 
 document.getElementById('btnGuardarOrcamentos').onclick = () => {
   if(!currentGroupId) return;
@@ -1339,9 +1372,10 @@ window.removerGasto = function(id){
     .catch(err => console.error('Erro a remover gasto:', err));
 };
 
-window.removerRecorrente = function(id){
+window.removerRecorrente = async function(id){
   if(!currentGroupId) return;
-  if(!confirm('Remover esta despesa fixa? Deixa de contar a partir de agora.')) return;
+  const ok = await confirmarAcao('Remover esta despesa fixa? Deixa de contar a partir de agora.', 'Remover');
+  if(!ok) return;
   db.collection('groups').doc(currentGroupId).collection('recorrentes').doc(id).delete()
     .catch(err => console.error('Erro a remover despesa fixa:', err));
 };
@@ -1555,7 +1589,7 @@ function encontrarGastoDuplicado(nif, valor, dataISO){
   ) || null;
 }
 
-document.getElementById('confirmAdd').onclick = () => {
+document.getElementById('confirmAdd').onclick = async () => {
   const valor = parseFloat(document.getElementById('valorDetetado').value);
   if(isNaN(valor) || valor <= 0){
     alert('Introduz um valor válido.');
@@ -1567,7 +1601,7 @@ document.getElementById('confirmAdd').onclick = () => {
 
   const duplicado = encontrarGastoDuplicado(nifDetetado, valor, dataFinal);
   if(duplicado){
-    const continuar = confirm(`Já tens um gasto igual registado (mesmo NIF, ${formatoEuro(valor)}, no mesmo dia). Queres adicionar mesmo assim?`);
+    const continuar = await confirmarAcao(`Já tens um gasto igual registado (mesmo NIF, ${formatoEuro(valor)}, no mesmo dia).`, 'Adicionar mesmo assim');
     if(!continuar) return;
   }
 
