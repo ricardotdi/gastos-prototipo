@@ -365,7 +365,7 @@
 
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <div class="eyebrow">Protótipo · controlo pessoal</div>
+    <div class="eyebrow">Finanças Positivas</div>
     <h1 class="login-title">Os meus gastos</h1>
     <p class="login-sub">Inicia sessão com o Google para guardares os teus gastos e os sincronizares entre dispositivos.</p>
     <button class="google-btn" id="btnEntrarGoogle">
@@ -383,7 +383,7 @@
 
 <div id="appShell" style="display:none">
   <header>
-    <div class="eyebrow">Protótipo · controlo pessoal</div>
+    <div class="eyebrow">Finanças Positivas</div>
     <h1>Os meus gastos</h1>
     <div class="user-bar">
       <span id="userEmailLabel"></span>
@@ -519,7 +519,6 @@
     <div class="menu-item" id="menuPartilhar">Partilhar gastos (convidar)</div>
     <div class="menu-item" id="menuJuntar">Juntar-me a um grupo</div>
     <div class="menu-item" id="menuOrcamentos">Orçamentos por categoria</div>
-    <div class="menu-item" id="menuCategorias">Categorias</div>
     <div class="menu-item" id="menuSair">Sair</div>
   </div>
 </div>
@@ -532,6 +531,7 @@
     <div id="orcamentosForm"></div>
     <button class="confirm-btn" id="btnGuardarOrcamentos">Guardar orçamentos</button>
     <div class="scan-status" id="orcamentosStatus"></div>
+    <div class="manual-toggle" id="btnAbrirCategorias" style="margin-top:18px;">gerir categorias</div>
   </div>
 </div>
 
@@ -718,13 +718,13 @@ function renderCategoriasForm(){
 }
 
 function abrirCategorias(){
-  menuOverlay.classList.remove('open');
+  orcamentosOverlay.classList.remove('open');
   renderCategoriasForm();
   categoriasStatus.textContent = '';
   categoriasOverlay.classList.add('open');
 }
 
-document.getElementById('menuCategorias').onclick = abrirCategorias;
+document.getElementById('btnAbrirCategorias').onclick = abrirCategorias;
 
 document.getElementById('closeCategoriasSheet').onclick = () => {
   categoriasOverlay.classList.remove('open');
