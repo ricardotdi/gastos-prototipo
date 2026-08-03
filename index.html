@@ -19,6 +19,7 @@
     --paper:#F6F4EF;
     --line:#DAD4C6;
     --danger:#B4543A;
+    --good:#4C7A5D;
   }
   *{box-sizing:border-box;}
   body{
@@ -315,6 +316,49 @@
     text-decoration:underline;
     cursor:pointer;
   }
+  #btnMenu{
+    text-decoration:none;
+    padding:4px 10px;
+  }
+  .menu-item{
+    padding:14px 4px;
+    border-bottom:1px solid var(--line);
+    font-size:15px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .menu-item:last-child{
+    border-bottom:none;
+    color:var(--danger);
+  }
+  .budget-row{
+    margin-bottom:12px;
+  }
+  .budget-row-top{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    margin-bottom:5px;
+  }
+  .budget-cat{
+    font-weight:600;
+    color:var(--navy);
+  }
+  .budget-values{
+    font-variant-numeric:tabular-nums;
+    color:#8a8478;
+  }
+  .budget-bar{
+    height:8px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .budget-bar-fill{
+    height:100%;
+    border-radius:6px;
+  }
 </style>
 </head>
 <body>
@@ -343,11 +387,7 @@
     <h1>Os meus gastos</h1>
     <div class="user-bar">
       <span id="userEmailLabel"></span>
-      <span style="display:flex; gap:14px;">
-        <span class="sair-link" id="btnPartilhar">Partilhar</span>
-        <span class="sair-link" id="btnAbrirJuntar">Juntar-me a um grupo</span>
-        <span class="sair-link" id="btnSair">Sair</span>
-      </span>
+      <span class="sair-link" id="btnMenu" style="font-size:16px; letter-spacing:2px;">⋯</span>
     </div>
     <div class="total-card">
       <div class="total-value" id="totalMes">0,00 €</div>
@@ -358,6 +398,14 @@
   <main>
     <div id="chart-wrap">
       <canvas id="catChart" height="160"></canvas>
+    </div>
+
+    <div id="orcamentosSection" style="display:none;">
+      <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Orçamentos do mês</span>
+        <span class="sair-link" id="btnEditarOrcamentos" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">editar</span>
+      </div>
+      <div id="listaOrcamentos" style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px;"></div>
     </div>
 
     <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
@@ -477,6 +525,29 @@
   </div>
 </div>
 
+<div class="overlay" id="menuOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeMenuSheet">✕</button>
+    <h2>Conta</h2>
+    <p class="hint">&nbsp;</p>
+    <div class="menu-item" id="menuPartilhar">Partilhar gastos (convidar)</div>
+    <div class="menu-item" id="menuJuntar">Juntar-me a um grupo</div>
+    <div class="menu-item" id="menuOrcamentos">Orçamentos por categoria</div>
+    <div class="menu-item" id="menuSair">Sair</div>
+  </div>
+</div>
+
+<div class="overlay" id="orcamentosOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeOrcamentosSheet">✕</button>
+    <h2>Orçamentos por categoria</h2>
+    <p class="hint">Define um limite mensal por categoria (deixa em branco para não acompanhar essa categoria). Aplica-se a todo o grupo.</p>
+    <div id="orcamentosForm"></div>
+    <button class="confirm-btn" id="btnGuardarOrcamentos">Guardar orçamentos</button>
+    <div class="scan-status" id="orcamentosStatus"></div>
+  </div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBNoZFR1c-LlQZgIHql0Jy9nReO1p3QD7s",
@@ -491,8 +562,11 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 db.enablePersistence({ synchronizeTabs: true }).catch(()=>{ /* não crítico, ignora */ });
 
+const CATEGORIAS = ['Alimentação', 'Casa', 'Transporte', 'Saúde', 'Lazer', 'Outros'];
+
 let gastos = [];
 let recorrentes = [];
+let orcamentos = {};
 let html5QrCode = null;
 let catAtiva = 'Alimentação';
 let catAtivaRecorrente = 'Casa';
@@ -501,6 +575,7 @@ let currentUser = null;
 let currentGroupId = null;
 let unsubscribeGastos = null;
 let unsubscribeRecorrentes = null;
+let unsubscribeGrupo = null;
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -522,11 +597,23 @@ document.getElementById('btnEntrarGoogle').onclick = () => {
     });
 };
 
-document.getElementById('btnSair').onclick = () => {
+const menuOverlay = document.getElementById('menuOverlay');
+
+document.getElementById('btnMenu').onclick = () => {
+  menuOverlay.classList.add('open');
+};
+
+document.getElementById('closeMenuSheet').onclick = () => {
+  menuOverlay.classList.remove('open');
+};
+
+document.getElementById('menuSair').onclick = () => {
+  menuOverlay.classList.remove('open');
   auth.signOut();
 };
 
-document.getElementById('btnPartilhar').onclick = () => {
+document.getElementById('menuPartilhar').onclick = () => {
+  menuOverlay.classList.remove('open');
   document.getElementById('inviteCodeDisplay').value = '';
   document.getElementById('inviteHint').textContent = '';
   inviteOverlay.classList.add('open');
@@ -536,7 +623,8 @@ document.getElementById('closeInviteSheet').onclick = () => {
   inviteOverlay.classList.remove('open');
 };
 
-document.getElementById('btnAbrirJuntar').onclick = () => {
+document.getElementById('menuJuntar').onclick = () => {
+  menuOverlay.classList.remove('open');
   document.getElementById('joinCodeInput').value = '';
   joinStatus.textContent = '';
   joinOverlay.classList.add('open');
@@ -578,6 +666,45 @@ document.getElementById('btnGuardarRecorrente').onclick = () => {
     console.error('Erro a guardar despesa fixa:', err);
     recorrenteStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
   });
+};
+
+const orcamentosOverlay = document.getElementById('orcamentosOverlay');
+const orcamentosStatus = document.getElementById('orcamentosStatus');
+
+function abrirOrcamentos(){
+  menuOverlay.classList.remove('open');
+  const form = document.getElementById('orcamentosForm');
+  form.innerHTML = CATEGORIAS.map(cat => `<div class="form-row">
+    <label>${cat}</label>
+    <input type="number" step="0.01" min="0" class="orc-input" data-cat="${cat}" placeholder="sem limite" value="${orcamentos[cat] != null ? orcamentos[cat] : ''}">
+  </div>`).join('');
+  orcamentosStatus.textContent = '';
+  orcamentosOverlay.classList.add('open');
+}
+
+document.getElementById('menuOrcamentos').onclick = abrirOrcamentos;
+document.getElementById('btnEditarOrcamentos').onclick = abrirOrcamentos;
+
+document.getElementById('closeOrcamentosSheet').onclick = () => {
+  orcamentosOverlay.classList.remove('open');
+};
+
+document.getElementById('btnGuardarOrcamentos').onclick = () => {
+  if(!currentGroupId) return;
+  const novoOrcamentos = {};
+  document.querySelectorAll('.orc-input').forEach(input => {
+    const v = parseFloat(input.value);
+    if(!isNaN(v) && v > 0){
+      novoOrcamentos[input.dataset.cat] = v;
+    }
+  });
+  db.collection('groups').doc(currentGroupId).set({ orcamentos: novoOrcamentos }, { merge: true })
+    .then(() => {
+      orcamentosOverlay.classList.remove('open');
+    }).catch(err => {
+      console.error('Erro a guardar orçamentos:', err);
+      orcamentosStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+    });
 };
 
 function gerarCodigoConvite(){
@@ -678,6 +805,15 @@ function ligarSincronizacao(groupId){
     }, err => {
       console.error('Erro a sincronizar despesas fixas:', err);
     });
+
+  if(unsubscribeGrupo) unsubscribeGrupo();
+  unsubscribeGrupo = db.collection('groups').doc(groupId)
+    .onSnapshot(snapshot => {
+      orcamentos = (snapshot.data() || {}).orcamentos || {};
+      render();
+    }, err => {
+      console.error('Erro a sincronizar orçamentos:', err);
+    });
 }
 
 auth.onAuthStateChanged(async (user) => {
@@ -695,9 +831,11 @@ auth.onAuthStateChanged(async (user) => {
   } else {
     if(unsubscribeGastos){ unsubscribeGastos(); unsubscribeGastos = null; }
     if(unsubscribeRecorrentes){ unsubscribeRecorrentes(); unsubscribeRecorrentes = null; }
+    if(unsubscribeGrupo){ unsubscribeGrupo(); unsubscribeGrupo = null; }
     currentGroupId = null;
     gastos = [];
     recorrentes = [];
+    orcamentos = {};
     loginScreen.style.display = 'flex';
     appShell.style.display = 'none';
     loginStatus.textContent = '';
@@ -743,6 +881,8 @@ function render(){
   document.getElementById('totalMes').textContent = formatoEuro(total);
   document.getElementById('mesLabel').textContent = 'gasto em ' + mesAtualLabel();
 
+  renderOrcamentos(doMes);
+
   const listaRec = document.getElementById('listaRecorrentes');
   if(recorrentes.length === 0){
     listaRec.innerHTML = '<div class="empty">Sem despesas fixas.<br>Ex: renda, subscrições, ginásio.</div>';
@@ -781,6 +921,38 @@ function render(){
   }
 
   renderChart(doMes);
+}
+
+function renderOrcamentos(doMes){
+  const secao = document.getElementById('orcamentosSection');
+  const categoriasComOrcamento = Object.keys(orcamentos);
+  if(categoriasComOrcamento.length === 0){
+    secao.style.display = 'none';
+    return;
+  }
+  secao.style.display = 'block';
+
+  const gastoPorCategoria = {};
+  doMes.forEach(g=>{
+    gastoPorCategoria[g.categoria] = (gastoPorCategoria[g.categoria] || 0) + g.valor;
+  });
+
+  const lista = document.getElementById('listaOrcamentos');
+  lista.innerHTML = CATEGORIAS.filter(cat => orcamentos[cat] != null).map(cat => {
+    const limite = orcamentos[cat];
+    const gasto = gastoPorCategoria[cat] || 0;
+    const ratio = Math.min(gasto / limite, 1);
+    let cor = 'var(--good)';
+    if(gasto / limite >= 1) cor = 'var(--danger)';
+    else if(gasto / limite >= 0.7) cor = 'var(--gold)';
+    return `<div class="budget-row">
+      <div class="budget-row-top">
+        <span class="budget-cat">${cat}</span>
+        <span class="budget-values">${formatoEuro(gasto)} / ${formatoEuro(limite)}</span>
+      </div>
+      <div class="budget-bar"><div class="budget-bar-fill" style="width:${(ratio*100).toFixed(0)}%; background:${cor};"></div></div>
+    </div>`;
+  }).join('');
 }
 
 function renderChart(doMes){
