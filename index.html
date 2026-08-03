@@ -345,6 +345,7 @@
       <span id="userEmailLabel"></span>
       <span style="display:flex; gap:14px;">
         <span class="sair-link" id="btnPartilhar">Partilhar</span>
+        <span class="sair-link" id="btnAbrirJuntar">Juntar-me a um grupo</span>
         <span class="sair-link" id="btnSair">Sair</span>
       </span>
     </div>
@@ -408,11 +409,11 @@
   </div>
 </div>
 
-<div class="overlay" id="shareOverlay">
+<div class="overlay" id="inviteOverlay">
   <div class="sheet">
-    <button class="close-btn" id="closeShareSheet">✕</button>
+    <button class="close-btn" id="closeInviteSheet">✕</button>
     <h2>Partilhar gastos</h2>
-    <p class="hint">Convida alguém (casal/família) para verem e adicionarem gastos em conjunto.</p>
+    <p class="hint">Gera um código e envia-o a quem queres convidar (casal/família) para verem e adicionarem gastos em conjunto.</p>
 
     <div class="form-row">
       <label>O teu código de convite</label>
@@ -422,13 +423,21 @@
       </div>
       <p class="hint" id="inviteHint" style="margin-top:8px; margin-bottom:0;"></p>
     </div>
+  </div>
+</div>
 
-    <div class="form-row" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--line);">
-      <label>Já tens um código de outra pessoa?</label>
+<div class="overlay" id="joinOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeJoinSheet">✕</button>
+    <h2>Juntar-me a um grupo</h2>
+    <p class="hint">Recebeste um código de alguém? Cola-o aqui para veres e adicionares gastos em conjunto com essa pessoa.</p>
+
+    <div class="form-row">
+      <label>Código de convite</label>
       <input type="text" id="joinCodeInput" placeholder="Cola aqui o código" style="text-transform:uppercase;">
       <button class="confirm-btn" id="btnJuntar">Juntar-me a esse grupo</button>
     </div>
-    <div class="scan-status" id="shareStatus"></div>
+    <div class="scan-status" id="joinStatus"></div>
   </div>
 </div>
 
@@ -461,8 +470,9 @@ const manualFields = document.getElementById('manualFields');
 const loginScreen = document.getElementById('loginScreen');
 const appShell = document.getElementById('appShell');
 const loginStatus = document.getElementById('loginStatus');
-const shareOverlay = document.getElementById('shareOverlay');
-const shareStatus = document.getElementById('shareStatus');
+const inviteOverlay = document.getElementById('inviteOverlay');
+const joinOverlay = document.getElementById('joinOverlay');
+const joinStatus = document.getElementById('joinStatus');
 
 document.getElementById('btnEntrarGoogle').onclick = () => {
   loginStatus.textContent = 'A abrir sessão…';
@@ -480,13 +490,21 @@ document.getElementById('btnSair').onclick = () => {
 document.getElementById('btnPartilhar').onclick = () => {
   document.getElementById('inviteCodeDisplay').value = '';
   document.getElementById('inviteHint').textContent = '';
-  document.getElementById('joinCodeInput').value = '';
-  shareStatus.textContent = '';
-  shareOverlay.classList.add('open');
+  inviteOverlay.classList.add('open');
 };
 
-document.getElementById('closeShareSheet').onclick = () => {
-  shareOverlay.classList.remove('open');
+document.getElementById('closeInviteSheet').onclick = () => {
+  inviteOverlay.classList.remove('open');
+};
+
+document.getElementById('btnAbrirJuntar').onclick = () => {
+  document.getElementById('joinCodeInput').value = '';
+  joinStatus.textContent = '';
+  joinOverlay.classList.add('open');
+};
+
+document.getElementById('closeJoinSheet').onclick = () => {
+  joinOverlay.classList.remove('open');
 };
 
 function gerarCodigoConvite(){
@@ -519,18 +537,18 @@ document.getElementById('btnGerarConvite').onclick = async () => {
 
 document.getElementById('btnJuntar').onclick = async () => {
   const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-  if(!code){ shareStatus.textContent = 'Introduz um código.'; return; }
+  if(!code){ joinStatus.textContent = 'Introduz um código.'; return; }
   if(!currentUser) return;
-  shareStatus.textContent = 'A juntar…';
+  joinStatus.textContent = 'A juntar…';
   try{
     const inviteSnap = await db.collection('invites').doc(code).get();
     if(!inviteSnap.exists){
-      shareStatus.textContent = 'Código inválido.';
+      joinStatus.textContent = 'Código inválido.';
       return;
     }
     const targetGroupId = inviteSnap.data().groupId;
     if(targetGroupId === currentGroupId){
-      shareStatus.textContent = 'Já estás neste grupo.';
+      joinStatus.textContent = 'Já estás neste grupo.';
       return;
     }
     await db.collection('groups').doc(targetGroupId).update({
@@ -539,11 +557,11 @@ document.getElementById('btnJuntar').onclick = async () => {
     await db.collection('users').doc(currentUser.uid).set({ groupId: targetGroupId }, { merge: true });
     currentGroupId = targetGroupId;
     ligarSincronizacao(currentGroupId);
-    shareStatus.textContent = '✓ Juntaste-te ao grupo! Os gastos vão sincronizar já a seguir.';
-    setTimeout(() => shareOverlay.classList.remove('open'), 1500);
+    joinStatus.textContent = '✓ Juntaste-te ao grupo! Os gastos vão sincronizar já a seguir.';
+    setTimeout(() => joinOverlay.classList.remove('open'), 1500);
   } catch(err){
     console.error(err);
-    shareStatus.textContent = 'Não foi possível juntar. Verifica o código e tenta de novo.';
+    joinStatus.textContent = 'Não foi possível juntar. Verifica o código e tenta de novo.';
   }
 };
 
