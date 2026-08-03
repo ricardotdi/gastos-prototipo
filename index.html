@@ -449,14 +449,7 @@
       </div>
       <div class="form-row">
         <label>Categoria</label>
-        <div class="cats" id="catChips">
-          <div class="cat-chip active" data-cat="Alimentação">Alimentação</div>
-          <div class="cat-chip" data-cat="Casa">Casa</div>
-          <div class="cat-chip" data-cat="Transporte">Transporte</div>
-          <div class="cat-chip" data-cat="Saúde">Saúde</div>
-          <div class="cat-chip" data-cat="Lazer">Lazer</div>
-          <div class="cat-chip" data-cat="Outros">Outros</div>
-        </div>
+        <div class="cats" id="catChips"></div>
       </div>
       <button class="confirm-btn" id="confirmAdd">Adicionar</button>
     </div>
@@ -511,14 +504,7 @@
     </div>
     <div class="form-row">
       <label>Categoria</label>
-      <div class="cats" id="catChipsRecorrente">
-        <div class="cat-chip active" data-cat="Casa">Casa</div>
-        <div class="cat-chip" data-cat="Alimentação">Alimentação</div>
-        <div class="cat-chip" data-cat="Transporte">Transporte</div>
-        <div class="cat-chip" data-cat="Saúde">Saúde</div>
-        <div class="cat-chip" data-cat="Lazer">Lazer</div>
-        <div class="cat-chip" data-cat="Outros">Outros</div>
-      </div>
+      <div class="cats" id="catChipsRecorrente"></div>
     </div>
     <button class="confirm-btn" id="btnGuardarRecorrente">Guardar despesa fixa</button>
     <div class="scan-status" id="recorrenteStatus"></div>
@@ -533,6 +519,7 @@
     <div class="menu-item" id="menuPartilhar">Partilhar gastos (convidar)</div>
     <div class="menu-item" id="menuJuntar">Juntar-me a um grupo</div>
     <div class="menu-item" id="menuOrcamentos">Orçamentos por categoria</div>
+    <div class="menu-item" id="menuCategorias">Categorias</div>
     <div class="menu-item" id="menuSair">Sair</div>
   </div>
 </div>
@@ -545,6 +532,18 @@
     <div id="orcamentosForm"></div>
     <button class="confirm-btn" id="btnGuardarOrcamentos">Guardar orçamentos</button>
     <div class="scan-status" id="orcamentosStatus"></div>
+  </div>
+</div>
+
+<div class="overlay" id="categoriasOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeCategoriasSheet">✕</button>
+    <h2>Categorias</h2>
+    <p class="hint">Edita o nome de uma categoria para a renomear (atualiza também os gastos já registados). Apaga o texto de uma linha para a remover — os gastos antigos mantêm o nome antigo.</p>
+    <div id="categoriasForm"></div>
+    <div class="manual-toggle" id="btnAddCategoriaRow">+ adicionar categoria</div>
+    <button class="confirm-btn" id="btnGuardarCategorias">Guardar categorias</button>
+    <div class="scan-status" id="categoriasStatus"></div>
   </div>
 </div>
 
@@ -562,11 +561,12 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 db.enablePersistence({ synchronizeTabs: true }).catch(()=>{ /* não crítico, ignora */ });
 
-const CATEGORIAS = ['Alimentação', 'Casa', 'Transporte', 'Saúde', 'Lazer', 'Outros'];
+const CATEGORIAS_DEFAULT = ['Alimentação', 'Casa', 'Transporte', 'Saúde', 'Lazer', 'Outros'];
 
 let gastos = [];
 let recorrentes = [];
 let orcamentos = {};
+let categoriasAtuais = CATEGORIAS_DEFAULT.slice();
 let html5QrCode = null;
 let catAtiva = 'Alimentação';
 let catAtivaRecorrente = 'Casa';
@@ -674,7 +674,7 @@ const orcamentosStatus = document.getElementById('orcamentosStatus');
 function abrirOrcamentos(){
   menuOverlay.classList.remove('open');
   const form = document.getElementById('orcamentosForm');
-  form.innerHTML = CATEGORIAS.map(cat => `<div class="form-row">
+  form.innerHTML = categoriasAtuais.map(cat => `<div class="form-row">
     <label>${cat}</label>
     <input type="number" step="0.01" min="0" class="orc-input" data-cat="${cat}" placeholder="sem limite" value="${orcamentos[cat] != null ? orcamentos[cat] : ''}">
   </div>`).join('');
@@ -705,6 +705,103 @@ document.getElementById('btnGuardarOrcamentos').onclick = () => {
       console.error('Erro a guardar orçamentos:', err);
       orcamentosStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
     });
+};
+
+const categoriasOverlay = document.getElementById('categoriasOverlay');
+const categoriasStatus = document.getElementById('categoriasStatus');
+
+function renderCategoriasForm(){
+  const form = document.getElementById('categoriasForm');
+  form.innerHTML = categoriasAtuais.map(cat => `<div class="form-row cat-edit-row" data-original="${cat}">
+    <input type="text" value="${cat}">
+  </div>`).join('');
+}
+
+function abrirCategorias(){
+  menuOverlay.classList.remove('open');
+  renderCategoriasForm();
+  categoriasStatus.textContent = '';
+  categoriasOverlay.classList.add('open');
+}
+
+document.getElementById('menuCategorias').onclick = abrirCategorias;
+
+document.getElementById('closeCategoriasSheet').onclick = () => {
+  categoriasOverlay.classList.remove('open');
+};
+
+document.getElementById('btnAddCategoriaRow').onclick = () => {
+  const form = document.getElementById('categoriasForm');
+  const row = document.createElement('div');
+  row.className = 'form-row cat-edit-row';
+  row.dataset.original = '';
+  row.innerHTML = '<input type="text" placeholder="Nova categoria">';
+  form.appendChild(row);
+  row.querySelector('input').focus();
+};
+
+async function migrarCategoria(de, para){
+  const batch = db.batch();
+  const gastosSnap = await db.collection('groups').doc(currentGroupId).collection('gastos').where('categoria', '==', de).get();
+  gastosSnap.forEach(doc => batch.update(doc.ref, { categoria: para }));
+  const recSnap = await db.collection('groups').doc(currentGroupId).collection('recorrentes').where('categoria', '==', de).get();
+  recSnap.forEach(doc => batch.update(doc.ref, { categoria: para }));
+  if(gastosSnap.size > 0 || recSnap.size > 0){
+    await batch.commit();
+  }
+}
+
+document.getElementById('btnGuardarCategorias').onclick = async () => {
+  if(!currentGroupId) return;
+  const linhas = [...document.querySelectorAll('.cat-edit-row')];
+  const novaListaBruta = [];
+  const renomeacoes = [];
+  const remocoes = [];
+
+  linhas.forEach(row => {
+    const original = row.dataset.original || '';
+    const valor = row.querySelector('input').value.trim();
+    if(valor){
+      novaListaBruta.push(valor);
+      if(original && original !== valor){
+        renomeacoes.push({ de: original, para: valor });
+      }
+    } else if(original){
+      remocoes.push(original);
+    }
+  });
+
+  const listaFinal = [...new Set(novaListaBruta)];
+  if(listaFinal.length === 0){
+    categoriasStatus.textContent = 'Precisas de pelo menos uma categoria.';
+    return;
+  }
+
+  categoriasStatus.textContent = 'A guardar…';
+  try{
+    for(const { de, para } of renomeacoes){
+      await migrarCategoria(de, para);
+    }
+
+    const novoOrcamentos = { ...orcamentos };
+    renomeacoes.forEach(({ de, para }) => {
+      if(novoOrcamentos[de] != null){
+        novoOrcamentos[para] = novoOrcamentos[de];
+        delete novoOrcamentos[de];
+      }
+    });
+    remocoes.forEach(nome => { delete novoOrcamentos[nome]; });
+
+    await db.collection('groups').doc(currentGroupId).set({
+      categorias: listaFinal,
+      orcamentos: novoOrcamentos
+    }, { merge: true });
+
+    categoriasOverlay.classList.remove('open');
+  } catch(err){
+    console.error('Erro a guardar categorias:', err);
+    categoriasStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+  }
 };
 
 function gerarCodigoConvite(){
@@ -776,6 +873,7 @@ async function resolverGrupo(user){
   const groupId = user.uid;
   await db.collection('groups').doc(groupId).set({
     members: [user.uid],
+    categorias: CATEGORIAS_DEFAULT,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
   await userRef.set({
@@ -809,7 +907,11 @@ function ligarSincronizacao(groupId){
   if(unsubscribeGrupo) unsubscribeGrupo();
   unsubscribeGrupo = db.collection('groups').doc(groupId)
     .onSnapshot(snapshot => {
-      orcamentos = (snapshot.data() || {}).orcamentos || {};
+      const dados = snapshot.data() || {};
+      orcamentos = dados.orcamentos || {};
+      categoriasAtuais = (dados.categorias && dados.categorias.length > 0) ? dados.categorias : CATEGORIAS_DEFAULT.slice();
+      montarChips('catChips', categoriasAtuais, catAtiva, (v) => { catAtiva = v; });
+      montarChips('catChipsRecorrente', categoriasAtuais, catAtivaRecorrente, (v) => { catAtivaRecorrente = v; });
       render();
     }, err => {
       console.error('Erro a sincronizar orçamentos:', err);
@@ -938,7 +1040,7 @@ function renderOrcamentos(doMes){
   });
 
   const lista = document.getElementById('listaOrcamentos');
-  lista.innerHTML = CATEGORIAS.filter(cat => orcamentos[cat] != null).map(cat => {
+  lista.innerHTML = categoriasAtuais.filter(cat => orcamentos[cat] != null).map(cat => {
     const limite = orcamentos[cat];
     const gasto = gastoPorCategoria[cat] || 0;
     const ratio = Math.min(gasto / limite, 1);
@@ -1049,21 +1151,25 @@ document.getElementById('manualValor').addEventListener('input', (e)=>{
   document.getElementById('valorDetetado').value = e.target.value;
 });
 
-document.querySelectorAll('#catChips .cat-chip').forEach(chip=>{
-  chip.onclick = ()=>{
-    document.querySelectorAll('#catChips .cat-chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    catAtiva = chip.dataset.cat;
-  };
-});
+// Constrói os chips de categoria dinamicamente (a lista é personalizável por grupo).
+function montarChips(containerId, categorias, ativaAtual, onSelect){
+  const container = document.getElementById(containerId);
+  const ativa = categorias.includes(ativaAtual) ? ativaAtual : categorias[0];
+  container.innerHTML = categorias.map(cat =>
+    `<div class="cat-chip${cat === ativa ? ' active' : ''}" data-cat="${cat}">${cat}</div>`
+  ).join('');
+  container.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.onclick = () => {
+      container.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      onSelect(chip.dataset.cat);
+    };
+  });
+  onSelect(ativa);
+}
 
-document.querySelectorAll('#catChipsRecorrente .cat-chip').forEach(chip=>{
-  chip.onclick = ()=>{
-    document.querySelectorAll('#catChipsRecorrente .cat-chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    catAtivaRecorrente = chip.dataset.cat;
-  };
-});
+montarChips('catChips', categoriasAtuais, catAtiva, (v) => { catAtiva = v; });
+montarChips('catChipsRecorrente', categoriasAtuais, catAtivaRecorrente, (v) => { catAtivaRecorrente = v; });
 
 let nativeStream = null;
 let nativeVideoEl = null;
