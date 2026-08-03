@@ -343,7 +343,10 @@
     <h1>Os meus gastos</h1>
     <div class="user-bar">
       <span id="userEmailLabel"></span>
-      <span class="sair-link" id="btnSair">Sair</span>
+      <span style="display:flex; gap:14px;">
+        <span class="sair-link" id="btnPartilhar">Partilhar</span>
+        <span class="sair-link" id="btnSair">Sair</span>
+      </span>
     </div>
     <div class="total-card">
       <div class="total-value" id="totalMes">0,00 €</div>
@@ -405,6 +408,30 @@
   </div>
 </div>
 
+<div class="overlay" id="shareOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeShareSheet">✕</button>
+    <h2>Partilhar gastos</h2>
+    <p class="hint">Convida alguém (casal/família) para verem e adicionarem gastos em conjunto.</p>
+
+    <div class="form-row">
+      <label>O teu código de convite</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="inviteCodeDisplay" readonly placeholder="ainda sem código" style="flex:1; text-align:center; font-weight:700; letter-spacing:3px;">
+        <button class="confirm-btn" id="btnGerarConvite" style="width:auto; margin:0; padding:0 18px; white-space:nowrap;">Gerar</button>
+      </div>
+      <p class="hint" id="inviteHint" style="margin-top:8px; margin-bottom:0;"></p>
+    </div>
+
+    <div class="form-row" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--line);">
+      <label>Já tens um código de outra pessoa?</label>
+      <input type="text" id="joinCodeInput" placeholder="Cola aqui o código" style="text-transform:uppercase;">
+      <button class="confirm-btn" id="btnJuntar">Juntar-me a esse grupo</button>
+    </div>
+    <div class="scan-status" id="shareStatus"></div>
+  </div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBNoZFR1c-LlQZgIHql0Jy9nReO1p3QD7s",
@@ -434,6 +461,8 @@ const manualFields = document.getElementById('manualFields');
 const loginScreen = document.getElementById('loginScreen');
 const appShell = document.getElementById('appShell');
 const loginStatus = document.getElementById('loginStatus');
+const shareOverlay = document.getElementById('shareOverlay');
+const shareStatus = document.getElementById('shareStatus');
 
 document.getElementById('btnEntrarGoogle').onclick = () => {
   loginStatus.textContent = 'A abrir sessão…';
@@ -446,6 +475,76 @@ document.getElementById('btnEntrarGoogle').onclick = () => {
 
 document.getElementById('btnSair').onclick = () => {
   auth.signOut();
+};
+
+document.getElementById('btnPartilhar').onclick = () => {
+  document.getElementById('inviteCodeDisplay').value = '';
+  document.getElementById('inviteHint').textContent = '';
+  document.getElementById('joinCodeInput').value = '';
+  shareStatus.textContent = '';
+  shareOverlay.classList.add('open');
+};
+
+document.getElementById('closeShareSheet').onclick = () => {
+  shareOverlay.classList.remove('open');
+};
+
+function gerarCodigoConvite(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sem carateres ambíguos (0/O, 1/I)
+  let code = '';
+  for(let i = 0; i < 6; i++){
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+document.getElementById('btnGerarConvite').onclick = async () => {
+  if(!currentGroupId || !currentUser) return;
+  const inviteHint = document.getElementById('inviteHint');
+  const code = gerarCodigoConvite();
+  inviteHint.textContent = 'A gerar código…';
+  try{
+    await db.collection('invites').doc(code).set({
+      groupId: currentGroupId,
+      createdBy: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('inviteCodeDisplay').value = code;
+    inviteHint.textContent = 'Envia este código à pessoa. Ela deve colá-lo em baixo, em "Já tens um código?", na app dela.';
+  } catch(err){
+    console.error(err);
+    inviteHint.textContent = 'Não foi possível gerar o código. Tenta novamente.';
+  }
+};
+
+document.getElementById('btnJuntar').onclick = async () => {
+  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  if(!code){ shareStatus.textContent = 'Introduz um código.'; return; }
+  if(!currentUser) return;
+  shareStatus.textContent = 'A juntar…';
+  try{
+    const inviteSnap = await db.collection('invites').doc(code).get();
+    if(!inviteSnap.exists){
+      shareStatus.textContent = 'Código inválido.';
+      return;
+    }
+    const targetGroupId = inviteSnap.data().groupId;
+    if(targetGroupId === currentGroupId){
+      shareStatus.textContent = 'Já estás neste grupo.';
+      return;
+    }
+    await db.collection('groups').doc(targetGroupId).update({
+      members: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+    });
+    await db.collection('users').doc(currentUser.uid).set({ groupId: targetGroupId }, { merge: true });
+    currentGroupId = targetGroupId;
+    ligarSincronizacao(currentGroupId);
+    shareStatus.textContent = '✓ Juntaste-te ao grupo! Os gastos vão sincronizar já a seguir.';
+    setTimeout(() => shareOverlay.classList.remove('open'), 1500);
+  } catch(err){
+    console.error(err);
+    shareStatus.textContent = 'Não foi possível juntar. Verifica o código e tenta de novo.';
+  }
 };
 
 // Cada utilizador começa num "grupo" pessoal (documento com o seu uid).
