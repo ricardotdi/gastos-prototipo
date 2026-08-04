@@ -90,9 +90,99 @@ poupar tempo de configuração.
 - **Categorias**: personalizáveis por grupo, guardadas em `groups/{groupId}.categorias`
   (array de strings). Renomear uma categoria migra automaticamente os
   documentos existentes (`gastos`, `recorrentes`) e o mapa de orçamentos.
+- **Contas a Acertar** (divisão de despesas com parceiro/parceira): coleções
+  **totalmente separadas** dos gastos mensais, por pedido explícito do
+  utilizador ("não quero que adicione às despesas do mês"):
+  - `groups/{groupId}/despesasPartilhadas/{id}`: `{ valor, descricao, data,
+    nif, pagoPor (uid), criadoPor, liquidacaoId }`. `liquidacaoId` é `null`
+    enquanto a despesa está em aberto.
+  - `groups/{groupId}/liquidacoes/{id}`: `{ numero, ano, data, valor,
+    quemDevia (uid ou null se empatado), quemRecebia (uid ou null), totalEu,
+    totalOutro, criadoPor }`. Numeração tipo "Nº 3/2026" — reinicia a cada
+    ano, calculada em `liquidacoes.filter(l => l.ano === anoAtual).length + 1`
+    (não transacional; aceitável para 2 utilizadores, risco de colisão
+    desprezável).
+  - Só faz sentido matematicamente para grupos de **exatamente 2 membros**
+    (`outroMembroUid()` devolve `null` para outros tamanhos, escondendo a
+    funcionalidade).
+  - Acesso: menu "⋯" → "Contas a Acertar" (overlay `#contasOverlay`), com 2
+    colunas (uma por pessoa), botão "+ Adicionar despesa partilhada" que abre
+    o **mesmo scanner/formulário do "+"** principal mas em `scanMode =
+    'partilhada'` (variável global `scanMode`: `'gasto'` | `'partilhada'`,
+    controla se `confirmAdd` grava em `gastos` ou em `despesasPartilhadas`, e
+    se mostra o form-row de categoria ou o de "quem pagou"). Botão
+    "Liquidado" fecha (`liquidacaoId`) todas as despesas em aberto e cria o
+    registo numerado.
+  - Histórico das liquidações também acessível em **Histórico → separador
+    "Liquidações"** (5º modo, ao lado de Mês/Trimestre/Semestre/Ano),
+    clicável para expandir o cálculo `(totalEu − totalOutro) ÷ 2` e a lista
+    de despesas incluídas nessa liquidação.
+  - `nomeDoMembro(uid)` e `outroMembroUid()` são helpers genéricos reutilizados
+    em várias partes (Contas a Acertar, formulário de despesa partilhada).
 - **Sem build/CI**: por design. Se uma futura app precisar de mais complexidade
   (múltiplos ficheiros JS, testes), reconsiderar esta escolha nessa altura, não
   antes.
+
+## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /groups/{groupId} {
+      allow get: if request.auth != null && request.auth.uid in resource.data.members;
+      allow create: if request.auth != null && request.auth.uid in request.resource.data.members;
+      allow update: if request.auth != null && (
+        request.auth.uid in resource.data.members ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'memberInfo']) &&
+          request.resource.data.members.hasAll(resource.data.members) &&
+          request.resource.data.members.size() == resource.data.members.size() + 1 &&
+          request.auth.uid in request.resource.data.members
+        )
+      );
+
+      match /gastos/{gastoId} {
+        allow read, write: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+      }
+
+      match /recorrentes/{recId} {
+        allow read, write: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+      }
+
+      match /despesasPartilhadas/{id} {
+        allow read, write: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+      }
+
+      match /liquidacoes/{id} {
+        allow read, write: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+      }
+    }
+
+    match /invites/{code} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+        request.resource.data.createdBy == request.auth.uid &&
+        request.auth.uid in get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.members;
+      allow update, delete: if false;
+    }
+  }
+}
+```
+
+Nota: existe uma coleção órfã `acertos` de uma versão anterior/abandonada da
+funcionalidade de partilha (antes de virar "Contas a Acertar" separado) — sem
+regras próprias, sem código a usá-la, inofensiva mas pode ser ignorada ou
+limpa manualmente na consola se algum dia incomodar.
 
 ## Identidade visual Fin+ (repetir nas próximas apps)
 
@@ -156,11 +246,17 @@ Não há testes automatizados. Fluxo de verificação usado até agora:
 Login Google + partilha de grupo (convites), despesas fixas/recorrentes,
 orçamento mensal por categoria com aviso visual, comparação com o mês anterior
 (geral e por categoria), ecrã de Histórico navegável por mês/trimestre/
-semestre/ano, categorias personalizáveis (criar/renomear com migração
-automática/remover), datas editáveis nos gastos, deteção de faturas
+semestre/ano/liquidações, categorias personalizáveis (criar/renomear com
+migração automática/remover), datas editáveis nos gastos, deteção de faturas
 duplicadas (mesmo NIF + valor + dia, só faz sentido em gastos vindos de QR),
 modal de confirmação próprio da app (não usar `confirm()`/`alert()` nativos do
-browser — mostram sempre o domínio do site e não são personalizáveis).
+browser — mostram sempre o domínio do site e não são personalizáveis),
+logótipo/identidade Fin+, e **Contas a Acertar** (divisão de despesas entre
+casal, ver secção própria acima) com liquidação numerada nº/ano.
+
+Testado e confirmado a funcionar em produção pelo utilizador (não é só
+"implementado", foi mesmo validado por ele) até e incluindo a funcionalidade
+de Contas a Acertar + separador Liquidações no Histórico.
 
 ## Próximos passos identificados (backlog)
 
