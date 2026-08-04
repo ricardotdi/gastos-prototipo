@@ -507,6 +507,8 @@
 
     <div id="qr-reader"></div>
     <div class="scan-status" id="scanStatus"></div>
+    <div class="manual-toggle" id="galeriaToggle">ou ler QR de uma foto da galeria</div>
+    <input type="file" accept="image/*" id="qrFileInput" style="display:none">
     <div class="manual-toggle" id="manualToggle">ou inserir valor manualmente</div>
 
     <div id="manualFields" style="display:none">
@@ -1874,6 +1876,16 @@ document.getElementById('manualToggle').onclick = () => {
   scanStatus.textContent = '';
 };
 
+document.getElementById('galeriaToggle').onclick = () => {
+  document.getElementById('qrFileInput').click();
+};
+
+document.getElementById('qrFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  e.target.value = ''; // permite escolher o mesmo ficheiro outra vez mais tarde
+  if(file) processarArquivoQR(file);
+});
+
 document.getElementById('manualValor').addEventListener('input', (e)=>{
   document.getElementById('valorDetetado').value = e.target.value;
 });
@@ -1999,6 +2011,51 @@ function iniciarScannerHtml5Qrcode(){
     scanStatus.textContent = 'Sem acesso à câmara. Usa a opção manual.';
     console.error(err);
   });
+}
+
+// Leitura de QR a partir de uma foto escolhida na galeria (em vez da câmara ao vivo).
+function processarArquivoQR(file){
+  pararScanner();
+  document.getElementById('qr-reader').innerHTML = '';
+  nifDetetado = null;
+  scanStatus.textContent = 'A ler QR Code da imagem…';
+
+  if('BarcodeDetector' in window){
+    lerQRDeImagemNativo(file);
+  } else {
+    lerQRDeImagemHtml5Qrcode(file);
+  }
+}
+
+async function lerQRDeImagemNativo(file){
+  try{
+    const detector = new BarcodeDetector({ formats: ['qr_code'] });
+    const bitmap = await createImageBitmap(file);
+    const codes = await detector.detect(bitmap);
+    if(codes.length > 0){
+      onQrDecodedText(codes[0].rawValue);
+    } else {
+      scanStatus.textContent = 'Não foi encontrado nenhum QR Code na imagem — tenta manual.';
+    }
+  } catch(e){
+    console.error(e);
+    lerQRDeImagemHtml5Qrcode(file);
+  }
+}
+
+// Fallback para browsers sem BarcodeDetector nativo (ex: iOS Safari).
+function lerQRDeImagemHtml5Qrcode(file){
+  const leitorArquivo = new Html5Qrcode("qr-reader", {
+    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+    verbose: false
+  });
+  leitorArquivo.scanFile(file, false)
+    .then(decodedText => onQrDecodedText(decodedText))
+    .catch(err => {
+      console.error(err);
+      scanStatus.textContent = 'Não foi encontrado nenhum QR Code na imagem — tenta manual.';
+    })
+    .finally(() => leitorArquivo.clear().catch(()=>{}));
 }
 
 function pararScanner(){
