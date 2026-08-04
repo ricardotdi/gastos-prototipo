@@ -414,6 +414,15 @@
   </header>
 
   <main>
+    <div id="saldoSection" style="display:none;">
+      <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Contas entre vocês</span>
+        <span class="sair-link" id="btnRegistarAcerto" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">registar pagamento</span>
+      </div>
+      <div id="saldoResumo" style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; text-align:center;"></div>
+      <div id="listaAcertos" style="margin-top:8px;"></div>
+    </div>
+
     <div id="chart-wrap">
       <canvas id="catChart" height="160"></canvas>
     </div>
@@ -472,6 +481,13 @@
       <div class="form-row">
         <label>Categoria</label>
         <div class="cats" id="catChips"></div>
+      </div>
+      <div class="form-row" id="divisaoRow" style="display:none;">
+        <label>Dividir esta despesa? (opcional)</label>
+        <div class="cats" id="divisaoChips">
+          <div class="cat-chip" data-pagou="eu">Paguei eu — dividir por igual</div>
+          <div class="cat-chip" data-pagou="outro">Pagou <span id="nomeParceiroChip"></span> — dividir por igual</div>
+        </div>
       </div>
       <button class="confirm-btn" id="confirmAdd">Adicionar</button>
     </div>
@@ -618,6 +634,25 @@
   </div>
 </div>
 
+<div class="overlay" id="acertoOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeAcertoSheet">✕</button>
+    <h2>Registar pagamento</h2>
+    <p class="hint" id="acertoHint">Regista quando um de vocês pagar ao outro, para acertarem as contas.</p>
+
+    <div class="cats" id="acertoDirecaoChips">
+      <div class="cat-chip active" data-direcao="euParaOutro">Eu paguei</div>
+      <div class="cat-chip" data-direcao="outroParaMim">Recebi</div>
+    </div>
+    <div class="form-row">
+      <label>Valor (€)</label>
+      <input type="number" step="0.01" id="acertoValor">
+    </div>
+    <button class="confirm-btn" id="btnGuardarAcerto">Guardar</button>
+    <div class="scan-status" id="acertoStatus"></div>
+  </div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBNoZFR1c-LlQZgIHql0Jy9nReO1p3QD7s",
@@ -647,7 +682,13 @@ let currentGroupId = null;
 let unsubscribeGastos = null;
 let unsubscribeRecorrentes = null;
 let unsubscribeGrupo = null;
+let unsubscribeAcertos = null;
 let nifDetetado = null;
+let grupoMembers = [];
+let grupoMemberInfo = {};
+let acertos = [];
+let pagoPorEscolhido = null; // null | 'eu' | 'outro'
+let acertoDirecao = 'euParaOutro';
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -793,6 +834,54 @@ document.querySelectorAll('.hist-modo-chip').forEach(chip => {
 
 document.getElementById('btnHistoricoAnterior').onclick = () => navegarHistorico(-1);
 document.getElementById('btnHistoricoSeguinte').onclick = () => navegarHistorico(1);
+
+const acertoOverlay = document.getElementById('acertoOverlay');
+const acertoStatus = document.getElementById('acertoStatus');
+
+document.getElementById('btnRegistarAcerto').onclick = () => {
+  const resultado = calcularSaldoCasal();
+  if(!resultado) return;
+  acertoDirecao = resultado.saldo < 0 ? 'euParaOutro' : 'outroParaMim';
+  document.querySelectorAll('#acertoDirecaoChips .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.direcao === acertoDirecao));
+  document.getElementById('acertoValor').value = Math.abs(resultado.saldo) < 0.005 ? '' : Math.abs(resultado.saldo).toFixed(2);
+  acertoStatus.textContent = '';
+  acertoOverlay.classList.add('open');
+};
+
+document.getElementById('closeAcertoSheet').onclick = () => {
+  acertoOverlay.classList.remove('open');
+};
+
+document.querySelectorAll('#acertoDirecaoChips .cat-chip').forEach(chip => {
+  chip.onclick = () => {
+    acertoDirecao = chip.dataset.direcao;
+    document.querySelectorAll('#acertoDirecaoChips .cat-chip').forEach(c => c.classList.toggle('active', c === chip));
+  };
+});
+
+document.getElementById('btnGuardarAcerto').onclick = () => {
+  const valor = parseFloat(document.getElementById('acertoValor').value);
+  if(isNaN(valor) || valor <= 0){
+    acertoStatus.textContent = 'Introduz um valor válido.';
+    return;
+  }
+  const outroUid = outroMembroUid();
+  if(!outroUid || !currentGroupId || !currentUser) return;
+  const de = acertoDirecao === 'euParaOutro' ? currentUser.uid : outroUid;
+  const para = acertoDirecao === 'euParaOutro' ? outroUid : currentUser.uid;
+  db.collection('groups').doc(currentGroupId).collection('acertos').add({
+    de,
+    para,
+    valor,
+    data: new Date().toISOString(),
+    criadoPor: currentUser.uid
+  }).then(() => {
+    acertoOverlay.classList.remove('open');
+  }).catch(err => {
+    console.error('Erro a registar pagamento:', err);
+    acertoStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+  });
+};
 
 // Modal de confirmação próprio da app (em vez de confirm() nativo do browser,
 // que mostra sempre o domínio do site no título e não se pode personalizar).
@@ -978,7 +1067,8 @@ document.getElementById('btnJuntar').onclick = async () => {
       return;
     }
     await db.collection('groups').doc(targetGroupId).update({
-      members: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+      members: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+      [`memberInfo.${currentUser.uid}`]: { displayName: currentUser.displayName || null, email: currentUser.email || null }
     });
     await db.collection('users').doc(currentUser.uid).set({ groupId: targetGroupId }, { merge: true });
     currentGroupId = targetGroupId;
@@ -1002,6 +1092,7 @@ async function resolverGrupo(user){
   const groupId = user.uid;
   await db.collection('groups').doc(groupId).set({
     members: [user.uid],
+    memberInfo: { [user.uid]: { displayName: user.displayName || null, email: user.email || null } },
     categorias: CATEGORIAS_DEFAULT,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
@@ -1039,11 +1130,22 @@ function ligarSincronizacao(groupId){
       const dados = snapshot.data() || {};
       orcamentos = dados.orcamentos || {};
       categoriasAtuais = (dados.categorias && dados.categorias.length > 0) ? dados.categorias : CATEGORIAS_DEFAULT.slice();
+      grupoMembers = dados.members || [];
+      grupoMemberInfo = dados.memberInfo || {};
       montarChips('catChips', categoriasAtuais, catAtiva, (v) => { catAtiva = v; });
       montarChips('catChipsRecorrente', categoriasAtuais, catAtivaRecorrente, (v) => { catAtivaRecorrente = v; });
       render();
     }, err => {
       console.error('Erro a sincronizar orçamentos:', err);
+    });
+
+  if(unsubscribeAcertos) unsubscribeAcertos();
+  unsubscribeAcertos = db.collection('groups').doc(groupId).collection('acertos')
+    .onSnapshot(snapshot => {
+      acertos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      render();
+    }, err => {
+      console.error('Erro a sincronizar pagamentos:', err);
     });
 }
 
@@ -1063,10 +1165,14 @@ auth.onAuthStateChanged(async (user) => {
     if(unsubscribeGastos){ unsubscribeGastos(); unsubscribeGastos = null; }
     if(unsubscribeRecorrentes){ unsubscribeRecorrentes(); unsubscribeRecorrentes = null; }
     if(unsubscribeGrupo){ unsubscribeGrupo(); unsubscribeGrupo = null; }
+    if(unsubscribeAcertos){ unsubscribeAcertos(); unsubscribeAcertos = null; }
     currentGroupId = null;
     gastos = [];
     recorrentes = [];
     orcamentos = {};
+    grupoMembers = [];
+    grupoMemberInfo = {};
+    acertos = [];
     loginScreen.style.display = 'flex';
     appShell.style.display = 'none';
     loginStatus.textContent = '';
@@ -1270,6 +1376,7 @@ function render(){
   document.getElementById('totalMes').textContent = formatoEuro(total);
   document.getElementById('mesLabel').textContent = 'gasto em ' + mesAtualLabel();
   renderComparacaoMensal(total);
+  renderSaldo();
 
   renderOrcamentos(doMes);
 
@@ -1312,6 +1419,90 @@ function render(){
 
   renderChart(doMes);
 }
+
+// ---- Contas entre parceiros (divisão de despesas 50/50) ----
+// Só faz sentido matematicamente para grupos com exatamente 2 pessoas.
+function outroMembroUid(){
+  if(!currentUser || !grupoMembers || grupoMembers.length !== 2) return null;
+  return grupoMembers.find(uid => uid !== currentUser.uid) || null;
+}
+
+function nomeDoMembro(uid){
+  if(!uid) return '';
+  if(currentUser && uid === currentUser.uid) return 'Tu';
+  const info = grupoMemberInfo[uid];
+  return (info && (info.displayName || info.email)) || 'a outra pessoa';
+}
+
+// saldo positivo: a outra pessoa deve-te esse valor. saldo negativo: tu deves-lhe.
+function calcularSaldoCasal(){
+  const outroUid = outroMembroUid();
+  if(!outroUid) return null;
+
+  let saldo = 0;
+  gastos.forEach(g => {
+    if(!g.dividir || !g.pagoPor) return;
+    const metade = g.valor / 2;
+    if(g.pagoPor === currentUser.uid) saldo += metade;
+    else if(g.pagoPor === outroUid) saldo -= metade;
+  });
+  acertos.forEach(a => {
+    if(a.de === currentUser.uid && a.para === outroUid) saldo += a.valor;
+    else if(a.de === outroUid && a.para === currentUser.uid) saldo -= a.valor;
+  });
+
+  return { saldo, outroUid };
+}
+
+function renderSaldo(){
+  const secao = document.getElementById('saldoSection');
+  const resultado = calcularSaldoCasal();
+  if(!resultado){
+    secao.style.display = 'none';
+    return;
+  }
+  secao.style.display = 'block';
+
+  const { saldo, outroUid } = resultado;
+  const nomeOutro = nomeDoMembro(outroUid);
+  const resumo = document.getElementById('saldoResumo');
+  if(Math.abs(saldo) < 0.005){
+    resumo.innerHTML = `<div style="font-size:15px; color:var(--good); font-weight:600;">Contas em dia ✓</div>`;
+  } else if(saldo > 0){
+    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${nomeOutro} deve-te</div><div style="font-size:26px; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums;">${formatoEuro(saldo)}</div>`;
+  } else {
+    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">Deves a ${nomeOutro}</div><div style="font-size:26px; font-weight:700; color:var(--danger); font-variant-numeric:tabular-nums;">${formatoEuro(Math.abs(saldo))}</div>`;
+  }
+
+  const listaAcertos = document.getElementById('listaAcertos');
+  if(!acertos || acertos.length === 0){
+    listaAcertos.innerHTML = '';
+  } else {
+    const ordenado = [...acertos].sort((a,b)=> new Date(b.data) - new Date(a.data));
+    listaAcertos.innerHTML = ordenado.slice(0,10).map(a => {
+      const d = new Date(a.data);
+      const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+      const quemPagou = nomeDoMembro(a.de);
+      const quemRecebeu = nomeDoMembro(a.para);
+      return `<div class="entry">
+        <div class="meta">
+          <span class="cat">${quemPagou} → ${quemRecebeu}</span>
+          <span class="date">${dataStr}</span>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <span class="amount">${formatoEuro(a.valor)}</span>
+          <button class="del" onclick="removerAcerto('${a.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+window.removerAcerto = function(id){
+  if(!currentGroupId) return;
+  db.collection('groups').doc(currentGroupId).collection('acertos').doc(id).delete()
+    .catch(err => console.error('Erro a remover pagamento:', err));
+};
 
 function renderOrcamentos(doMes){
   const secao = document.getElementById('orcamentosSection');
@@ -1419,12 +1610,39 @@ function parseFaturaQR(texto){
 }
 
 // ---- Scanner ----
+function resetDivisaoUI(){
+  pagoPorEscolhido = null;
+  document.querySelectorAll('#divisaoChips .cat-chip').forEach(c => c.classList.remove('active'));
+  const outroUid = outroMembroUid();
+  const divisaoRow = document.getElementById('divisaoRow');
+  if(outroUid){
+    document.getElementById('nomeParceiroChip').textContent = nomeDoMembro(outroUid);
+    divisaoRow.style.display = 'block';
+  } else {
+    divisaoRow.style.display = 'none';
+  }
+}
+
+document.querySelectorAll('#divisaoChips .cat-chip').forEach(chip => {
+  chip.onclick = () => {
+    const valor = chip.dataset.pagou;
+    if(pagoPorEscolhido === valor){
+      pagoPorEscolhido = null;
+      document.querySelectorAll('#divisaoChips .cat-chip').forEach(c => c.classList.remove('active'));
+    } else {
+      pagoPorEscolhido = valor;
+      document.querySelectorAll('#divisaoChips .cat-chip').forEach(c => c.classList.toggle('active', c === chip));
+    }
+  };
+});
+
 document.getElementById('openScan').onclick = () => {
   overlay.classList.add('open');
   confirmFields.style.display = 'none';
   manualFields.style.display = 'none';
   document.getElementById('dataInput').value = '';
   nifDetetado = null;
+  resetDivisaoUI();
   scanStatus.textContent = '';
   iniciarScanner();
 };
@@ -1443,6 +1661,7 @@ document.getElementById('manualToggle').onclick = () => {
   document.getElementById('comercianteInput').value = '';
   document.getElementById('dataInput').value = '';
   nifDetetado = null;
+  resetDivisaoUI();
   scanStatus.textContent = '';
 };
 
@@ -1624,13 +1843,19 @@ document.getElementById('confirmAdd').onclick = async () => {
     if(!continuar) return;
   }
 
+  const outroUid = outroMembroUid();
+  const dividir = pagoPorEscolhido !== null && outroUid !== null;
+  const pagoPor = pagoPorEscolhido === 'eu' ? currentUser.uid : (pagoPorEscolhido === 'outro' ? outroUid : null);
+
   db.collection('groups').doc(currentGroupId).collection('gastos').add({
     valor,
     categoria: catAtiva,
     comerciante: document.getElementById('comercianteInput').value.trim(),
     data: dataFinal,
     nif: nifDetetado || null,
-    criadoPor: currentUser.uid
+    criadoPor: currentUser.uid,
+    dividir,
+    pagoPor
   }).catch(err => {
     console.error('Erro a adicionar gasto:', err);
     alert('Não foi possível guardar o gasto. Tenta novamente.');
