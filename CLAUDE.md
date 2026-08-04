@@ -19,22 +19,53 @@ poupar tempo de configuração.
 - **Hosting**: GitHub Pages, branch `main`, ficheiro `index.html` na raiz.
   Repositório público (Pages grátis exige isso, a não ser que haja GitHub
   Pro/Team).
-- **Login**: Firebase Authentication, só com o fornecedor **Google**
+- **Login**: Firebase Authentication, com **Google** e **Facebook**
   (`signInWithPopup`), usando o SDK **compat** do Firebase via CDN
   (`firebase-app-compat.js`, `firebase-auth-compat.js`,
   `firebase-firestore-compat.js` — `https://www.gstatic.com/firebasejs/<versão>/...`).
   O SDK compat foi escolhido de propósito porque o site não usa bundler nem
   `<script type="module">`, e mantém a API global `firebase.*` simples de
-  integrar num script inline.
-  - **Decisão explícita do utilizador: nada de métodos de login pagos.**
-    Já foram testados e removidos/rejeitados: login por email+password (foi
-    implementado e depois removido a pedido — problema de fundo era entrega de
-    email em spam, não o código em si), Apple Sign-In (rejeitado por exigir
-    Apple Developer Program, 99 USD/ano), SMS/telefone (rejeitado por exigir
-    plano Blaze + custo por SMS). Microsoft e Facebook ficaram em aberto mas
-    exigem registo de app externo (Azure/Meta) da parte do utilizador — não
-    avançar com nenhum método novo de login sem confirmar primeiro que é
-    gratuito e sem assumir que o utilizador quer pagar por infraestrutura.
+  integrar num script inline. Erros de login mapeados para mensagens em
+  português em `mensagemErroLogin(codigo)`.
+  - **Decisão explícita do utilizador: nada de métodos de login pagos, e
+    evitar fricção/burocracia desnecessária.** Histórico do que já foi
+    tentado:
+    - **Email+password**: implementado e depois removido a pedido do
+      utilizador (o problema de fundo nem era o código — era a entrega de
+      emails da Firebase (reset de password) cair sempre em spam, e alguns
+      filtros de spam "pré-clicam" links, invalidando o link de reset antes do
+      utilizador o abrir).
+    - **Apple Sign-In**: rejeitado — exige Apple Developer Program, 99
+      USD/ano.
+    - **SMS/telefone**: rejeitado — exige mudar o projeto Firebase do plano
+      Spark para o Blaze (pagas o que usares) e custa por SMS enviado.
+    - **Microsoft**: tentado e abandonado — a conta pessoal Microsoft do
+      utilizador (`ricardotdi@gmail.com`, criada via Gmail) não tem um tenant
+      Entra ID válido para registar uma app (erro "not contained within any
+      directory"). O M365 Developer Program (que dá um tenant sandbox grátis
+      sem cartão de crédito) recusou a candidatura ("You don't currently
+      qualify"). A única via restante era "sign up for Azure" (free trial),
+      que pede cartão de crédito para verificação de identidade (não cobra
+      nada em si, mas o utilizador preferiu não avançar). Se no futuro se
+      quiser retomar isto, o caminho é: o utilizador criar/obter um tenant
+      Entra ID válido por outra via (conta Microsoft 365 de trabalho/escola,
+      ou aceitar dar cartão no signup do Azure), registar uma app em **App
+      registrations** (tipo "Web", suportar contas pessoais + organizacionais,
+      redirect URI `https://gastos-prototipo-ef57a.firebaseapp.com/__/auth/handler`),
+      e colar o Client ID + Client Secret em Firebase → Authentication →
+      Sign-in method → Microsoft.
+    - **Facebook**: implementado — precisa de uma app em
+      developers.facebook.com com "Valid OAuth Redirect URI" =
+      `https://gastos-prototipo-ef57a.firebaseapp.com/__/auth/handler`, e o
+      App ID/Secret colados em Firebase → Authentication → Sign-in method →
+      Facebook. Nota: enquanto a app do Facebook estiver em modo
+      "Development", só o developer e testers explicitamente adicionados
+      conseguem entrar — para funcionar para qualquer pessoa é preciso mudar
+      para "Live", o que exige preencher uma Política de Privacidade (URL),
+      ainda não feita nesta app.
+    - Regra geral: não avançar com nenhum método novo de login sem confirmar
+      primeiro que é gratuito, e sem assumir que o utilizador quer lidar com
+      burocracia de contas externas (Azure/Meta/Apple) — perguntar primeiro.
 - **Dados**: Cloud Firestore (plano gratuito Spark — dá para sempre neste tipo
   de app, ver conversa anterior sobre limites). Sincronização em tempo real via
   `onSnapshot`, sem `localStorage` como fonte de verdade (só cache offline do
