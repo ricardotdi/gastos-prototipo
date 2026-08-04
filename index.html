@@ -373,6 +373,66 @@
     color:#8a8478;
     margin-top:4px;
   }
+  .contas-col-header{
+    font-size:12px;
+    font-weight:700;
+    color:var(--navy);
+    text-align:center;
+    margin-bottom:8px;
+    padding-bottom:6px;
+    border-bottom:2px solid var(--line);
+  }
+  .contas-col-total{
+    text-align:center;
+    font-size:13.5px;
+    font-weight:700;
+    margin-top:6px;
+    font-variant-numeric:tabular-nums;
+    color:var(--ink);
+  }
+  .mini-entry{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 9px;
+    margin-bottom:6px;
+  }
+  .mini-entry .mini-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:4px;
+  }
+  .mini-entry .mini-valor{
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    font-size:12.5px;
+  }
+  .mini-entry .mini-del{
+    color:#b8b0a0;
+    cursor:pointer;
+    font-size:12px;
+    line-height:1;
+    flex-shrink:0;
+  }
+  .mini-entry .mini-meta{
+    color:#8a8478;
+    font-size:10.5px;
+    margin-top:2px;
+    overflow-wrap:anywhere;
+  }
+  .liquidacao-row{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    font-size:12.5px;
+  }
+  .liquidacao-row .liquidacao-numero{
+    font-weight:700;
+    color:var(--navy);
+  }
 </style>
 </head>
 <body>
@@ -414,15 +474,6 @@
   </header>
 
   <main>
-    <div id="saldoSection" style="display:none;">
-      <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-        <span>Contas entre vocês</span>
-        <span class="sair-link" id="btnRegistarAcerto" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">registar pagamento</span>
-      </div>
-      <div id="saldoResumo" style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; text-align:center;"></div>
-      <div id="listaAcertos" style="margin-top:8px;"></div>
-    </div>
-
     <div id="chart-wrap">
       <canvas id="catChart" height="160"></canvas>
     </div>
@@ -478,15 +529,15 @@
         <label>Data (opcional — em branco fica hoje)</label>
         <input type="date" id="dataInput">
       </div>
-      <div class="form-row">
+      <div class="form-row" id="categoriaRow">
         <label>Categoria</label>
         <div class="cats" id="catChips"></div>
       </div>
-      <div class="form-row" id="divisaoRow" style="display:none;">
-        <label>Dividir esta despesa? (opcional)</label>
-        <div class="cats" id="divisaoChips">
-          <div class="cat-chip" data-pagou="eu">Paguei eu — dividir por igual</div>
-          <div class="cat-chip" data-pagou="outro">Pagou <span id="nomeParceiroChip"></span> — dividir por igual</div>
+      <div class="form-row" id="pagoPorPartilhadaRow" style="display:none;">
+        <label>Quem pagou?</label>
+        <div class="cats" id="pagoPorPartilhadaChips">
+          <div class="cat-chip" data-pagou="eu">Eu</div>
+          <div class="cat-chip" data-pagou="outro" id="chipOutroPagou">Parceiro(a)</div>
         </div>
       </div>
       <button class="confirm-btn" id="confirmAdd">Adicionar</button>
@@ -558,6 +609,7 @@
     <div class="menu-item" id="menuJuntar">Juntar-me a um grupo</div>
     <div class="menu-item" id="menuOrcamentos">Orçamentos por categoria</div>
     <div class="menu-item" id="menuHistorico">Histórico</div>
+    <div class="menu-item" id="menuContas">Contas a Acertar</div>
     <div class="menu-item" id="menuSair">Sair</div>
   </div>
 </div>
@@ -634,22 +686,35 @@
   </div>
 </div>
 
-<div class="overlay" id="acertoOverlay">
+<div class="overlay" id="contasOverlay">
   <div class="sheet">
-    <button class="close-btn" id="closeAcertoSheet">✕</button>
-    <h2>Registar pagamento</h2>
-    <p class="hint" id="acertoHint">Regista quando um de vocês pagar ao outro, para acertarem as contas.</p>
+    <button class="close-btn" id="closeContasSheet">✕</button>
+    <h2>Contas a Acertar</h2>
+    <p class="hint" id="contasSemParceiro" style="display:none;">Ainda não tens ninguém junto neste grupo. Convida a tua parceira/parceiro em "Partilhar" no menu para começarem a dividir despesas.</p>
 
-    <div class="cats" id="acertoDirecaoChips">
-      <div class="cat-chip active" data-direcao="euParaOutro">Eu paguei</div>
-      <div class="cat-chip" data-direcao="outroParaMim">Recebi</div>
+    <div id="contasConteudo" style="display:none;">
+      <div id="contasResumo" style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; text-align:center; margin-bottom:16px;"></div>
+
+      <button class="confirm-btn" id="btnAddDespesaPartilhada" style="margin-bottom:16px;">+ Adicionar despesa partilhada</button>
+
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1; min-width:0;">
+          <div id="colNomeEu" class="contas-col-header"></div>
+          <div id="colDespesasEu"></div>
+          <div id="colTotalEu" class="contas-col-total"></div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div id="colNomeOutro" class="contas-col-header"></div>
+          <div id="colDespesasOutro"></div>
+          <div id="colTotalOutro" class="contas-col-total"></div>
+        </div>
+      </div>
+
+      <button class="confirm-btn" id="btnLiquidar" style="margin-top:20px; background:var(--good);">Liquidado</button>
+
+      <div class="section-title" style="margin-top:24px;">Liquidações anteriores</div>
+      <div id="listaLiquidacoes"></div>
     </div>
-    <div class="form-row">
-      <label>Valor (€)</label>
-      <input type="number" step="0.01" id="acertoValor">
-    </div>
-    <button class="confirm-btn" id="btnGuardarAcerto">Guardar</button>
-    <div class="scan-status" id="acertoStatus"></div>
   </div>
 </div>
 
@@ -682,13 +747,15 @@ let currentGroupId = null;
 let unsubscribeGastos = null;
 let unsubscribeRecorrentes = null;
 let unsubscribeGrupo = null;
-let unsubscribeAcertos = null;
+let unsubscribeDespesasPartilhadas = null;
+let unsubscribeLiquidacoes = null;
 let nifDetetado = null;
 let grupoMembers = [];
 let grupoMemberInfo = {};
-let acertos = [];
-let pagoPorEscolhido = null; // null | 'eu' | 'outro'
-let acertoDirecao = 'euParaOutro';
+let despesasPartilhadas = [];
+let liquidacoes = [];
+let scanMode = 'gasto'; // 'gasto' | 'partilhada'
+let pagoPorPartilhadaEscolhido = null; // 'eu' | 'outro'
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -824,6 +891,85 @@ document.getElementById('menuHistorico').onclick = () => {
   historicoOverlay.classList.add('open');
 };
 
+const contasOverlay = document.getElementById('contasOverlay');
+
+document.getElementById('menuContas').onclick = () => {
+  menuOverlay.classList.remove('open');
+  renderContas();
+  contasOverlay.classList.add('open');
+};
+
+document.getElementById('closeContasSheet').onclick = () => {
+  contasOverlay.classList.remove('open');
+};
+
+document.getElementById('btnAddDespesaPartilhada').onclick = () => {
+  if(!outroMembroUid()) return;
+  contasOverlay.classList.remove('open');
+  scanMode = 'partilhada';
+  voltarParaContas = true;
+  overlay.classList.add('open');
+  confirmFields.style.display = 'none';
+  manualFields.style.display = 'none';
+  document.getElementById('dataInput').value = '';
+  nifDetetado = null;
+  configurarCamposConfirmacao();
+  scanStatus.textContent = '';
+  iniciarScanner();
+};
+
+document.getElementById('btnLiquidar').onclick = async () => {
+  const outroUid = outroMembroUid();
+  if(!outroUid || !currentGroupId || !currentUser) return;
+
+  const emAberto = despesasPartilhadas.filter(d => !d.liquidacaoId);
+  if(emAberto.length === 0){
+    await confirmarAcao('Não há despesas em aberto para liquidar.', 'Ok');
+    return;
+  }
+
+  const totalEu = emAberto.filter(d => d.pagoPor === currentUser.uid).reduce((s,d)=>s+d.valor,0);
+  const totalOutro = emAberto.filter(d => d.pagoPor === outroUid).reduce((s,d)=>s+d.valor,0);
+  const diferenca = (totalEu - totalOutro) / 2;
+  const empatado = Math.abs(diferenca) < 0.005;
+  const quemDevia = empatado ? null : (diferenca >= 0 ? outroUid : currentUser.uid);
+  const quemRecebia = empatado ? null : (diferenca >= 0 ? currentUser.uid : outroUid);
+  const valor = Math.abs(diferenca);
+
+  const mensagem = empatado
+    ? 'As contas já estão equilibradas — isto arquiva as despesas em aberto e regista a liquidação.'
+    : `${nomeDoMembro(quemDevia)} → ${nomeDoMembro(quemRecebia)}: ${formatoEuro(valor)}. Isto arquiva todas as despesas em aberto.`;
+  const confirmar = await confirmarAcao(mensagem, 'Confirmar liquidação');
+  if(!confirmar) return;
+
+  const anoAtual = new Date().getFullYear();
+  const numero = liquidacoes.filter(l => l.ano === anoAtual).length + 1;
+
+  try{
+    const liquidacaoRef = db.collection('groups').doc(currentGroupId).collection('liquidacoes').doc();
+    const batch = db.batch();
+    batch.set(liquidacaoRef, {
+      numero,
+      ano: anoAtual,
+      data: new Date().toISOString(),
+      valor,
+      quemDevia,
+      quemRecebia,
+      totalEu,
+      totalOutro,
+      criadoPor: currentUser.uid
+    });
+    emAberto.forEach(d => {
+      const ref = db.collection('groups').doc(currentGroupId).collection('despesasPartilhadas').doc(d.id);
+      batch.update(ref, { liquidacaoId: liquidacaoRef.id });
+    });
+    await batch.commit();
+  } catch(err){
+    console.error('Erro a liquidar:', err);
+    alert('Não foi possível liquidar. Tenta novamente.');
+  }
+};
+
 document.getElementById('closeHistoricoSheet').onclick = () => {
   historicoOverlay.classList.remove('open');
 };
@@ -834,54 +980,6 @@ document.querySelectorAll('.hist-modo-chip').forEach(chip => {
 
 document.getElementById('btnHistoricoAnterior').onclick = () => navegarHistorico(-1);
 document.getElementById('btnHistoricoSeguinte').onclick = () => navegarHistorico(1);
-
-const acertoOverlay = document.getElementById('acertoOverlay');
-const acertoStatus = document.getElementById('acertoStatus');
-
-document.getElementById('btnRegistarAcerto').onclick = () => {
-  const resultado = calcularSaldoCasal();
-  if(!resultado) return;
-  acertoDirecao = resultado.saldo < 0 ? 'euParaOutro' : 'outroParaMim';
-  document.querySelectorAll('#acertoDirecaoChips .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.direcao === acertoDirecao));
-  document.getElementById('acertoValor').value = Math.abs(resultado.saldo) < 0.005 ? '' : Math.abs(resultado.saldo).toFixed(2);
-  acertoStatus.textContent = '';
-  acertoOverlay.classList.add('open');
-};
-
-document.getElementById('closeAcertoSheet').onclick = () => {
-  acertoOverlay.classList.remove('open');
-};
-
-document.querySelectorAll('#acertoDirecaoChips .cat-chip').forEach(chip => {
-  chip.onclick = () => {
-    acertoDirecao = chip.dataset.direcao;
-    document.querySelectorAll('#acertoDirecaoChips .cat-chip').forEach(c => c.classList.toggle('active', c === chip));
-  };
-});
-
-document.getElementById('btnGuardarAcerto').onclick = () => {
-  const valor = parseFloat(document.getElementById('acertoValor').value);
-  if(isNaN(valor) || valor <= 0){
-    acertoStatus.textContent = 'Introduz um valor válido.';
-    return;
-  }
-  const outroUid = outroMembroUid();
-  if(!outroUid || !currentGroupId || !currentUser) return;
-  const de = acertoDirecao === 'euParaOutro' ? currentUser.uid : outroUid;
-  const para = acertoDirecao === 'euParaOutro' ? outroUid : currentUser.uid;
-  db.collection('groups').doc(currentGroupId).collection('acertos').add({
-    de,
-    para,
-    valor,
-    data: new Date().toISOString(),
-    criadoPor: currentUser.uid
-  }).then(() => {
-    acertoOverlay.classList.remove('open');
-  }).catch(err => {
-    console.error('Erro a registar pagamento:', err);
-    acertoStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
-  });
-};
 
 // Modal de confirmação próprio da app (em vez de confirm() nativo do browser,
 // que mostra sempre o domínio do site no título e não se pode personalizar).
@@ -1139,13 +1237,23 @@ function ligarSincronizacao(groupId){
       console.error('Erro a sincronizar orçamentos:', err);
     });
 
-  if(unsubscribeAcertos) unsubscribeAcertos();
-  unsubscribeAcertos = db.collection('groups').doc(groupId).collection('acertos')
+  if(unsubscribeDespesasPartilhadas) unsubscribeDespesasPartilhadas();
+  unsubscribeDespesasPartilhadas = db.collection('groups').doc(groupId).collection('despesasPartilhadas')
+    .orderBy('data', 'desc')
     .onSnapshot(snapshot => {
-      acertos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      render();
+      despesasPartilhadas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderContas();
     }, err => {
-      console.error('Erro a sincronizar pagamentos:', err);
+      console.error('Erro a sincronizar despesas partilhadas:', err);
+    });
+
+  if(unsubscribeLiquidacoes) unsubscribeLiquidacoes();
+  unsubscribeLiquidacoes = db.collection('groups').doc(groupId).collection('liquidacoes')
+    .onSnapshot(snapshot => {
+      liquidacoes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderContas();
+    }, err => {
+      console.error('Erro a sincronizar liquidações:', err);
     });
 }
 
@@ -1165,14 +1273,16 @@ auth.onAuthStateChanged(async (user) => {
     if(unsubscribeGastos){ unsubscribeGastos(); unsubscribeGastos = null; }
     if(unsubscribeRecorrentes){ unsubscribeRecorrentes(); unsubscribeRecorrentes = null; }
     if(unsubscribeGrupo){ unsubscribeGrupo(); unsubscribeGrupo = null; }
-    if(unsubscribeAcertos){ unsubscribeAcertos(); unsubscribeAcertos = null; }
+    if(unsubscribeDespesasPartilhadas){ unsubscribeDespesasPartilhadas(); unsubscribeDespesasPartilhadas = null; }
+    if(unsubscribeLiquidacoes){ unsubscribeLiquidacoes(); unsubscribeLiquidacoes = null; }
     currentGroupId = null;
     gastos = [];
     recorrentes = [];
     orcamentos = {};
     grupoMembers = [];
     grupoMemberInfo = {};
-    acertos = [];
+    despesasPartilhadas = [];
+    liquidacoes = [];
     loginScreen.style.display = 'flex';
     appShell.style.display = 'none';
     loginStatus.textContent = '';
@@ -1376,7 +1486,7 @@ function render(){
   document.getElementById('totalMes').textContent = formatoEuro(total);
   document.getElementById('mesLabel').textContent = 'gasto em ' + mesAtualLabel();
   renderComparacaoMensal(total);
-  renderSaldo();
+  renderContas();
 
   renderOrcamentos(doMes);
 
@@ -1420,7 +1530,7 @@ function render(){
   renderChart(doMes);
 }
 
-// ---- Contas entre parceiros (divisão de despesas 50/50) ----
+// ---- Contas a Acertar (divisão de despesas partilhadas, à parte dos gastos do mês) ----
 // Só faz sentido matematicamente para grupos com exatamente 2 pessoas.
 function outroMembroUid(){
   if(!currentUser || !grupoMembers || grupoMembers.length !== 2) return null;
@@ -1434,74 +1544,82 @@ function nomeDoMembro(uid){
   return (info && (info.displayName || info.email)) || 'a outra pessoa';
 }
 
-// saldo positivo: a outra pessoa deve-te esse valor. saldo negativo: tu deves-lhe.
-function calcularSaldoCasal(){
+function renderContas(){
+  const semParceiro = document.getElementById('contasSemParceiro');
+  const conteudo = document.getElementById('contasConteudo');
   const outroUid = outroMembroUid();
-  if(!outroUid) return null;
 
-  let saldo = 0;
-  gastos.forEach(g => {
-    if(!g.dividir || !g.pagoPor) return;
-    const metade = g.valor / 2;
-    if(g.pagoPor === currentUser.uid) saldo += metade;
-    else if(g.pagoPor === outroUid) saldo -= metade;
-  });
-  acertos.forEach(a => {
-    if(a.de === currentUser.uid && a.para === outroUid) saldo += a.valor;
-    else if(a.de === outroUid && a.para === currentUser.uid) saldo -= a.valor;
-  });
-
-  return { saldo, outroUid };
-}
-
-function renderSaldo(){
-  const secao = document.getElementById('saldoSection');
-  const resultado = calcularSaldoCasal();
-  if(!resultado){
-    secao.style.display = 'none';
+  if(!outroUid){
+    semParceiro.style.display = 'block';
+    conteudo.style.display = 'none';
     return;
   }
-  secao.style.display = 'block';
+  semParceiro.style.display = 'none';
+  conteudo.style.display = 'block';
 
-  const { saldo, outroUid } = resultado;
   const nomeOutro = nomeDoMembro(outroUid);
-  const resumo = document.getElementById('saldoResumo');
-  if(Math.abs(saldo) < 0.005){
+  document.getElementById('colNomeEu').textContent = 'Tu';
+  document.getElementById('colNomeOutro').textContent = nomeOutro;
+  document.getElementById('chipOutroPagou').textContent = nomeOutro;
+
+  const emAberto = despesasPartilhadas.filter(d => !d.liquidacaoId);
+  const minhas = emAberto.filter(d => d.pagoPor === currentUser.uid);
+  const dele = emAberto.filter(d => d.pagoPor === outroUid);
+  const totalEu = minhas.reduce((s,d)=>s+d.valor,0);
+  const totalOutro = dele.reduce((s,d)=>s+d.valor,0);
+
+  const renderColuna = (lista) => {
+    if(lista.length === 0) return '<div class="empty" style="padding:16px 6px; font-size:11px;">Sem despesas</div>';
+    return [...lista].sort((a,b)=> new Date(b.data) - new Date(a.data)).map(d => {
+      const dt = new Date(d.data);
+      const dataStr = dt.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+      return `<div class="mini-entry">
+        <div class="mini-top">
+          <span class="mini-valor">${formatoEuro(d.valor)}</span>
+          <span class="mini-del" onclick="removerDespesaPartilhada('${d.id}')">✕</span>
+        </div>
+        <div class="mini-meta">${d.descricao ? d.descricao + ' · ' : ''}${dataStr}</div>
+      </div>`;
+    }).join('');
+  };
+
+  document.getElementById('colDespesasEu').innerHTML = renderColuna(minhas);
+  document.getElementById('colDespesasOutro').innerHTML = renderColuna(dele);
+  document.getElementById('colTotalEu').textContent = formatoEuro(totalEu);
+  document.getElementById('colTotalOutro').textContent = formatoEuro(totalOutro);
+
+  const diferenca = (totalEu - totalOutro) / 2; // positivo: o outro deve-te; negativo: deves-lhe
+  const resumo = document.getElementById('contasResumo');
+  if(Math.abs(diferenca) < 0.005){
     resumo.innerHTML = `<div style="font-size:15px; color:var(--good); font-weight:600;">Contas em dia ✓</div>`;
-  } else if(saldo > 0){
-    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${nomeOutro} deve-te</div><div style="font-size:26px; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums;">${formatoEuro(saldo)}</div>`;
+  } else if(diferenca > 0){
+    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${nomeOutro} deve-te</div><div style="font-size:26px; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums;">${formatoEuro(diferenca)}</div>`;
   } else {
-    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">Deves a ${nomeOutro}</div><div style="font-size:26px; font-weight:700; color:var(--danger); font-variant-numeric:tabular-nums;">${formatoEuro(Math.abs(saldo))}</div>`;
+    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">Deves a ${nomeOutro}</div><div style="font-size:26px; font-weight:700; color:var(--danger); font-variant-numeric:tabular-nums;">${formatoEuro(Math.abs(diferenca))}</div>`;
   }
 
-  const listaAcertos = document.getElementById('listaAcertos');
-  if(!acertos || acertos.length === 0){
-    listaAcertos.innerHTML = '';
+  const listaLiq = document.getElementById('listaLiquidacoes');
+  if(!liquidacoes || liquidacoes.length === 0){
+    listaLiq.innerHTML = '<div class="empty">Ainda sem liquidações.</div>';
   } else {
-    const ordenado = [...acertos].sort((a,b)=> new Date(b.data) - new Date(a.data));
-    listaAcertos.innerHTML = ordenado.slice(0,10).map(a => {
-      const d = new Date(a.data);
-      const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
-      const quemPagou = nomeDoMembro(a.de);
-      const quemRecebeu = nomeDoMembro(a.para);
-      return `<div class="entry">
-        <div class="meta">
-          <span class="cat">${quemPagou} → ${quemRecebeu}</span>
-          <span class="date">${dataStr}</span>
-        </div>
-        <div style="display:flex;align-items:center;">
-          <span class="amount">${formatoEuro(a.valor)}</span>
-          <button class="del" onclick="removerAcerto('${a.id}')">✕</button>
-        </div>
+    const ordenado = [...liquidacoes].sort((a,b)=> new Date(b.data) - new Date(a.data));
+    listaLiq.innerHTML = ordenado.map(l => {
+      const d = new Date(l.data);
+      const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric'});
+      const corpo = l.quemDevia
+        ? `${nomeDoMembro(l.quemDevia)} → ${nomeDoMembro(l.quemRecebia)}: <strong>${formatoEuro(l.valor)}</strong>`
+        : 'Contas equilibradas';
+      return `<div class="liquidacao-row">
+        <span class="liquidacao-numero">Nº ${l.numero}/${l.ano}</span> — ${dataStr}<br>${corpo}
       </div>`;
     }).join('');
   }
 }
 
-window.removerAcerto = function(id){
+window.removerDespesaPartilhada = function(id){
   if(!currentGroupId) return;
-  db.collection('groups').doc(currentGroupId).collection('acertos').doc(id).delete()
-    .catch(err => console.error('Erro a remover pagamento:', err));
+  db.collection('groups').doc(currentGroupId).collection('despesasPartilhadas').doc(id).delete()
+    .catch(err => console.error('Erro a remover despesa partilhada:', err));
 };
 
 function renderOrcamentos(doMes){
@@ -1610,46 +1728,57 @@ function parseFaturaQR(texto){
 }
 
 // ---- Scanner ----
-function resetDivisaoUI(){
-  pagoPorEscolhido = null;
-  document.querySelectorAll('#divisaoChips .cat-chip').forEach(c => c.classList.remove('active'));
-  const outroUid = outroMembroUid();
-  const divisaoRow = document.getElementById('divisaoRow');
-  if(outroUid){
-    document.getElementById('nomeParceiroChip').textContent = nomeDoMembro(outroUid);
-    divisaoRow.style.display = 'block';
+// scanMode 'gasto' = despesa mensal normal; 'partilhada' = despesa partilhada
+// (guardada numa coleção à parte, não conta para os gastos do mês).
+let voltarParaContas = false;
+
+function configurarCamposConfirmacao(){
+  const categoriaRow = document.getElementById('categoriaRow');
+  const pagoPorRow = document.getElementById('pagoPorPartilhadaRow');
+  pagoPorPartilhadaEscolhido = null;
+  document.querySelectorAll('#pagoPorPartilhadaChips .cat-chip').forEach(c => c.classList.remove('active'));
+
+  if(scanMode === 'partilhada'){
+    categoriaRow.style.display = 'none';
+    pagoPorRow.style.display = 'block';
   } else {
-    divisaoRow.style.display = 'none';
+    categoriaRow.style.display = 'block';
+    pagoPorRow.style.display = 'none';
   }
 }
 
-document.querySelectorAll('#divisaoChips .cat-chip').forEach(chip => {
+document.querySelectorAll('#pagoPorPartilhadaChips .cat-chip').forEach(chip => {
   chip.onclick = () => {
-    const valor = chip.dataset.pagou;
-    if(pagoPorEscolhido === valor){
-      pagoPorEscolhido = null;
-      document.querySelectorAll('#divisaoChips .cat-chip').forEach(c => c.classList.remove('active'));
-    } else {
-      pagoPorEscolhido = valor;
-      document.querySelectorAll('#divisaoChips .cat-chip').forEach(c => c.classList.toggle('active', c === chip));
-    }
+    pagoPorPartilhadaEscolhido = chip.dataset.pagou;
+    document.querySelectorAll('#pagoPorPartilhadaChips .cat-chip').forEach(c => c.classList.toggle('active', c === chip));
   };
 });
 
 document.getElementById('openScan').onclick = () => {
+  scanMode = 'gasto';
+  voltarParaContas = false;
   overlay.classList.add('open');
   confirmFields.style.display = 'none';
   manualFields.style.display = 'none';
   document.getElementById('dataInput').value = '';
   nifDetetado = null;
-  resetDivisaoUI();
+  configurarCamposConfirmacao();
   scanStatus.textContent = '';
   iniciarScanner();
 };
 
+function fecharOverlayScan(){
+  overlay.classList.remove('open');
+  if(voltarParaContas){
+    voltarParaContas = false;
+    renderContas();
+    document.getElementById('contasOverlay').classList.add('open');
+  }
+}
+
 document.getElementById('closeSheet').onclick = () => {
   pararScanner();
-  overlay.classList.remove('open');
+  fecharOverlayScan();
 };
 
 document.getElementById('manualToggle').onclick = () => {
@@ -1661,7 +1790,7 @@ document.getElementById('manualToggle').onclick = () => {
   document.getElementById('comercianteInput').value = '';
   document.getElementById('dataInput').value = '';
   nifDetetado = null;
-  resetDivisaoUI();
+  configurarCamposConfirmacao();
   scanStatus.textContent = '';
 };
 
@@ -1836,6 +1965,30 @@ document.getElementById('confirmAdd').onclick = async () => {
   if(!currentGroupId || !currentUser) return;
   const dataEscolhida = document.getElementById('dataInput').value;
   const dataFinal = dataEscolhida ? dataInputParaISO(dataEscolhida) : new Date().toISOString();
+  const comerciante = document.getElementById('comercianteInput').value.trim();
+
+  if(scanMode === 'partilhada'){
+    const outroUid = outroMembroUid();
+    if(!pagoPorPartilhadaEscolhido || !outroUid){
+      alert('Escolhe quem pagou esta despesa.');
+      return;
+    }
+    const pagoPor = pagoPorPartilhadaEscolhido === 'eu' ? currentUser.uid : outroUid;
+    db.collection('groups').doc(currentGroupId).collection('despesasPartilhadas').add({
+      valor,
+      descricao: comerciante,
+      data: dataFinal,
+      nif: nifDetetado || null,
+      pagoPor,
+      criadoPor: currentUser.uid,
+      liquidacaoId: null
+    }).catch(err => {
+      console.error('Erro a adicionar despesa partilhada:', err);
+      alert('Não foi possível guardar. Tenta novamente.');
+    });
+    fecharOverlayScan();
+    return;
+  }
 
   const duplicado = encontrarGastoDuplicado(nifDetetado, valor, dataFinal);
   if(duplicado){
@@ -1843,24 +1996,18 @@ document.getElementById('confirmAdd').onclick = async () => {
     if(!continuar) return;
   }
 
-  const outroUid = outroMembroUid();
-  const dividir = pagoPorEscolhido !== null && outroUid !== null;
-  const pagoPor = pagoPorEscolhido === 'eu' ? currentUser.uid : (pagoPorEscolhido === 'outro' ? outroUid : null);
-
   db.collection('groups').doc(currentGroupId).collection('gastos').add({
     valor,
     categoria: catAtiva,
-    comerciante: document.getElementById('comercianteInput').value.trim(),
+    comerciante,
     data: dataFinal,
     nif: nifDetetado || null,
-    criadoPor: currentUser.uid,
-    dividir,
-    pagoPor
+    criadoPor: currentUser.uid
   }).catch(err => {
     console.error('Erro a adicionar gasto:', err);
     alert('Não foi possível guardar o gasto. Tenta novamente.');
   });
-  overlay.classList.remove('open');
+  fecharOverlayScan();
 };
 
 let editarDataGastoId = null;
