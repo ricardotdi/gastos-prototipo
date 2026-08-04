@@ -1673,17 +1673,41 @@ function gerarCodigoConvite(){
   return code;
 }
 
+// Gera um código e grava-o de forma atómica só se ainda não existir (transação:
+// lê + escreve num único passo, sem janela entre verificar e gravar). Se por
+// azar calhar num código já em uso, tenta outro — até 5 vezes, o que chega e
+// sobra dado o espaço de 32^6 combinações possíveis.
+async function gerarConviteUnico(){
+  for(let tentativa = 0; tentativa < 5; tentativa++){
+    const code = gerarCodigoConvite();
+    const ref = db.collection('invites').doc(code);
+    try{
+      await db.runTransaction(async (transaction) => {
+        const snap = await transaction.get(ref);
+        if(snap.exists){
+          throw { codigoJaExiste: true };
+        }
+        transaction.set(ref, {
+          groupId: currentGroupId,
+          createdBy: currentUser.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+      return code;
+    } catch(err){
+      if(err && err.codigoJaExiste) continue;
+      throw err;
+    }
+  }
+  throw new Error('Não foi possível gerar um código único depois de várias tentativas.');
+}
+
 document.getElementById('btnGerarConvite').onclick = async () => {
   if(!currentGroupId || !currentUser) return;
   const inviteHint = document.getElementById('inviteHint');
-  const code = gerarCodigoConvite();
   inviteHint.textContent = t('status_gerando_codigo');
   try{
-    await db.collection('invites').doc(code).set({
-      groupId: currentGroupId,
-      createdBy: currentUser.uid,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    const code = await gerarConviteUnico();
     document.getElementById('inviteCodeDisplay').value = code;
     inviteHint.textContent = t('hint_codigo_gerado');
   } catch(err){
