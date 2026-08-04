@@ -441,9 +441,9 @@
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <img src="Fin_plus_logo_euro.png" alt="Fin+" style="height:64px; margin-bottom:16px;">
-    <div class="eyebrow">Finanças Positivas</div>
-    <h1 class="login-title">Os meus gastos</h1>
-    <p class="login-sub">Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.</p>
+    <div class="eyebrow" id="loginEyebrow">Finanças Positivas</div>
+    <h1 class="login-title" id="loginTitulo">Os meus gastos</h1>
+    <p class="login-sub" id="loginSubtitulo">Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.</p>
     <button class="oauth-btn" id="btnEntrarGoogle">
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <path fill="#FFC107" d="M43.6 20.5h-1.9V20.4H24v7.2h11.3c-1.6 4.6-6 7.9-11.3 7.9-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.1-5.1C34.6 6.2 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/>
@@ -451,7 +451,7 @@
         <path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.1-5.1l-6.5-5.5C29.6 35.1 26.9 36 24 36c-5.2 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
         <path fill="#1976D2" d="M43.6 20.5H24v7.2h11.3c-.8 2.3-2.2 4.1-4.1 5.4l6.5 5.5C42.1 34.9 44 29.9 44 24c0-1.2-.1-2.4-.4-3.5z"/>
       </svg>
-      Entrar com Google
+      <span id="btnEntrarGoogleTexto">Entrar com Google</span>
     </button>
 
     <div class="login-status" id="loginStatus"></div>
@@ -461,8 +461,8 @@
 <div id="appShell" style="display:none">
   <header>
     <img src="Fin_plus_logo_euro.png" alt="Fin+" style="height:40px; display:block; margin-bottom:8px;">
-    <div class="eyebrow">Finanças Positivas</div>
-    <h1>Os meus gastos</h1>
+    <div class="eyebrow" id="headerEyebrow">Finanças Positivas</div>
+    <h1 id="headerTitulo">Os meus gastos</h1>
     <div class="user-bar">
       <span id="userEmailLabel"></span>
       <span class="sair-link" id="btnMenu" style="font-size:16px; letter-spacing:2px;">⋯</span>
@@ -481,19 +481,19 @@
 
     <div id="orcamentosSection" style="display:none;">
       <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-        <span>Orçamentos do mês</span>
+        <span id="tituloOrcamentosMes">Orçamentos do mês</span>
         <span class="sair-link" id="btnEditarOrcamentos" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">editar</span>
       </div>
       <div id="listaOrcamentos" style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px;"></div>
     </div>
 
     <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-      <span>Despesas fixas</span>
+      <span id="tituloDespesasFixas">Despesas fixas</span>
       <span class="sair-link" id="btnAddRecorrente" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">+ adicionar</span>
     </div>
     <div id="listaRecorrentes"></div>
 
-    <div class="section-title">Movimentos recentes</div>
+    <div class="section-title" id="tituloMovimentosRecentes">Movimentos recentes</div>
     <div id="lista"></div>
   </main>
 
@@ -503,8 +503,8 @@
 <div class="overlay" id="overlay">
   <div class="sheet">
     <button class="close-btn" id="closeSheet">✕</button>
-    <h2>Adicionar gasto</h2>
-    <p class="hint">Aponta a câmara ao QR Code da fatura</p>
+    <h2 id="tituloAdicionarGasto">Adicionar gasto</h2>
+    <p class="hint" id="hintAdicionarGasto">Aponta a câmara ao QR Code da fatura</p>
 
     <div id="qr-reader"></div>
     <div class="scan-status" id="scanStatus"></div>
@@ -514,32 +514,32 @@
 
     <div id="manualFields" style="display:none">
       <div class="form-row">
-        <label>Valor (€)</label>
+        <label id="labelValorManual">Valor (€)</label>
         <input type="number" step="0.01" id="manualValor" placeholder="0,00">
       </div>
     </div>
 
     <div id="confirmFields" style="display:none">
       <div class="form-row">
-        <label>Valor detetado</label>
+        <label id="labelValorDetetado">Valor detetado</label>
         <input type="number" step="0.01" id="valorDetetado">
       </div>
       <div class="form-row">
-        <label>Comerciante (opcional)</label>
+        <label id="labelComerciante">Comerciante (opcional)</label>
         <input type="text" id="comercianteInput" placeholder="Nome da loja">
       </div>
       <div class="form-row">
-        <label>Data (opcional — em branco fica hoje)</label>
+        <label id="labelDataGasto">Data (opcional — em branco fica hoje)</label>
         <input type="date" id="dataInput">
       </div>
       <div class="form-row" id="categoriaRow">
-        <label>Categoria</label>
+        <label id="labelCategoria">Categoria</label>
         <div class="cats" id="catChips"></div>
       </div>
       <div class="form-row" id="pagoPorPartilhadaRow" style="display:none;">
-        <label>Quem pagou?</label>
+        <label id="labelQuemPagou">Quem pagou?</label>
         <div class="cats" id="pagoPorPartilhadaChips">
-          <div class="cat-chip" data-pagou="eu">Eu</div>
+          <div class="cat-chip" data-pagou="eu" id="chipEuPagou">Eu</div>
           <div class="cat-chip" data-pagou="outro" id="chipOutroPagou">Parceiro(a)</div>
         </div>
       </div>
@@ -551,11 +551,11 @@
 <div class="overlay" id="inviteOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeInviteSheet">✕</button>
-    <h2>Partilhar gastos</h2>
-    <p class="hint">Gera um código e envia-o a quem queres convidar (casal/família) para verem e adicionarem gastos em conjunto.</p>
+    <h2 id="tituloPartilhar">Partilhar gastos</h2>
+    <p class="hint" id="hintPartilhar">Gera um código e envia-o a quem queres convidar (casal/família) para verem e adicionarem gastos em conjunto.</p>
 
     <div class="form-row">
-      <label>O teu código de convite</label>
+      <label id="labelCodigoConvite">O teu código de convite</label>
       <div style="display:flex; gap:8px;">
         <input type="text" id="inviteCodeDisplay" readonly placeholder="ainda sem código" style="flex:1; text-align:center; font-weight:700; letter-spacing:3px;">
         <button class="confirm-btn" id="btnGerarConvite" style="width:auto; margin:0; padding:0 18px; white-space:nowrap;">Gerar</button>
@@ -568,11 +568,11 @@
 <div class="overlay" id="joinOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeJoinSheet">✕</button>
-    <h2>Juntar-me a um grupo</h2>
-    <p class="hint">Recebeste um código de alguém? Cola-o aqui para veres e adicionares gastos em conjunto com essa pessoa.</p>
+    <h2 id="tituloJuntar">Juntar-me a um grupo</h2>
+    <p class="hint" id="hintJuntar">Recebeste um código de alguém? Cola-o aqui para veres e adicionares gastos em conjunto com essa pessoa.</p>
 
     <div class="form-row">
-      <label>Código de convite</label>
+      <label id="labelCodigoConviteJuntar">Código de convite</label>
       <input type="text" id="joinCodeInput" placeholder="Cola aqui o código" style="text-transform:uppercase;">
       <button class="confirm-btn" id="btnJuntar">Juntar-me a esse grupo</button>
     </div>
@@ -583,19 +583,19 @@
 <div class="overlay" id="recorrenteOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeRecorrenteSheet">✕</button>
-    <h2>Nova despesa fixa</h2>
-    <p class="hint">Para gastos que se repetem todo o mês (renda, subscrições, etc.), sem precisares de fatura.</p>
+    <h2 id="tituloNovaDespesaFixa">Nova despesa fixa</h2>
+    <p class="hint" id="hintNovaDespesaFixa">Para gastos que se repetem todo o mês (renda, subscrições, etc.), sem precisares de fatura.</p>
 
     <div class="form-row">
-      <label>Descrição</label>
+      <label id="labelDescricao">Descrição</label>
       <input type="text" id="recDescricao" placeholder="Ex: Renda, Netflix, Ginásio">
     </div>
     <div class="form-row">
-      <label>Valor mensal (€)</label>
+      <label id="labelValorMensal">Valor mensal (€)</label>
       <input type="number" step="0.01" id="recValor" placeholder="0,00">
     </div>
     <div class="form-row">
-      <label>Categoria</label>
+      <label id="labelCategoriaRecorrente">Categoria</label>
       <div class="cats" id="catChipsRecorrente"></div>
     </div>
     <button class="confirm-btn" id="btnGuardarRecorrente">Guardar despesa fixa</button>
@@ -606,13 +606,14 @@
 <div class="overlay" id="menuOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeMenuSheet">✕</button>
-    <h2>Conta</h2>
+    <h2 id="tituloConta">Conta</h2>
     <p class="hint">&nbsp;</p>
     <div class="menu-item" id="menuPartilhar">Partilhar gastos (convidar)</div>
     <div class="menu-item" id="menuJuntar">Juntar-me a um grupo</div>
     <div class="menu-item" id="menuOrcamentos">Orçamentos por categoria</div>
     <div class="menu-item" id="menuHistorico">Histórico</div>
     <div class="menu-item" id="menuContas">Contas a Acertar</div>
+    <div class="menu-item" id="menuDefinicoes">Definições</div>
     <div class="menu-item" id="menuSair">Sair</div>
   </div>
 </div>
@@ -620,8 +621,8 @@
 <div class="overlay" id="orcamentosOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeOrcamentosSheet">✕</button>
-    <h2>Orçamentos por categoria</h2>
-    <p class="hint">Define um limite mensal por categoria (deixa em branco para não acompanhar essa categoria). Aplica-se a todo o grupo.</p>
+    <h2 id="tituloOrcamentos">Orçamentos por categoria</h2>
+    <p class="hint" id="hintOrcamentos">Define um limite mensal por categoria (deixa em branco para não acompanhar essa categoria). Aplica-se a todo o grupo.</p>
     <div id="orcamentosForm"></div>
     <button class="confirm-btn" id="btnGuardarOrcamentos">Guardar orçamentos</button>
     <div class="scan-status" id="orcamentosStatus"></div>
@@ -632,8 +633,8 @@
 <div class="overlay" id="categoriasOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeCategoriasSheet">✕</button>
-    <h2>Categorias</h2>
-    <p class="hint">Edita o nome de uma categoria para a renomear (atualiza também os gastos já registados). Apaga o texto de uma linha para a remover — os gastos antigos mantêm o nome antigo.</p>
+    <h2 id="tituloCategorias">Categorias</h2>
+    <p class="hint" id="hintCategorias">Edita o nome de uma categoria para a renomear (atualiza também os gastos já registados). Apaga o texto de uma linha para a remover — os gastos antigos mantêm o nome antigo.</p>
     <div id="categoriasForm"></div>
     <div class="manual-toggle" id="btnAddCategoriaRow">+ adicionar categoria</div>
     <button class="confirm-btn" id="btnGuardarCategorias">Guardar categorias</button>
@@ -644,9 +645,9 @@
 <div class="overlay" id="editarDataOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeEditarDataSheet">✕</button>
-    <h2>Editar data do gasto</h2>
+    <h2 id="tituloEditarData">Editar data do gasto</h2>
     <div class="form-row">
-      <label>Data</label>
+      <label id="labelData">Data</label>
       <input type="date" id="editarDataInput">
     </div>
     <button class="confirm-btn" id="btnGuardarDataEditada">Guardar</button>
@@ -654,10 +655,33 @@
   </div>
 </div>
 
+<div class="overlay" id="definicoesOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeDefinicoesSheet">✕</button>
+    <h2 id="tituloDefinicoes">Definições</h2>
+
+    <div class="form-row">
+      <label id="labelIdioma">Idioma</label>
+      <div class="cats" id="idiomaChips">
+        <div class="cat-chip" data-idioma="pt">Português</div>
+        <div class="cat-chip" data-idioma="en">English</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label id="labelMoeda">Moeda</label>
+      <div class="cats" id="moedaChips"></div>
+    </div>
+
+    <button class="confirm-btn" id="btnGuardarDefinicoes">Guardar</button>
+    <div class="scan-status" id="definicoesStatus"></div>
+  </div>
+</div>
+
 <div class="overlay" id="historicoOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeHistoricoSheet">✕</button>
-    <h2>Histórico</h2>
+    <h2 id="tituloHistorico">Histórico</h2>
 
     <div class="cats" id="historicoModoChips">
       <div class="cat-chip hist-modo-chip active" data-modo="mes">Mês</div>
@@ -696,7 +720,7 @@
 <div class="overlay" id="contasOverlay">
   <div class="sheet">
     <button class="close-btn" id="closeContasSheet">✕</button>
-    <h2>Contas a Acertar</h2>
+    <h2 id="tituloContas">Contas a Acertar</h2>
     <p class="hint" id="contasSemParceiro" style="display:none;">Ainda não tens ninguém junto neste grupo. Convida a tua parceira/parceiro em "Partilhar" no menu para começarem a dividir despesas.</p>
 
     <div id="contasConteudo" style="display:none;">
@@ -719,7 +743,7 @@
 
       <button class="confirm-btn" id="btnLiquidar" style="margin-top:20px; background:var(--good);">Liquidado</button>
 
-      <div class="section-title" style="margin-top:24px;">Liquidações anteriores</div>
+      <div class="section-title" style="margin-top:24px;" id="tituloLiquidacoesAnteriores">Liquidações anteriores</div>
       <div id="listaLiquidacoes"></div>
     </div>
   </div>
@@ -740,6 +764,352 @@ const db = firebase.firestore();
 db.enablePersistence({ synchronizeTabs: true }).catch(()=>{ /* não crítico, ignora */ });
 
 const CATEGORIAS_DEFAULT = ['Alimentação', 'Prestação da casa', 'Transporte', 'Saúde', 'Lazer', 'Seguro Multirriscos', 'Seguro de Vida', 'Outros'];
+
+// ---- Idioma e moeda (preferência guardada por utilizador em users/{uid}) ----
+// A moeda só muda o símbolo apresentado — os valores continuam nos mesmos
+// números guardados (não há conversão cambial). "simboloPDF" existe porque a
+// fonte base do jsPDF não tem o glifo do símbolo "€" (ver formatoEuroPDF).
+const MOEDAS = [
+  { codigo: 'EUR', simbolo: '€', simboloPDF: 'EUR' },
+  { codigo: 'USD', simbolo: '$', simboloPDF: '$' },
+  { codigo: 'GBP', simbolo: '£', simboloPDF: '£' },
+  { codigo: 'BRL', simbolo: 'R$', simboloPDF: 'R$' },
+  { codigo: 'AOA', simbolo: 'Kz', simboloPDF: 'Kz' }
+];
+let idioma = 'pt'; // 'pt' | 'en'
+let moedaCodigo = 'EUR';
+
+function moedaAtual(){
+  return MOEDAS.find(m => m.codigo === moedaCodigo) || MOEDAS[0];
+}
+
+function localeAtual(){
+  return idioma === 'en' ? 'en-GB' : 'pt-PT';
+}
+
+const MESES = {
+  pt: ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
+  en: ['January','February','March','April','May','June','July','August','September','October','November','December']
+};
+
+const T = {
+  pt: {
+    login_eyebrow: 'Finanças Positivas',
+    titulo_app: 'Os meus gastos',
+    login_subtitulo: 'Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.',
+    btn_entrar_google: 'Entrar com Google',
+    erro_login_nao_ativado: 'Este método de login ainda não está ativado. Tenta outro por agora.',
+    erro_login_conta_existe: 'Já tens conta com outro método de login (ex: Google) associado a este email — usa esse.',
+    erro_login_popup_bloqueado: 'O browser bloqueou a janela de login. Permite pop-ups para este site e tenta novamente.',
+    erro_login_generico: 'Não foi possível iniciar sessão. Tenta novamente.',
+    status_abrindo_sessao: 'A abrir sessão…',
+    mes_label_prefixo: 'gasto em ',
+    a_carregar: 'a carregar…',
+    menu_conta: 'Conta',
+    menu_partilhar: 'Partilhar gastos (convidar)',
+    menu_juntar: 'Juntar-me a um grupo',
+    menu_orcamentos: 'Orçamentos por categoria',
+    menu_historico: 'Histórico',
+    menu_contas: 'Contas a Acertar',
+    menu_definicoes: 'Definições',
+    menu_sair: 'Sair',
+    titulo_orcamentos_mes: 'Orçamentos do mês',
+    link_editar: 'editar',
+    titulo_despesas_fixas: 'Despesas fixas',
+    link_adicionar: '+ adicionar',
+    titulo_movimentos_recentes: 'Movimentos recentes',
+    titulo_adicionar_gasto: 'Adicionar gasto',
+    hint_adicionar_gasto: 'Aponta a câmara ao QR Code da fatura',
+    toggle_galeria: 'ou ler QR de uma foto da galeria',
+    toggle_manual: 'ou inserir valor manualmente',
+    label_valor_moeda: 'Valor ({moeda})',
+    label_valor_detetado: 'Valor detetado',
+    label_comerciante: 'Comerciante (opcional)',
+    placeholder_nome_loja: 'Nome da loja',
+    label_data_gasto: 'Data (opcional — em branco fica hoje)',
+    label_categoria: 'Categoria',
+    label_quem_pagou: 'Quem pagou?',
+    chip_eu: 'Eu',
+    chip_parceiro: 'Parceiro(a)',
+    btn_adicionar: 'Adicionar',
+    status_abrindo_camara: 'A abrir câmara…',
+    status_sem_camera: 'Sem acesso à câmara. Usa a opção manual.',
+    status_fatura_lida: '✓ Fatura lida com sucesso',
+    status_qr_sem_valor: 'QR lido mas sem valor total reconhecido — tenta manual.',
+    status_lendo_imagem: 'A ler QR Code da imagem…',
+    status_qr_nao_encontrado: 'Não foi encontrado nenhum QR Code na imagem — tenta manual.',
+    alerta_valor_invalido: 'Introduz um valor válido.',
+    alerta_escolher_quem_pagou: 'Escolhe quem pagou esta despesa.',
+    alerta_nao_guardado: 'Não foi possível guardar. Tenta novamente.',
+    alerta_gasto_nao_guardado: 'Não foi possível guardar o gasto. Tenta novamente.',
+    confirm_duplicado: 'Já tens um gasto igual registado (mesmo NIF, {valor}, no mesmo dia).',
+    btn_adicionar_mesmo_assim: 'Adicionar mesmo assim',
+    titulo_partilhar: 'Partilhar gastos',
+    hint_partilhar: 'Gera um código e envia-o a quem queres convidar (casal/família) para verem e adicionarem gastos em conjunto.',
+    label_codigo_convite: 'O teu código de convite',
+    placeholder_sem_codigo: 'ainda sem código',
+    btn_gerar: 'Gerar',
+    status_gerando_codigo: 'A gerar código…',
+    hint_codigo_gerado: 'Envia este código à pessoa. Ela deve colá-lo em baixo, em "Já tens um código?", na app dela.',
+    erro_gerar_codigo: 'Não foi possível gerar o código. Tenta novamente.',
+    titulo_juntar: 'Juntar-me a um grupo',
+    hint_juntar: 'Recebeste um código de alguém? Cola-o aqui para veres e adicionares gastos em conjunto com essa pessoa.',
+    label_codigo_convite_juntar: 'Código de convite',
+    placeholder_colar_codigo: 'Cola aqui o código',
+    btn_juntar_grupo: 'Juntar-me a esse grupo',
+    status_introduz_codigo: 'Introduz um código.',
+    status_juntando: 'A juntar…',
+    status_codigo_invalido: 'Código inválido.',
+    status_ja_no_grupo: 'Já estás neste grupo.',
+    status_juntou_grupo: '✓ Juntaste-te ao grupo! Os gastos vão sincronizar já a seguir.',
+    status_erro_juntar: 'Não foi possível juntar. Verifica o código e tenta de novo.',
+    titulo_nova_despesa_fixa: 'Nova despesa fixa',
+    hint_nova_despesa_fixa: 'Para gastos que se repetem todo o mês (renda, subscrições, etc.), sem precisares de fatura.',
+    label_descricao: 'Descrição',
+    placeholder_ex_recorrente: 'Ex: Renda, Netflix, Ginásio',
+    label_valor_mensal_moeda: 'Valor mensal ({moeda})',
+    btn_guardar_despesa_fixa: 'Guardar despesa fixa',
+    status_introduz_descricao: 'Introduz uma descrição.',
+    status_introduz_valor_valido: 'Introduz um valor válido.',
+    titulo_orcamentos: 'Orçamentos por categoria',
+    hint_orcamentos: 'Define um limite mensal por categoria (deixa em branco para não acompanhar essa categoria). Aplica-se a todo o grupo.',
+    placeholder_sem_limite: 'sem limite',
+    btn_guardar_orcamentos: 'Guardar orçamentos',
+    link_gerir_categorias: 'gerir categorias',
+    titulo_categorias: 'Categorias',
+    hint_categorias: 'Edita o nome de uma categoria para a renomear (atualiza também os gastos já registados). Apaga o texto de uma linha para a remover — os gastos antigos mantêm o nome antigo.',
+    link_add_categoria: '+ adicionar categoria',
+    placeholder_nova_categoria: 'Nova categoria',
+    btn_guardar_categorias: 'Guardar categorias',
+    status_precisa_categoria: 'Precisas de pelo menos uma categoria.',
+    status_guardando: 'A guardar…',
+    titulo_editar_data: 'Editar data do gasto',
+    label_data: 'Data',
+    btn_guardar: 'Guardar',
+    status_escolhe_data: 'Escolhe uma data.',
+    titulo_historico: 'Histórico',
+    chip_mes: 'Mês',
+    chip_trimestre: 'Trimestre',
+    chip_semestre: 'Semestre',
+    chip_ano: 'Ano',
+    chip_liquidacoes: 'Liquidações',
+    titulo_por_categoria: 'Por categoria',
+    link_exportar_pdf: 'exportar PDF',
+    msg_sem_gastos_periodo: 'Sem gastos neste período.',
+    msg_sem_ninguem_liquidacoes: 'Ainda não tens ninguém junto neste grupo para haver liquidações.',
+    msg_sem_liquidacoes_registadas: 'Ainda sem liquidações registadas.',
+    contas_equilibradas: 'Contas equilibradas',
+    liquidacao_numero: 'Nº {numero}/{ano}',
+    liquidacao_detalhe_toca: 'toca para ver o cálculo',
+    msg_sem_despesas_associadas: 'Sem despesas associadas (podem ter sido removidas).',
+    titulo_confirmar: 'Confirmar',
+    btn_confirmar: 'Confirmar',
+    btn_cancelar: 'Cancelar',
+    titulo_contas: 'Contas a Acertar',
+    hint_sem_parceiro: 'Ainda não tens ninguém junto neste grupo. Convida a tua parceira/parceiro em "Partilhar" no menu para começarem a dividir despesas.',
+    btn_add_despesa_partilhada: '+ Adicionar despesa partilhada',
+    btn_liquidado: 'Liquidado',
+    titulo_liquidacoes_anteriores: 'Liquidações anteriores',
+    tu: 'Tu',
+    a_outra_pessoa: 'a outra pessoa',
+    sem_despesas: 'Sem despesas',
+    contas_em_dia: 'Contas em dia ✓',
+    deve_te: '{nome} deve-te',
+    deves_a: 'Deves a {nome}',
+    sem_liquidacoes: 'Ainda sem liquidações.',
+    msg_sem_despesas_abrir: 'Não há despesas em aberto para liquidar.',
+    btn_ok: 'Ok',
+    liquidacao_confirmar_msg: '{quem1} → {quem2}: {valor}. Isto arquiva todas as despesas em aberto.',
+    liquidacao_equilibrada_msg: 'As contas já estão equilibradas — isto arquiva as despesas em aberto e regista a liquidação.',
+    btn_confirmar_liquidacao: 'Confirmar liquidação',
+    alerta_liquidar_erro: 'Não foi possível liquidar. Tenta novamente.',
+    msg_remover_recorrente: 'Remover esta despesa fixa? Deixa de contar a partir de agora.',
+    btn_remover: 'Remover',
+    msg_sem_despesas_fixas: 'Sem despesas fixas.<br>Ex: renda, subscrições, ginásio.',
+    msg_todos_meses: 'todos os meses',
+    msg_sem_movimentos: 'Ainda sem movimentos.<br>Toca em + para registar a primeira fatura.',
+    txt_editar_inline: 'editar',
+    txt_fixo: 'fixo',
+    txt_vs_mes_passado: 'que o mês passado',
+    pdf_tagline: 'Finanças Positivas',
+    pdf_titulo_resumo: 'Resumo de gastos - {periodo}',
+    pdf_total: 'Total: ',
+    pdf_categoria: 'Categoria',
+    pdf_valor: 'Valor',
+    pdf_gerado_em: 'Gerado em {data} · Fin+ Finanças Positivas',
+    pdf_share_titulo: 'Resumo de gastos',
+    titulo_definicoes: 'Definições',
+    label_idioma: 'Idioma',
+    chip_portugues: 'Português',
+    chip_english: 'English',
+    label_moeda: 'Moeda',
+    btn_guardar_definicoes: 'Guardar',
+    status_guardando_definicoes: 'A guardar…',
+    status_definicoes_guardadas: '✓ Guardado'
+  },
+  en: {
+    login_eyebrow: 'Positive Finances',
+    titulo_app: 'My expenses',
+    login_subtitulo: 'Sign in to save your expenses and sync them across devices.',
+    btn_entrar_google: 'Sign in with Google',
+    erro_login_nao_ativado: 'This login method isn\'t enabled yet. Try another one for now.',
+    erro_login_conta_existe: 'You already have an account with another login method (e.g. Google) linked to this email — use that one.',
+    erro_login_popup_bloqueado: 'The browser blocked the login window. Allow pop-ups for this site and try again.',
+    erro_login_generico: 'Could not sign in. Try again.',
+    status_abrindo_sessao: 'Opening session…',
+    mes_label_prefixo: 'spent in ',
+    a_carregar: 'loading…',
+    menu_conta: 'Account',
+    menu_partilhar: 'Share expenses (invite)',
+    menu_juntar: 'Join a group',
+    menu_orcamentos: 'Budgets by category',
+    menu_historico: 'History',
+    menu_contas: 'Settle Up',
+    menu_definicoes: 'Settings',
+    menu_sair: 'Sign out',
+    titulo_orcamentos_mes: 'This month\'s budgets',
+    link_editar: 'edit',
+    titulo_despesas_fixas: 'Fixed expenses',
+    link_adicionar: '+ add',
+    titulo_movimentos_recentes: 'Recent activity',
+    titulo_adicionar_gasto: 'Add expense',
+    hint_adicionar_gasto: 'Point the camera at the invoice\'s QR code',
+    toggle_galeria: 'or read QR from a gallery photo',
+    toggle_manual: 'or enter amount manually',
+    label_valor_moeda: 'Amount ({moeda})',
+    label_valor_detetado: 'Detected amount',
+    label_comerciante: 'Merchant (optional)',
+    placeholder_nome_loja: 'Store name',
+    label_data_gasto: 'Date (optional — leave blank for today)',
+    label_categoria: 'Category',
+    label_quem_pagou: 'Who paid?',
+    chip_eu: 'Me',
+    chip_parceiro: 'Partner',
+    btn_adicionar: 'Add',
+    status_abrindo_camara: 'Opening camera…',
+    status_sem_camera: 'No camera access. Use the manual option.',
+    status_fatura_lida: '✓ Invoice read successfully',
+    status_qr_sem_valor: 'QR read but no total amount recognized — try manual.',
+    status_lendo_imagem: 'Reading QR code from image…',
+    status_qr_nao_encontrado: 'No QR code found in the image — try manual.',
+    alerta_valor_invalido: 'Enter a valid amount.',
+    alerta_escolher_quem_pagou: 'Choose who paid this expense.',
+    alerta_nao_guardado: 'Could not save. Try again.',
+    alerta_gasto_nao_guardado: 'Could not save the expense. Try again.',
+    confirm_duplicado: 'You already have an identical expense recorded (same NIF, {valor}, on the same day).',
+    btn_adicionar_mesmo_assim: 'Add anyway',
+    titulo_partilhar: 'Share expenses',
+    hint_partilhar: 'Generate a code and send it to whoever you want to invite (partner/family) to see and add expenses together.',
+    label_codigo_convite: 'Your invite code',
+    placeholder_sem_codigo: 'no code yet',
+    btn_gerar: 'Generate',
+    status_gerando_codigo: 'Generating code…',
+    hint_codigo_gerado: 'Send this code to the person. They should paste it below, in "Got a code?", in their app.',
+    erro_gerar_codigo: 'Could not generate the code. Try again.',
+    titulo_juntar: 'Join a group',
+    hint_juntar: 'Got a code from someone? Paste it here to see and add expenses together with them.',
+    label_codigo_convite_juntar: 'Invite code',
+    placeholder_colar_codigo: 'Paste the code here',
+    btn_juntar_grupo: 'Join that group',
+    status_introduz_codigo: 'Enter a code.',
+    status_juntando: 'Joining…',
+    status_codigo_invalido: 'Invalid code.',
+    status_ja_no_grupo: 'You are already in this group.',
+    status_juntou_grupo: '✓ You joined the group! Expenses will sync right away.',
+    status_erro_juntar: 'Could not join. Check the code and try again.',
+    titulo_nova_despesa_fixa: 'New fixed expense',
+    hint_nova_despesa_fixa: 'For expenses that repeat every month (rent, subscriptions, etc.), no invoice needed.',
+    label_descricao: 'Description',
+    placeholder_ex_recorrente: 'E.g. Rent, Netflix, Gym',
+    label_valor_mensal_moeda: 'Monthly amount ({moeda})',
+    btn_guardar_despesa_fixa: 'Save fixed expense',
+    status_introduz_descricao: 'Enter a description.',
+    status_introduz_valor_valido: 'Enter a valid amount.',
+    titulo_orcamentos: 'Budgets by category',
+    hint_orcamentos: 'Set a monthly limit per category (leave blank to not track that category). Applies to the whole group.',
+    placeholder_sem_limite: 'no limit',
+    btn_guardar_orcamentos: 'Save budgets',
+    link_gerir_categorias: 'manage categories',
+    titulo_categorias: 'Categories',
+    hint_categorias: 'Edit a category\'s name to rename it (also updates expenses already recorded). Clear a row\'s text to remove it — old expenses keep the old name.',
+    link_add_categoria: '+ add category',
+    placeholder_nova_categoria: 'New category',
+    btn_guardar_categorias: 'Save categories',
+    status_precisa_categoria: 'You need at least one category.',
+    status_guardando: 'Saving…',
+    titulo_editar_data: 'Edit expense date',
+    label_data: 'Date',
+    btn_guardar: 'Save',
+    status_escolhe_data: 'Choose a date.',
+    titulo_historico: 'History',
+    chip_mes: 'Month',
+    chip_trimestre: 'Quarter',
+    chip_semestre: 'Half-year',
+    chip_ano: 'Year',
+    chip_liquidacoes: 'Settlements',
+    titulo_por_categoria: 'By category',
+    link_exportar_pdf: 'export PDF',
+    msg_sem_gastos_periodo: 'No expenses in this period.',
+    msg_sem_ninguem_liquidacoes: 'You don\'t have anyone in this group yet for there to be settlements.',
+    msg_sem_liquidacoes_registadas: 'No settlements recorded yet.',
+    contas_equilibradas: 'Accounts settled',
+    liquidacao_numero: 'No. {numero}/{ano}',
+    liquidacao_detalhe_toca: 'tap to see the calculation',
+    msg_sem_despesas_associadas: 'No expenses associated (may have been removed).',
+    titulo_confirmar: 'Confirm',
+    btn_confirmar: 'Confirm',
+    btn_cancelar: 'Cancel',
+    titulo_contas: 'Settle Up',
+    hint_sem_parceiro: 'You don\'t have anyone in this group yet. Invite your partner in "Share" from the menu to start splitting expenses.',
+    btn_add_despesa_partilhada: '+ Add shared expense',
+    btn_liquidado: 'Settled',
+    titulo_liquidacoes_anteriores: 'Previous settlements',
+    tu: 'You',
+    a_outra_pessoa: 'the other person',
+    sem_despesas: 'No expenses',
+    contas_em_dia: 'Accounts settled ✓',
+    deve_te: '{nome} owes you',
+    deves_a: 'You owe {nome}',
+    sem_liquidacoes: 'No settlements yet.',
+    msg_sem_despesas_abrir: 'There are no open expenses to settle.',
+    btn_ok: 'Ok',
+    liquidacao_confirmar_msg: '{quem1} → {quem2}: {valor}. This archives all open expenses.',
+    liquidacao_equilibrada_msg: 'The accounts are already balanced — this archives the open expenses and records the settlement.',
+    btn_confirmar_liquidacao: 'Confirm settlement',
+    alerta_liquidar_erro: 'Could not settle. Try again.',
+    msg_remover_recorrente: 'Remove this fixed expense? It stops counting from now on.',
+    btn_remover: 'Remove',
+    msg_sem_despesas_fixas: 'No fixed expenses.<br>E.g. rent, subscriptions, gym.',
+    msg_todos_meses: 'every month',
+    msg_sem_movimentos: 'No activity yet.<br>Tap + to record the first invoice.',
+    txt_editar_inline: 'edit',
+    txt_fixo: 'fixed',
+    txt_vs_mes_passado: 'vs last month',
+    pdf_tagline: 'Positive Finances',
+    pdf_titulo_resumo: 'Expense summary - {periodo}',
+    pdf_total: 'Total: ',
+    pdf_categoria: 'Category',
+    pdf_valor: 'Amount',
+    pdf_gerado_em: 'Generated on {data} · Fin+ Positive Finances',
+    pdf_share_titulo: 'Expense summary',
+    titulo_definicoes: 'Settings',
+    label_idioma: 'Language',
+    chip_portugues: 'Português',
+    chip_english: 'English',
+    label_moeda: 'Currency',
+    btn_guardar_definicoes: 'Save',
+    status_guardando_definicoes: 'Saving…',
+    status_definicoes_guardadas: '✓ Saved'
+  }
+};
+
+function t(chave, vars){
+  let texto = (T[idioma] && T[idioma][chave]) || T.pt[chave] || chave;
+  if(vars){
+    Object.keys(vars).forEach(k => { texto = texto.split('{' + k + '}').join(vars[k]); });
+  }
+  return texto;
+}
 
 let gastos = [];
 let recorrentes = [];
@@ -775,19 +1145,126 @@ const inviteOverlay = document.getElementById('inviteOverlay');
 const joinOverlay = document.getElementById('joinOverlay');
 const joinStatus = document.getElementById('joinStatus');
 
+// Atualiza todo o texto estático da interface consoante o idioma escolhido.
+// Chamada uma vez no arranque e sempre que o idioma muda nas Definições.
+function aplicarTraducoes(){
+  document.getElementById('loginEyebrow').textContent = t('login_eyebrow');
+  document.getElementById('loginTitulo').textContent = t('titulo_app');
+  document.getElementById('loginSubtitulo').textContent = t('login_subtitulo');
+  document.getElementById('btnEntrarGoogleTexto').textContent = t('btn_entrar_google');
+  document.getElementById('headerEyebrow').textContent = t('login_eyebrow');
+  document.getElementById('headerTitulo').textContent = t('titulo_app');
+  document.getElementById('tituloOrcamentosMes').textContent = t('titulo_orcamentos_mes');
+  document.getElementById('btnEditarOrcamentos').textContent = t('link_editar');
+  document.getElementById('tituloDespesasFixas').textContent = t('titulo_despesas_fixas');
+  document.getElementById('btnAddRecorrente').textContent = t('link_adicionar');
+  document.getElementById('tituloMovimentosRecentes').textContent = t('titulo_movimentos_recentes');
+  if(!currentUser) document.getElementById('mesLabel').textContent = t('a_carregar');
+
+  document.getElementById('tituloAdicionarGasto').textContent = t('titulo_adicionar_gasto');
+  document.getElementById('hintAdicionarGasto').textContent = t('hint_adicionar_gasto');
+  document.getElementById('galeriaToggle').textContent = t('toggle_galeria');
+  document.getElementById('manualToggle').textContent = t('toggle_manual');
+  document.getElementById('labelValorManual').textContent = t('label_valor_moeda', { moeda: moedaAtual().simbolo });
+  document.getElementById('labelValorDetetado').textContent = t('label_valor_detetado');
+  document.getElementById('labelComerciante').textContent = t('label_comerciante');
+  document.getElementById('comercianteInput').placeholder = t('placeholder_nome_loja');
+  document.getElementById('labelDataGasto').textContent = t('label_data_gasto');
+  document.getElementById('labelCategoria').textContent = t('label_categoria');
+  document.getElementById('labelQuemPagou').textContent = t('label_quem_pagou');
+  document.getElementById('chipEuPagou').textContent = t('chip_eu');
+  if(!outroMembroUid()) document.getElementById('chipOutroPagou').textContent = t('chip_parceiro');
+  document.getElementById('confirmAdd').textContent = t('btn_adicionar');
+
+  document.getElementById('tituloPartilhar').textContent = t('titulo_partilhar');
+  document.getElementById('hintPartilhar').textContent = t('hint_partilhar');
+  document.getElementById('labelCodigoConvite').textContent = t('label_codigo_convite');
+  document.getElementById('inviteCodeDisplay').placeholder = t('placeholder_sem_codigo');
+  document.getElementById('btnGerarConvite').textContent = t('btn_gerar');
+
+  document.getElementById('tituloJuntar').textContent = t('titulo_juntar');
+  document.getElementById('hintJuntar').textContent = t('hint_juntar');
+  document.getElementById('labelCodigoConviteJuntar').textContent = t('label_codigo_convite_juntar');
+  document.getElementById('joinCodeInput').placeholder = t('placeholder_colar_codigo');
+  document.getElementById('btnJuntar').textContent = t('btn_juntar_grupo');
+
+  document.getElementById('tituloNovaDespesaFixa').textContent = t('titulo_nova_despesa_fixa');
+  document.getElementById('hintNovaDespesaFixa').textContent = t('hint_nova_despesa_fixa');
+  document.getElementById('labelDescricao').textContent = t('label_descricao');
+  document.getElementById('recDescricao').placeholder = t('placeholder_ex_recorrente');
+  document.getElementById('labelValorMensal').textContent = t('label_valor_mensal_moeda', { moeda: moedaAtual().simbolo });
+  document.getElementById('labelCategoriaRecorrente').textContent = t('label_categoria');
+  document.getElementById('btnGuardarRecorrente').textContent = t('btn_guardar_despesa_fixa');
+
+  document.getElementById('tituloConta').textContent = t('menu_conta');
+  document.getElementById('menuPartilhar').textContent = t('menu_partilhar');
+  document.getElementById('menuJuntar').textContent = t('menu_juntar');
+  document.getElementById('menuOrcamentos').textContent = t('menu_orcamentos');
+  document.getElementById('menuHistorico').textContent = t('menu_historico');
+  document.getElementById('menuContas').textContent = t('menu_contas');
+  document.getElementById('menuDefinicoes').textContent = t('menu_definicoes');
+  document.getElementById('menuSair').textContent = t('menu_sair');
+
+  document.getElementById('tituloOrcamentos').textContent = t('titulo_orcamentos');
+  document.getElementById('hintOrcamentos').textContent = t('hint_orcamentos');
+  document.getElementById('btnGuardarOrcamentos').textContent = t('btn_guardar_orcamentos');
+  document.getElementById('btnAbrirCategorias').textContent = t('link_gerir_categorias');
+
+  document.getElementById('tituloCategorias').textContent = t('titulo_categorias');
+  document.getElementById('hintCategorias').textContent = t('hint_categorias');
+  document.getElementById('btnAddCategoriaRow').textContent = t('link_add_categoria');
+  document.getElementById('btnGuardarCategorias').textContent = t('btn_guardar_categorias');
+
+  document.getElementById('tituloEditarData').textContent = t('titulo_editar_data');
+  document.getElementById('labelData').textContent = t('label_data');
+  document.getElementById('btnGuardarDataEditada').textContent = t('btn_guardar');
+
+  document.getElementById('tituloHistorico').textContent = t('titulo_historico');
+  document.querySelectorAll('.hist-modo-chip').forEach(chip => {
+    const chaves = { mes: 'chip_mes', trimestre: 'chip_trimestre', semestre: 'chip_semestre', ano: 'chip_ano', liquidacoes: 'chip_liquidacoes' };
+    chip.textContent = t(chaves[chip.dataset.modo]);
+  });
+  document.getElementById('btnExportarHistorico').textContent = t('link_exportar_pdf');
+
+  document.getElementById('confirmModalTitle').textContent = t('titulo_confirmar');
+  document.getElementById('confirmModalNo').textContent = t('btn_cancelar');
+
+  document.getElementById('tituloContas').textContent = t('titulo_contas');
+  document.getElementById('contasSemParceiro').textContent = t('hint_sem_parceiro');
+  document.getElementById('btnAddDespesaPartilhada').textContent = t('btn_add_despesa_partilhada');
+  document.getElementById('btnLiquidar').textContent = t('btn_liquidado');
+  document.getElementById('tituloLiquidacoesAnteriores').textContent = t('titulo_liquidacoes_anteriores');
+
+  document.getElementById('tituloDefinicoes').textContent = t('titulo_definicoes');
+  document.getElementById('labelIdioma').textContent = t('label_idioma');
+  document.querySelector('#idiomaChips [data-idioma="pt"]').textContent = t('chip_portugues');
+  document.querySelector('#idiomaChips [data-idioma="en"]').textContent = t('chip_english');
+  document.getElementById('labelMoeda').textContent = t('label_moeda');
+  document.getElementById('btnGuardarDefinicoes').textContent = t('btn_guardar_definicoes');
+
+  document.documentElement.lang = idioma === 'en' ? 'en' : 'pt-PT';
+
+  // Reaplica as vistas dinâmicas para que os textos gerados em JS (listas,
+  // histórico, etc.) também mudem de idioma imediatamente.
+  if(currentUser){
+    render();
+    if(historicoOverlay.classList.contains('open')) renderHistorico();
+  }
+}
+
 function mensagemErroLogin(codigo){
   const mapa = {
-    'auth/operation-not-allowed': 'Este método de login ainda não está ativado. Tenta outro por agora.',
-    'auth/account-exists-with-different-credential': 'Já tens conta com outro método de login (ex: Google) associado a este email — usa esse.',
+    'auth/operation-not-allowed': t('erro_login_nao_ativado'),
+    'auth/account-exists-with-different-credential': t('erro_login_conta_existe'),
     'auth/popup-closed-by-user': '',
     'auth/cancelled-popup-request': '',
-    'auth/popup-blocked': 'O browser bloqueou a janela de login. Permite pop-ups para este site e tenta novamente.'
+    'auth/popup-blocked': t('erro_login_popup_bloqueado')
   };
-  return codigo in mapa ? mapa[codigo] : 'Não foi possível iniciar sessão. Tenta novamente.';
+  return codigo in mapa ? mapa[codigo] : t('erro_login_generico');
 }
 
 function entrarComProvider(provider){
-  loginStatus.textContent = 'A abrir sessão…';
+  loginStatus.textContent = t('status_abrindo_sessao');
   auth.signInWithPopup(provider).catch(err => {
     console.error(err);
     loginStatus.textContent = mensagemErroLogin(err.code);
@@ -852,8 +1329,8 @@ document.getElementById('closeRecorrenteSheet').onclick = () => {
 document.getElementById('btnGuardarRecorrente').onclick = () => {
   const descricao = document.getElementById('recDescricao').value.trim();
   const valor = parseFloat(document.getElementById('recValor').value);
-  if(!descricao){ recorrenteStatus.textContent = 'Introduz uma descrição.'; return; }
-  if(isNaN(valor) || valor <= 0){ recorrenteStatus.textContent = 'Introduz um valor válido.'; return; }
+  if(!descricao){ recorrenteStatus.textContent = t('status_introduz_descricao'); return; }
+  if(isNaN(valor) || valor <= 0){ recorrenteStatus.textContent = t('status_introduz_valor_valido'); return; }
   if(!currentGroupId || !currentUser) return;
   db.collection('groups').doc(currentGroupId).collection('recorrentes').add({
     descricao,
@@ -865,7 +1342,7 @@ document.getElementById('btnGuardarRecorrente').onclick = () => {
     recorrenteOverlay.classList.remove('open');
   }).catch(err => {
     console.error('Erro a guardar despesa fixa:', err);
-    recorrenteStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+    recorrenteStatus.textContent = t('alerta_nao_guardado');
   });
 };
 
@@ -877,7 +1354,7 @@ function abrirOrcamentos(){
   const form = document.getElementById('orcamentosForm');
   form.innerHTML = categoriasAtuais.map(cat => `<div class="form-row">
     <label>${cat}</label>
-    <input type="number" step="0.01" min="0" class="orc-input" data-cat="${cat}" placeholder="sem limite" value="${orcamentos[cat] != null ? orcamentos[cat] : ''}">
+    <input type="number" step="0.01" min="0" class="orc-input" data-cat="${cat}" placeholder="${t('placeholder_sem_limite')}" value="${orcamentos[cat] != null ? orcamentos[cat] : ''}">
   </div>`).join('');
   orcamentosStatus.textContent = '';
   orcamentosOverlay.classList.add('open');
@@ -910,6 +1387,65 @@ document.getElementById('closeContasSheet').onclick = () => {
   contasOverlay.classList.remove('open');
 };
 
+// ---- Definições (idioma e moeda, por utilizador) ----
+const definicoesOverlay = document.getElementById('definicoesOverlay');
+const definicoesStatus = document.getElementById('definicoesStatus');
+
+function montarChipsMoeda(){
+  const container = document.getElementById('moedaChips');
+  container.innerHTML = MOEDAS.map(m =>
+    `<div class="cat-chip${m.codigo === moedaCodigo ? ' active' : ''}" data-moeda="${m.codigo}">${m.simbolo} ${m.codigo}</div>`
+  ).join('');
+  container.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.onclick = () => {
+      container.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    };
+  });
+}
+
+document.getElementById('menuDefinicoes').onclick = () => {
+  menuOverlay.classList.remove('open');
+  document.querySelectorAll('#idiomaChips .cat-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.idioma === idioma);
+  });
+  montarChipsMoeda();
+  definicoesStatus.textContent = '';
+  definicoesOverlay.classList.add('open');
+};
+
+document.getElementById('closeDefinicoesSheet').onclick = () => {
+  definicoesOverlay.classList.remove('open');
+};
+
+document.querySelectorAll('#idiomaChips .cat-chip').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('#idiomaChips .cat-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  };
+});
+
+document.getElementById('btnGuardarDefinicoes').onclick = async () => {
+  if(!currentUser) return;
+  const chipIdioma = document.querySelector('#idiomaChips .cat-chip.active');
+  const chipMoeda = document.querySelector('#moedaChips .cat-chip.active');
+  const novoIdioma = chipIdioma ? chipIdioma.dataset.idioma : idioma;
+  const novaMoeda = chipMoeda ? chipMoeda.dataset.moeda : moedaCodigo;
+
+  definicoesStatus.textContent = t('status_guardando_definicoes');
+  try{
+    await db.collection('users').doc(currentUser.uid).set({ idioma: novoIdioma, moeda: novaMoeda }, { merge: true });
+    idioma = novoIdioma;
+    moedaCodigo = novaMoeda;
+    aplicarTraducoes();
+    definicoesStatus.textContent = t('status_definicoes_guardadas');
+    setTimeout(() => { definicoesOverlay.classList.remove('open'); }, 700);
+  } catch(err){
+    console.error('Erro a guardar definições:', err);
+    definicoesStatus.textContent = t('alerta_nao_guardado');
+  }
+};
+
 document.getElementById('btnAddDespesaPartilhada').onclick = () => {
   if(!outroMembroUid()) return;
   contasOverlay.classList.remove('open');
@@ -931,7 +1467,7 @@ document.getElementById('btnLiquidar').onclick = async () => {
 
   const emAberto = despesasPartilhadas.filter(d => !d.liquidacaoId);
   if(emAberto.length === 0){
-    await confirmarAcao('Não há despesas em aberto para liquidar.', 'Ok');
+    await confirmarAcao(t('msg_sem_despesas_abrir'), t('btn_ok'));
     return;
   }
 
@@ -944,9 +1480,9 @@ document.getElementById('btnLiquidar').onclick = async () => {
   const valor = Math.abs(diferenca);
 
   const mensagem = empatado
-    ? 'As contas já estão equilibradas — isto arquiva as despesas em aberto e regista a liquidação.'
-    : `${nomeDoMembro(quemDevia)} → ${nomeDoMembro(quemRecebia)}: ${formatoEuro(valor)}. Isto arquiva todas as despesas em aberto.`;
-  const confirmar = await confirmarAcao(mensagem, 'Confirmar liquidação');
+    ? t('liquidacao_equilibrada_msg')
+    : t('liquidacao_confirmar_msg', { quem1: nomeDoMembro(quemDevia), quem2: nomeDoMembro(quemRecebia), valor: formatoEuro(valor) });
+  const confirmar = await confirmarAcao(mensagem, t('btn_confirmar_liquidacao'));
   if(!confirmar) return;
 
   const anoAtual = new Date().getFullYear();
@@ -973,7 +1509,7 @@ document.getElementById('btnLiquidar').onclick = async () => {
     await batch.commit();
   } catch(err){
     console.error('Erro a liquidar:', err);
-    alert('Não foi possível liquidar. Tenta novamente.');
+    alert(t('alerta_liquidar_erro'));
   }
 };
 
@@ -996,7 +1532,7 @@ let confirmModalResolve = null;
 
 function confirmarAcao(mensagem, tituloBotaoConfirmar){
   document.getElementById('confirmModalMessage').textContent = mensagem;
-  document.getElementById('confirmModalYes').textContent = tituloBotaoConfirmar || 'Confirmar';
+  document.getElementById('confirmModalYes').textContent = tituloBotaoConfirmar || t('btn_confirmar');
   confirmModalOverlay.classList.add('open');
   return new Promise(resolve => { confirmModalResolve = resolve; });
 }
@@ -1027,7 +1563,7 @@ document.getElementById('btnGuardarOrcamentos').onclick = () => {
       orcamentosOverlay.classList.remove('open');
     }).catch(err => {
       console.error('Erro a guardar orçamentos:', err);
-      orcamentosStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+      orcamentosStatus.textContent = t('alerta_nao_guardado');
     });
 };
 
@@ -1059,7 +1595,7 @@ document.getElementById('btnAddCategoriaRow').onclick = () => {
   const row = document.createElement('div');
   row.className = 'form-row cat-edit-row';
   row.dataset.original = '';
-  row.innerHTML = '<input type="text" placeholder="Nova categoria">';
+  row.innerHTML = `<input type="text" placeholder="${t('placeholder_nova_categoria')}">`;
   form.appendChild(row);
   row.querySelector('input').focus();
 };
@@ -1097,11 +1633,11 @@ document.getElementById('btnGuardarCategorias').onclick = async () => {
 
   const listaFinal = [...new Set(novaListaBruta)];
   if(listaFinal.length === 0){
-    categoriasStatus.textContent = 'Precisas de pelo menos uma categoria.';
+    categoriasStatus.textContent = t('status_precisa_categoria');
     return;
   }
 
-  categoriasStatus.textContent = 'A guardar…';
+  categoriasStatus.textContent = t('status_guardando');
   try{
     for(const { de, para } of renomeacoes){
       await migrarCategoria(de, para);
@@ -1124,7 +1660,7 @@ document.getElementById('btnGuardarCategorias').onclick = async () => {
     categoriasOverlay.classList.remove('open');
   } catch(err){
     console.error('Erro a guardar categorias:', err);
-    categoriasStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+    categoriasStatus.textContent = t('alerta_nao_guardado');
   }
 };
 
@@ -1141,7 +1677,7 @@ document.getElementById('btnGerarConvite').onclick = async () => {
   if(!currentGroupId || !currentUser) return;
   const inviteHint = document.getElementById('inviteHint');
   const code = gerarCodigoConvite();
-  inviteHint.textContent = 'A gerar código…';
+  inviteHint.textContent = t('status_gerando_codigo');
   try{
     await db.collection('invites').doc(code).set({
       groupId: currentGroupId,
@@ -1149,27 +1685,27 @@ document.getElementById('btnGerarConvite').onclick = async () => {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     document.getElementById('inviteCodeDisplay').value = code;
-    inviteHint.textContent = 'Envia este código à pessoa. Ela deve colá-lo em baixo, em "Já tens um código?", na app dela.';
+    inviteHint.textContent = t('hint_codigo_gerado');
   } catch(err){
     console.error(err);
-    inviteHint.textContent = 'Não foi possível gerar o código. Tenta novamente.';
+    inviteHint.textContent = t('erro_gerar_codigo');
   }
 };
 
 document.getElementById('btnJuntar').onclick = async () => {
   const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-  if(!code){ joinStatus.textContent = 'Introduz um código.'; return; }
+  if(!code){ joinStatus.textContent = t('status_introduz_codigo'); return; }
   if(!currentUser) return;
-  joinStatus.textContent = 'A juntar…';
+  joinStatus.textContent = t('status_juntando');
   try{
     const inviteSnap = await db.collection('invites').doc(code).get();
     if(!inviteSnap.exists){
-      joinStatus.textContent = 'Código inválido.';
+      joinStatus.textContent = t('status_codigo_invalido');
       return;
     }
     const targetGroupId = inviteSnap.data().groupId;
     if(targetGroupId === currentGroupId){
-      joinStatus.textContent = 'Já estás neste grupo.';
+      joinStatus.textContent = t('status_ja_no_grupo');
       return;
     }
     await db.collection('groups').doc(targetGroupId).update({
@@ -1179,11 +1715,11 @@ document.getElementById('btnJuntar').onclick = async () => {
     await db.collection('users').doc(currentUser.uid).set({ groupId: targetGroupId }, { merge: true });
     currentGroupId = targetGroupId;
     ligarSincronizacao(currentGroupId);
-    joinStatus.textContent = '✓ Juntaste-te ao grupo! Os gastos vão sincronizar já a seguir.';
+    joinStatus.textContent = t('status_juntou_grupo');
     setTimeout(() => joinOverlay.classList.remove('open'), 1500);
   } catch(err){
     console.error(err);
-    joinStatus.textContent = 'Não foi possível juntar. Verifica o código e tenta de novo.';
+    joinStatus.textContent = t('status_erro_juntar');
   }
 };
 
@@ -1192,6 +1728,12 @@ document.getElementById('btnJuntar').onclick = async () => {
 async function resolverGrupo(user){
   const userRef = db.collection('users').doc(user.uid);
   const userSnap = await userRef.get();
+  if(userSnap.exists){
+    const dados = userSnap.data();
+    idioma = dados.idioma === 'en' ? 'en' : 'pt';
+    moedaCodigo = MOEDAS.some(m => m.codigo === dados.moeda) ? dados.moeda : 'EUR';
+    aplicarTraducoes();
+  }
   if(userSnap.exists && userSnap.data().groupId){
     return userSnap.data().groupId;
   }
@@ -1293,20 +1835,24 @@ auth.onAuthStateChanged(async (user) => {
     grupoMemberInfo = {};
     despesasPartilhadas = [];
     liquidacoes = [];
+    idioma = 'pt';
+    moedaCodigo = 'EUR';
+    aplicarTraducoes();
     loginScreen.style.display = 'flex';
     appShell.style.display = 'none';
     loginStatus.textContent = '';
   }
 });
 
+aplicarTraducoes();
+
 function mesAtualLabel(){
-  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const d = new Date();
-  return meses[d.getMonth()] + ' ' + d.getFullYear();
+  return MESES[idioma][d.getMonth()] + ' ' + d.getFullYear();
 }
 
 function formatoEuro(v){
-  return v.toLocaleString('pt-PT', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+  return v.toLocaleString(localeAtual(), {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ' + moedaAtual().simbolo;
 }
 
 function gastosDoMes(){
@@ -1410,11 +1956,10 @@ function gastoPorCategoriaHistorico(ano, modo, periodo){
 
 function labelPeriodoHistorico(ano, modo, periodo){
   if(modo === 'mes'){
-    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-    return meses[periodo] + ' ' + ano;
+    return MESES[idioma][periodo] + ' ' + ano;
   }
-  if(modo === 'trimestre') return periodo + 'º trimestre ' + ano;
-  if(modo === 'semestre') return periodo + 'º semestre ' + ano;
+  if(modo === 'trimestre') return idioma === 'en' ? ('Q' + periodo + ' ' + ano) : (periodo + 'º trimestre ' + ano);
+  if(modo === 'semestre') return idioma === 'en' ? ('H' + periodo + ' ' + ano) : (periodo + 'º semestre ' + ano);
   return String(ano);
 }
 
@@ -1467,7 +2012,7 @@ function renderHistorico(){
 
   navWrap.style.display = 'flex';
   secaoTitulo.style.display = 'flex';
-  document.getElementById('historicoSecaoTituloTexto').textContent = 'Por categoria';
+  document.getElementById('historicoSecaoTituloTexto').textContent = t('titulo_por_categoria');
 
   document.getElementById('historicoLabel').textContent = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
   document.getElementById('historicoTotal').textContent = formatoEuro(totalHistorico(historicoAno, historicoModo, historicoPeriodo));
@@ -1476,7 +2021,7 @@ function renderHistorico(){
   const categoriasOrdenadas = Object.keys(porCategoria).sort((a, b) => porCategoria[b] - porCategoria[a]);
   const lista = document.getElementById('historicoPorCategoria');
   if(categoriasOrdenadas.length === 0){
-    lista.innerHTML = '<div class="empty">Sem gastos neste período.</div>';
+    lista.innerHTML = `<div class="empty">${t('msg_sem_gastos_periodo')}</div>`;
   } else {
     lista.innerHTML = categoriasOrdenadas.map(cat => `<div class="budget-row">
       <div class="budget-row-top">
@@ -1489,10 +2034,10 @@ function renderHistorico(){
 
 // A fonte base do jsPDF (Helvetica core, sem TTF embutido) não tem o glífico
 // do símbolo "€" nem do traço "—" — ficam em branco no PDF gerado. Por isso
-// os valores monetários usam "EUR" só no PDF (o resto da app continua a
-// mostrar "€" normalmente, isto é só uma limitação da biblioteca de PDF).
+// o euro usa "EUR" por extenso só no PDF (as outras moedas já são seguras:
+// $, £, R$ e Kz renderizam bem nesta fonte).
 function formatoEuroPDF(v){
-  return v.toLocaleString('pt-PT', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' EUR';
+  return v.toLocaleString(localeAtual(), {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ' + moedaAtual().simboloPDF;
 }
 
 // Gera um PDF com o resumo por categoria do período do Histórico atualmente
@@ -1516,28 +2061,28 @@ async function exportarHistoricoPDF(){
 
   doc.setTextColor('#A19276');
   doc.setFontSize(10);
-  doc.text('Finanças Positivas', 20, 34);
+  doc.text(t('pdf_tagline'), 20, 34);
 
   doc.setTextColor('#12202E');
   doc.setFontSize(18);
-  doc.text('Resumo de gastos - ' + labelCapitalizado, 20, 46);
+  doc.text(t('pdf_titulo_resumo', { periodo: labelCapitalizado }), 20, 46);
 
   doc.setTextColor('#1A3C5E');
   doc.setFontSize(24);
-  doc.text('Total: ' + formatoEuroPDF(total), 20, 58);
+  doc.text(t('pdf_total') + formatoEuroPDF(total), 20, 58);
 
   let y = 72;
   doc.setFontSize(11);
   doc.setTextColor('#12202E');
-  doc.text('Categoria', 20, y);
-  doc.text('Valor', 190, y, { align: 'right' });
+  doc.text(t('pdf_categoria'), 20, y);
+  doc.text(t('pdf_valor'), 190, y, { align: 'right' });
   y += 3;
   doc.setDrawColor('#DAD4C6');
   doc.line(20, y, 190, y);
   y += 8;
 
   if(categoriasOrdenadas.length === 0){
-    doc.text('Sem gastos neste período.', 20, y);
+    doc.text(t('msg_sem_gastos_periodo'), 20, y);
   } else {
     categoriasOrdenadas.forEach(cat => {
       doc.text(cat, 20, y);
@@ -1548,7 +2093,7 @@ async function exportarHistoricoPDF(){
 
   doc.setFontSize(8);
   doc.setTextColor('#8a8478');
-  doc.text('Gerado em ' + new Date().toLocaleDateString('pt-PT') + ' · Fin+ Finanças Positivas', 20, 285);
+  doc.text(t('pdf_gerado_em', { data: new Date().toLocaleDateString(localeAtual()) }), 20, 285);
 
   const nomeFicheiro = 'gastos-' + labelPeriodo.replace(/\s+/g, '-') + '.pdf';
   const blob = doc.output('blob');
@@ -1556,7 +2101,7 @@ async function exportarHistoricoPDF(){
 
   if(navigator.canShare && navigator.canShare({ files: [ficheiro] })){
     try{
-      await navigator.share({ files: [ficheiro], title: 'Resumo de gastos', text: labelCapitalizado });
+      await navigator.share({ files: [ficheiro], title: t('pdf_share_titulo'), text: labelCapitalizado });
       return;
     } catch(e){
       if(e && e.name === 'AbortError') return; // utilizador cancelou a partilha
@@ -1572,11 +2117,11 @@ function renderHistoricoLiquidacoes(){
   const outroUid = outroMembroUid();
 
   if(!outroUid){
-    lista.innerHTML = '<div class="empty">Ainda não tens ninguém junto neste grupo para haver liquidações.</div>';
+    lista.innerHTML = `<div class="empty">${t('msg_sem_ninguem_liquidacoes')}</div>`;
     return;
   }
   if(!liquidacoes || liquidacoes.length === 0){
-    lista.innerHTML = '<div class="empty">Ainda sem liquidações registadas.</div>';
+    lista.innerHTML = `<div class="empty">${t('msg_sem_liquidacoes_registadas')}</div>`;
     return;
   }
 
@@ -1584,17 +2129,17 @@ function renderHistoricoLiquidacoes(){
   const ordenado = [...liquidacoes].sort((a,b)=> new Date(b.data) - new Date(a.data));
   lista.innerHTML = ordenado.map(l => {
     const d = new Date(l.data);
-    const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric'});
+    const dataStr = d.toLocaleDateString(localeAtual(),{day:'2-digit',month:'short',year:'numeric'});
     const corpo = l.quemDevia
       ? `${nomeDoMembro(l.quemDevia)} → ${nomeDoMembro(l.quemRecebia)}: <strong>${formatoEuro(l.valor)}</strong>`
-      : 'Contas equilibradas';
+      : t('contas_equilibradas');
 
     const despesasDaLiquidacao = despesasPartilhadas.filter(d2 => d2.liquidacaoId === l.id);
     const detalheDespesas = despesasDaLiquidacao.length === 0
-      ? '<p class="hint" style="margin:6px 0 0;">Sem despesas associadas (podem ter sido removidas).</p>'
+      ? `<p class="hint" style="margin:6px 0 0;">${t('msg_sem_despesas_associadas')}</p>`
       : [...despesasDaLiquidacao].sort((a,b)=> new Date(a.data) - new Date(b.data)).map(dsp => {
           const dd = new Date(dsp.data);
-          const ddStr = dd.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+          const ddStr = dd.toLocaleDateString(localeAtual(),{day:'2-digit',month:'short'});
           return `<div class="mini-entry">
             <div class="mini-top">
               <span class="mini-valor">${formatoEuro(dsp.valor)}</span>
@@ -1606,8 +2151,8 @@ function renderHistoricoLiquidacoes(){
 
     return `<div class="liquidacao-row">
       <div onclick="toggleLiquidacaoDetalhe('${l.id}')" style="cursor:pointer;">
-        <span class="liquidacao-numero">Nº ${l.numero}/${l.ano}</span> — ${dataStr}<br>${corpo}
-        <div style="font-size:11px; color:#8a8478; margin-top:4px;">Tu: ${formatoEuro(l.totalEu)} · ${nomeOutro}: ${formatoEuro(l.totalOutro)} — toca para ver o cálculo</div>
+        <span class="liquidacao-numero">${t('liquidacao_numero', { numero: l.numero, ano: l.ano })}</span> — ${dataStr}<br>${corpo}
+        <div style="font-size:11px; color:#8a8478; margin-top:4px;">${t('tu')}: ${formatoEuro(l.totalEu)} · ${nomeOutro}: ${formatoEuro(l.totalOutro)} — ${t('liquidacao_detalhe_toca')}</div>
       </div>
       <div id="detalheLiquidacao-${l.id}" style="display:none; margin-top:10px; border-top:1px solid var(--line); padding-top:10px;">
         <div style="font-size:11.5px; color:#8a8478; margin-bottom:8px;">
@@ -1634,7 +2179,7 @@ function textoComparacaoMensal(atual, anterior, corSubiu, corDesceu, corIgual){
   const cor = subiu ? corSubiu : (desceu ? corDesceu : corIgual);
   const seta = subiu ? '▲' : (desceu ? '▼' : '•');
   const sinal = subiu ? '+' : '';
-  return `<span style="color:${cor};">${seta} ${sinal}${percent.toFixed(0)}%</span> que o mês passado`;
+  return `<span style="color:${cor};">${seta} ${sinal}${percent.toFixed(0)}%</span> ${t('txt_vs_mes_passado')}`;
 }
 
 function renderComparacaoMensal(totalAtual){
@@ -1649,7 +2194,7 @@ function render(){
   const doMes = gastosDoMes().concat(recVirtuais);
   const total = doMes.reduce((s,g)=>s+g.valor,0);
   document.getElementById('totalMes').textContent = formatoEuro(total);
-  document.getElementById('mesLabel').textContent = 'gasto em ' + mesAtualLabel();
+  document.getElementById('mesLabel').textContent = t('mes_label_prefixo') + mesAtualLabel();
   renderComparacaoMensal(total);
   renderContas();
 
@@ -1657,12 +2202,12 @@ function render(){
 
   const listaRec = document.getElementById('listaRecorrentes');
   if(recorrentes.length === 0){
-    listaRec.innerHTML = '<div class="empty">Sem despesas fixas.<br>Ex: renda, subscrições, ginásio.</div>';
+    listaRec.innerHTML = `<div class="empty">${t('msg_sem_despesas_fixas')}</div>`;
   } else {
     listaRec.innerHTML = recorrentes.map(r => `<div class="entry">
       <div class="meta">
         <span class="cat">${r.categoria} · ${r.descricao}</span>
-        <span class="date">todos os meses</span>
+        <span class="date">${t('msg_todos_meses')}</span>
       </div>
       <div style="display:flex;align-items:center;">
         <span class="amount">${formatoEuro(r.valor)}</span>
@@ -1674,15 +2219,15 @@ function render(){
   const lista = document.getElementById('lista');
   const ordenado = [...gastos, ...recVirtuais].sort((a,b)=> new Date(b.data) - new Date(a.data));
   if(ordenado.length === 0){
-    lista.innerHTML = '<div class="empty">Ainda sem movimentos.<br>Toca em + para registar a primeira fatura.</div>';
+    lista.innerHTML = `<div class="empty">${t('msg_sem_movimentos')}</div>`;
   } else {
     lista.innerHTML = ordenado.slice(0,30).map(g=>{
       const d = new Date(g.data);
-      const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+      const dataStr = d.toLocaleDateString(localeAtual(),{day:'2-digit',month:'short'});
       return `<div class="entry">
         <div class="meta">
-          <span class="cat">${g.categoria}${g.comerciante ? ' · '+g.comerciante : ''}${g.recorrente ? ' · <span style="color:var(--gold);">fixo</span>' : ''}</span>
-          <span class="date">${dataStr}${g.recorrente ? '' : ` · <span style="text-decoration:underline; cursor:pointer;" onclick="abrirEditarData('${g.id}', '${g.data}')">editar</span>`}</span>
+          <span class="cat">${g.categoria}${g.comerciante ? ' · '+g.comerciante : ''}${g.recorrente ? ' · <span style="color:var(--gold);">'+t('txt_fixo')+'</span>' : ''}</span>
+          <span class="date">${dataStr}${g.recorrente ? '' : ` · <span style="text-decoration:underline; cursor:pointer;" onclick="abrirEditarData('${g.id}', '${g.data}')">${t('txt_editar_inline')}</span>`}</span>
         </div>
         <div style="display:flex;align-items:center;">
           <span class="amount">${formatoEuro(g.valor)}</span>
@@ -1704,9 +2249,9 @@ function outroMembroUid(){
 
 function nomeDoMembro(uid){
   if(!uid) return '';
-  if(currentUser && uid === currentUser.uid) return 'Tu';
+  if(currentUser && uid === currentUser.uid) return t('tu');
   const info = grupoMemberInfo[uid];
-  return (info && (info.displayName || info.email)) || 'a outra pessoa';
+  return (info && (info.displayName || info.email)) || t('a_outra_pessoa');
 }
 
 function renderContas(){
@@ -1723,7 +2268,7 @@ function renderContas(){
   conteudo.style.display = 'block';
 
   const nomeOutro = nomeDoMembro(outroUid);
-  document.getElementById('colNomeEu').textContent = 'Tu';
+  document.getElementById('colNomeEu').textContent = t('tu');
   document.getElementById('colNomeOutro').textContent = nomeOutro;
   document.getElementById('chipOutroPagou').textContent = nomeOutro;
 
@@ -1734,10 +2279,10 @@ function renderContas(){
   const totalOutro = dele.reduce((s,d)=>s+d.valor,0);
 
   const renderColuna = (lista) => {
-    if(lista.length === 0) return '<div class="empty" style="padding:16px 6px; font-size:11px;">Sem despesas</div>';
+    if(lista.length === 0) return `<div class="empty" style="padding:16px 6px; font-size:11px;">${t('sem_despesas')}</div>`;
     return [...lista].sort((a,b)=> new Date(b.data) - new Date(a.data)).map(d => {
       const dt = new Date(d.data);
-      const dataStr = dt.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+      const dataStr = dt.toLocaleDateString(localeAtual(),{day:'2-digit',month:'short'});
       return `<div class="mini-entry">
         <div class="mini-top">
           <span class="mini-valor">${formatoEuro(d.valor)}</span>
@@ -1756,26 +2301,26 @@ function renderContas(){
   const diferenca = (totalEu - totalOutro) / 2; // positivo: o outro deve-te; negativo: deves-lhe
   const resumo = document.getElementById('contasResumo');
   if(Math.abs(diferenca) < 0.005){
-    resumo.innerHTML = `<div style="font-size:15px; color:var(--good); font-weight:600;">Contas em dia ✓</div>`;
+    resumo.innerHTML = `<div style="font-size:15px; color:var(--good); font-weight:600;">${t('contas_em_dia')}</div>`;
   } else if(diferenca > 0){
-    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${nomeOutro} deve-te</div><div style="font-size:26px; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums;">${formatoEuro(diferenca)}</div>`;
+    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${t('deve_te', { nome: nomeOutro })}</div><div style="font-size:26px; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums;">${formatoEuro(diferenca)}</div>`;
   } else {
-    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">Deves a ${nomeOutro}</div><div style="font-size:26px; font-weight:700; color:var(--danger); font-variant-numeric:tabular-nums;">${formatoEuro(Math.abs(diferenca))}</div>`;
+    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${t('deves_a', { nome: nomeOutro })}</div><div style="font-size:26px; font-weight:700; color:var(--danger); font-variant-numeric:tabular-nums;">${formatoEuro(Math.abs(diferenca))}</div>`;
   }
 
   const listaLiq = document.getElementById('listaLiquidacoes');
   if(!liquidacoes || liquidacoes.length === 0){
-    listaLiq.innerHTML = '<div class="empty">Ainda sem liquidações.</div>';
+    listaLiq.innerHTML = `<div class="empty">${t('sem_liquidacoes')}</div>`;
   } else {
     const ordenado = [...liquidacoes].sort((a,b)=> new Date(b.data) - new Date(a.data));
     listaLiq.innerHTML = ordenado.map(l => {
       const d = new Date(l.data);
-      const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric'});
+      const dataStr = d.toLocaleDateString(localeAtual(),{day:'2-digit',month:'short',year:'numeric'});
       const corpo = l.quemDevia
         ? `${nomeDoMembro(l.quemDevia)} → ${nomeDoMembro(l.quemRecebia)}: <strong>${formatoEuro(l.valor)}</strong>`
-        : 'Contas equilibradas';
+        : t('contas_equilibradas');
       return `<div class="liquidacao-row">
-        <span class="liquidacao-numero">Nº ${l.numero}/${l.ano}</span> — ${dataStr}<br>${corpo}
+        <span class="liquidacao-numero">${t('liquidacao_numero', { numero: l.numero, ano: l.ano })}</span> — ${dataStr}<br>${corpo}
       </div>`;
     }).join('');
   }
@@ -1853,7 +2398,7 @@ function renderChart(doMes){
     options: {
       plugins: { legend: { display:false } },
       scales: {
-        y: { beginAtZero:true, ticks:{ callback:v=>v+'€' } }
+        y: { beginAtZero:true, ticks:{ callback:v=>v+moedaAtual().simbolo } }
       }
     }
   });
@@ -1867,7 +2412,7 @@ window.removerGasto = function(id){
 
 window.removerRecorrente = async function(id){
   if(!currentGroupId) return;
-  const ok = await confirmarAcao('Remover esta despesa fixa? Deixa de contar a partir de agora.', 'Remover');
+  const ok = await confirmarAcao(t('msg_remover_recorrente'), t('btn_remover'));
   if(!ok) return;
   db.collection('groups').doc(currentGroupId).collection('recorrentes').doc(id).delete()
     .catch(err => console.error('Erro a remover despesa fixa:', err));
@@ -2002,18 +2547,18 @@ function onQrDecodedText(decodedText){
   if(resultado.valido){
     pararScanner();
     document.getElementById('qr-reader').innerHTML = '';
-    scanStatus.textContent = '✓ Fatura lida com sucesso';
+    scanStatus.textContent = t('status_fatura_lida');
     confirmFields.style.display = 'block';
     document.getElementById('valorDetetado').value = resultado.total.toFixed(2);
     document.getElementById('comercianteInput').value = '';
     nifDetetado = resultado.nifEmitente;
   } else {
-    scanStatus.textContent = 'QR lido mas sem valor total reconhecido — tenta manual.';
+    scanStatus.textContent = t('status_qr_sem_valor');
   }
 }
 
 function iniciarScanner(){
-  scanStatus.textContent = 'A abrir câmara…';
+  scanStatus.textContent = t('status_abrindo_camara');
   if('BarcodeDetector' in window){
     iniciarScannerNativo();
   } else {
@@ -2040,7 +2585,7 @@ async function iniciarScannerNativo(){
       }
     });
   } catch(err){
-    scanStatus.textContent = 'Sem acesso à câmara. Usa a opção manual.';
+    scanStatus.textContent = t('status_sem_camera');
     console.error(err);
     return;
   }
@@ -2091,7 +2636,7 @@ function iniciarScannerHtml5Qrcode(){
     (decodedText) => onQrDecodedText(decodedText),
     () => { /* erro de leitura por frame, ignorar */ }
   ).catch(err=>{
-    scanStatus.textContent = 'Sem acesso à câmara. Usa a opção manual.';
+    scanStatus.textContent = t('status_sem_camera');
     console.error(err);
   });
 }
@@ -2101,7 +2646,7 @@ function processarArquivoQR(file){
   pararScanner();
   document.getElementById('qr-reader').innerHTML = '';
   nifDetetado = null;
-  scanStatus.textContent = 'A ler QR Code da imagem…';
+  scanStatus.textContent = t('status_lendo_imagem');
 
   if('BarcodeDetector' in window){
     lerQRDeImagemNativo(file);
@@ -2118,7 +2663,7 @@ async function lerQRDeImagemNativo(file){
     if(codes.length > 0){
       onQrDecodedText(codes[0].rawValue);
     } else {
-      scanStatus.textContent = 'Não foi encontrado nenhum QR Code na imagem — tenta manual.';
+      scanStatus.textContent = t('status_qr_nao_encontrado');
     }
   } catch(e){
     console.error(e);
@@ -2136,7 +2681,7 @@ function lerQRDeImagemHtml5Qrcode(file){
     .then(decodedText => onQrDecodedText(decodedText))
     .catch(err => {
       console.error(err);
-      scanStatus.textContent = 'Não foi encontrado nenhum QR Code na imagem — tenta manual.';
+      scanStatus.textContent = t('status_qr_nao_encontrado');
     })
     .finally(() => leitorArquivo.clear().catch(()=>{}));
 }
@@ -2179,7 +2724,7 @@ function encontrarGastoDuplicado(nif, valor, dataISO){
 document.getElementById('confirmAdd').onclick = async () => {
   const valor = parseFloat(document.getElementById('valorDetetado').value);
   if(isNaN(valor) || valor <= 0){
-    alert('Introduz um valor válido.');
+    alert(t('alerta_valor_invalido'));
     return;
   }
   if(!currentGroupId || !currentUser) return;
@@ -2190,7 +2735,7 @@ document.getElementById('confirmAdd').onclick = async () => {
   if(scanMode === 'partilhada'){
     const outroUid = outroMembroUid();
     if(!pagoPorPartilhadaEscolhido || !outroUid){
-      alert('Escolhe quem pagou esta despesa.');
+      alert(t('alerta_escolher_quem_pagou'));
       return;
     }
     const pagoPor = pagoPorPartilhadaEscolhido === 'eu' ? currentUser.uid : outroUid;
@@ -2204,7 +2749,7 @@ document.getElementById('confirmAdd').onclick = async () => {
       liquidacaoId: null
     }).catch(err => {
       console.error('Erro a adicionar despesa partilhada:', err);
-      alert('Não foi possível guardar. Tenta novamente.');
+      alert(t('alerta_nao_guardado'));
     });
     fecharOverlayScan();
     return;
@@ -2212,7 +2757,7 @@ document.getElementById('confirmAdd').onclick = async () => {
 
   const duplicado = encontrarGastoDuplicado(nifDetetado, valor, dataFinal);
   if(duplicado){
-    const continuar = await confirmarAcao(`Já tens um gasto igual registado (mesmo NIF, ${formatoEuro(valor)}, no mesmo dia).`, 'Adicionar mesmo assim');
+    const continuar = await confirmarAcao(t('confirm_duplicado', { valor: formatoEuro(valor) }), t('btn_adicionar_mesmo_assim'));
     if(!continuar) return;
   }
 
@@ -2225,7 +2770,7 @@ document.getElementById('confirmAdd').onclick = async () => {
     criadoPor: currentUser.uid
   }).catch(err => {
     console.error('Erro a adicionar gasto:', err);
-    alert('Não foi possível guardar o gasto. Tenta novamente.');
+    alert(t('alerta_gasto_nao_guardado'));
   });
   fecharOverlayScan();
 };
@@ -2251,7 +2796,7 @@ document.getElementById('closeEditarDataSheet').onclick = () => {
 
 document.getElementById('btnGuardarDataEditada').onclick = () => {
   const valorInput = document.getElementById('editarDataInput').value;
-  if(!valorInput){ editarDataStatus.textContent = 'Escolhe uma data.'; return; }
+  if(!valorInput){ editarDataStatus.textContent = t('status_escolhe_data'); return; }
   if(!currentGroupId || !editarDataGastoId) return;
   db.collection('groups').doc(currentGroupId).collection('gastos').doc(editarDataGastoId)
     .update({ data: dataInputParaISO(valorInput) })
@@ -2259,7 +2804,7 @@ document.getElementById('btnGuardarDataEditada').onclick = () => {
       editarDataOverlay.classList.remove('open');
     }).catch(err => {
       console.error('Erro a editar data:', err);
-      editarDataStatus.textContent = 'Não foi possível guardar. Tenta novamente.';
+      editarDataStatus.textContent = t('alerta_nao_guardado');
     });
 };
 </script>
