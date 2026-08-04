@@ -393,13 +393,6 @@
       Entrar com Google
     </button>
 
-    <button class="oauth-btn" id="btnEntrarFacebook">
-      <svg viewBox="0 0 48 48" aria-hidden="true">
-        <path fill="#1877F2" d="M24 4C12.95 4 4 12.95 4 24c0 9.98 7.31 18.26 16.88 19.77V29.66h-5.08V24h5.08v-4.32c0-5.02 2.99-7.79 7.56-7.79 2.19 0 4.48.39 4.48.39v4.93h-2.52c-2.49 0-3.26 1.54-3.26 3.13V24h5.55l-.89 5.66h-4.66v14.11C36.69 42.26 44 33.98 44 24 44 12.95 35.05 4 24 4z"/>
-      </svg>
-      Entrar com Facebook
-    </button>
-
     <div class="login-status" id="loginStatus"></div>
   </div>
 </div>
@@ -688,10 +681,6 @@ function entrarComProvider(provider){
 
 document.getElementById('btnEntrarGoogle').onclick = () => {
   entrarComProvider(new firebase.auth.GoogleAuthProvider());
-};
-
-document.getElementById('btnEntrarFacebook').onclick = () => {
-  entrarComProvider(new firebase.auth.FacebookAuthProvider());
 };
 
 const menuOverlay = document.getElementById('menuOverlay');
