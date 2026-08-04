@@ -6,6 +6,7 @@
 <title>Gastos — Protótipo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore-compat.js"></script>
@@ -675,7 +676,10 @@
       <button class="close-btn" id="btnHistoricoSeguinte" style="position:static; font-size:26px; padding:0 10px;">›</button>
     </div>
 
-    <div class="section-title" id="historicoSecaoTitulo" style="margin-top:24px;">Por categoria</div>
+    <div class="section-title" id="historicoSecaoTitulo" style="margin-top:24px; display:flex; justify-content:space-between; align-items:center;">
+      <span id="historicoSecaoTituloTexto">Por categoria</span>
+      <span class="sair-link" id="btnExportarHistorico" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">exportar PDF</span>
+    </div>
     <div id="historicoPorCategoria"></div>
   </div>
 </div>
@@ -983,6 +987,7 @@ document.querySelectorAll('.hist-modo-chip').forEach(chip => {
 
 document.getElementById('btnHistoricoAnterior').onclick = () => navegarHistorico(-1);
 document.getElementById('btnHistoricoSeguinte').onclick = () => navegarHistorico(1);
+document.getElementById('btnExportarHistorico').onclick = () => exportarHistoricoPDF();
 
 // Modal de confirmação próprio da app (em vez de confirm() nativo do browser,
 // que mostra sempre o domínio do site no título e não se pode personalizar).
@@ -1461,8 +1466,8 @@ function renderHistorico(){
   }
 
   navWrap.style.display = 'flex';
-  secaoTitulo.style.display = 'block';
-  secaoTitulo.textContent = 'Por categoria';
+  secaoTitulo.style.display = 'flex';
+  document.getElementById('historicoSecaoTituloTexto').textContent = 'Por categoria';
 
   document.getElementById('historicoLabel').textContent = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
   document.getElementById('historicoTotal').textContent = formatoEuro(totalHistorico(historicoAno, historicoModo, historicoPeriodo));
@@ -1480,6 +1485,84 @@ function renderHistorico(){
       </div>
     </div>`).join('');
   }
+}
+
+// A fonte base do jsPDF (Helvetica core, sem TTF embutido) não tem o glífico
+// do símbolo "€" nem do traço "—" — ficam em branco no PDF gerado. Por isso
+// os valores monetários usam "EUR" só no PDF (o resto da app continua a
+// mostrar "€" normalmente, isto é só uma limitação da biblioteca de PDF).
+function formatoEuroPDF(v){
+  return v.toLocaleString('pt-PT', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' EUR';
+}
+
+// Gera um PDF com o resumo por categoria do período do Histórico atualmente
+// selecionado, e tenta partilhá-lo (Web Share API — funciona também numa
+// futura app Android via TWA); se não for possível partilhar, descarrega o
+// ficheiro diretamente.
+async function exportarHistoricoPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+  const labelPeriodo = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
+  const labelCapitalizado = labelPeriodo.charAt(0).toUpperCase() + labelPeriodo.slice(1);
+  const total = totalHistorico(historicoAno, historicoModo, historicoPeriodo);
+  const porCategoria = gastoPorCategoriaHistorico(historicoAno, historicoModo, historicoPeriodo);
+  const categoriasOrdenadas = Object.keys(porCategoria).sort((a, b) => porCategoria[b] - porCategoria[a]);
+
+  const logoImg = document.querySelector('header img');
+  try{
+    doc.addImage(logoImg, 'PNG', 20, 15, 24, 10.5);
+  } catch(e){ /* segue sem logótipo se a imagem ainda não estiver pronta */ }
+
+  doc.setTextColor('#A19276');
+  doc.setFontSize(10);
+  doc.text('Finanças Positivas', 20, 34);
+
+  doc.setTextColor('#12202E');
+  doc.setFontSize(18);
+  doc.text('Resumo de gastos - ' + labelCapitalizado, 20, 46);
+
+  doc.setTextColor('#1A3C5E');
+  doc.setFontSize(24);
+  doc.text('Total: ' + formatoEuroPDF(total), 20, 58);
+
+  let y = 72;
+  doc.setFontSize(11);
+  doc.setTextColor('#12202E');
+  doc.text('Categoria', 20, y);
+  doc.text('Valor', 190, y, { align: 'right' });
+  y += 3;
+  doc.setDrawColor('#DAD4C6');
+  doc.line(20, y, 190, y);
+  y += 8;
+
+  if(categoriasOrdenadas.length === 0){
+    doc.text('Sem gastos neste período.', 20, y);
+  } else {
+    categoriasOrdenadas.forEach(cat => {
+      doc.text(cat, 20, y);
+      doc.text(formatoEuroPDF(porCategoria[cat]), 190, y, { align: 'right' });
+      y += 8;
+    });
+  }
+
+  doc.setFontSize(8);
+  doc.setTextColor('#8a8478');
+  doc.text('Gerado em ' + new Date().toLocaleDateString('pt-PT') + ' · Fin+ Finanças Positivas', 20, 285);
+
+  const nomeFicheiro = 'gastos-' + labelPeriodo.replace(/\s+/g, '-') + '.pdf';
+  const blob = doc.output('blob');
+  const ficheiro = new File([blob], nomeFicheiro, { type: 'application/pdf' });
+
+  if(navigator.canShare && navigator.canShare({ files: [ficheiro] })){
+    try{
+      await navigator.share({ files: [ficheiro], title: 'Resumo de gastos', text: labelCapitalizado });
+      return;
+    } catch(e){
+      if(e && e.name === 'AbortError') return; // utilizador cancelou a partilha
+    }
+  }
+  doc.save(nomeFicheiro);
 }
 
 // Mostra o histórico de liquidações das Contas a Acertar, com o cálculo
