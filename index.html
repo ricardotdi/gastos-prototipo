@@ -661,9 +661,10 @@
       <div class="cat-chip hist-modo-chip" data-modo="trimestre">Trimestre</div>
       <div class="cat-chip hist-modo-chip" data-modo="semestre">Semestre</div>
       <div class="cat-chip hist-modo-chip" data-modo="ano">Ano</div>
+      <div class="cat-chip hist-modo-chip" data-modo="liquidacoes">Liquidações</div>
     </div>
 
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px;">
+    <div id="historicoNavWrap" style="display:flex; align-items:center; justify-content:space-between; margin-top:20px;">
       <button class="close-btn" id="btnHistoricoAnterior" style="position:static; font-size:26px; padding:0 10px;">‹</button>
       <div style="text-align:center;">
         <div id="historicoLabel" style="font-size:13px; color:var(--navy); font-weight:600; text-transform:capitalize;"></div>
@@ -672,7 +673,7 @@
       <button class="close-btn" id="btnHistoricoSeguinte" style="position:static; font-size:26px; padding:0 10px;">›</button>
     </div>
 
-    <div class="section-title" style="margin-top:24px;">Por categoria</div>
+    <div class="section-title" id="historicoSecaoTitulo" style="margin-top:24px;">Por categoria</div>
     <div id="historicoPorCategoria"></div>
   </div>
 </div>
@@ -1243,6 +1244,7 @@ function ligarSincronizacao(groupId){
     .onSnapshot(snapshot => {
       despesasPartilhadas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderContas();
+      if(historicoModo === 'liquidacoes') renderHistorico();
     }, err => {
       console.error('Erro a sincronizar despesas partilhadas:', err);
     });
@@ -1252,6 +1254,7 @@ function ligarSincronizacao(groupId){
     .onSnapshot(snapshot => {
       liquidacoes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderContas();
+      if(historicoModo === 'liquidacoes') renderHistorico();
     }, err => {
       console.error('Erro a sincronizar liquidações:', err);
     });
@@ -1411,6 +1414,10 @@ function labelPeriodoHistorico(ano, modo, periodo){
 function definirModoHistorico(modo){
   const agora = new Date();
   historicoModo = modo;
+  if(modo === 'liquidacoes'){
+    renderHistorico();
+    return;
+  }
   historicoAno = agora.getFullYear();
   if(modo === 'mes') historicoPeriodo = agora.getMonth();
   else if(modo === 'trimestre') historicoPeriodo = Math.floor(agora.getMonth() / 3) + 1;
@@ -1441,6 +1448,20 @@ function navegarHistorico(direcao){
 function renderHistorico(){
   document.querySelectorAll('.hist-modo-chip').forEach(c => c.classList.toggle('active', c.dataset.modo === historicoModo));
 
+  const navWrap = document.getElementById('historicoNavWrap');
+  const secaoTitulo = document.getElementById('historicoSecaoTitulo');
+
+  if(historicoModo === 'liquidacoes'){
+    navWrap.style.display = 'none';
+    secaoTitulo.style.display = 'none';
+    renderHistoricoLiquidacoes();
+    return;
+  }
+
+  navWrap.style.display = 'flex';
+  secaoTitulo.style.display = 'block';
+  secaoTitulo.textContent = 'Por categoria';
+
   document.getElementById('historicoLabel').textContent = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
   document.getElementById('historicoTotal').textContent = formatoEuro(totalHistorico(historicoAno, historicoModo, historicoPeriodo));
 
@@ -1458,6 +1479,65 @@ function renderHistorico(){
     </div>`).join('');
   }
 }
+
+// Mostra o histórico de liquidações das Contas a Acertar, com o cálculo
+// detalhado de cada uma (totais de cada pessoa e despesas incluídas).
+function renderHistoricoLiquidacoes(){
+  const lista = document.getElementById('historicoPorCategoria');
+  const outroUid = outroMembroUid();
+
+  if(!outroUid){
+    lista.innerHTML = '<div class="empty">Ainda não tens ninguém junto neste grupo para haver liquidações.</div>';
+    return;
+  }
+  if(!liquidacoes || liquidacoes.length === 0){
+    lista.innerHTML = '<div class="empty">Ainda sem liquidações registadas.</div>';
+    return;
+  }
+
+  const nomeOutro = nomeDoMembro(outroUid);
+  const ordenado = [...liquidacoes].sort((a,b)=> new Date(b.data) - new Date(a.data));
+  lista.innerHTML = ordenado.map(l => {
+    const d = new Date(l.data);
+    const dataStr = d.toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric'});
+    const corpo = l.quemDevia
+      ? `${nomeDoMembro(l.quemDevia)} → ${nomeDoMembro(l.quemRecebia)}: <strong>${formatoEuro(l.valor)}</strong>`
+      : 'Contas equilibradas';
+
+    const despesasDaLiquidacao = despesasPartilhadas.filter(d2 => d2.liquidacaoId === l.id);
+    const detalheDespesas = despesasDaLiquidacao.length === 0
+      ? '<p class="hint" style="margin:6px 0 0;">Sem despesas associadas (podem ter sido removidas).</p>'
+      : [...despesasDaLiquidacao].sort((a,b)=> new Date(a.data) - new Date(b.data)).map(dsp => {
+          const dd = new Date(dsp.data);
+          const ddStr = dd.toLocaleDateString('pt-PT',{day:'2-digit',month:'short'});
+          return `<div class="mini-entry">
+            <div class="mini-top">
+              <span class="mini-valor">${formatoEuro(dsp.valor)}</span>
+              <span class="mini-meta">${nomeDoMembro(dsp.pagoPor)}</span>
+            </div>
+            <div class="mini-meta">${dsp.descricao ? dsp.descricao + ' · ' : ''}${ddStr}</div>
+          </div>`;
+        }).join('');
+
+    return `<div class="liquidacao-row">
+      <div onclick="toggleLiquidacaoDetalhe('${l.id}')" style="cursor:pointer;">
+        <span class="liquidacao-numero">Nº ${l.numero}/${l.ano}</span> — ${dataStr}<br>${corpo}
+        <div style="font-size:11px; color:#8a8478; margin-top:4px;">Tu: ${formatoEuro(l.totalEu)} · ${nomeOutro}: ${formatoEuro(l.totalOutro)} — toca para ver o cálculo</div>
+      </div>
+      <div id="detalheLiquidacao-${l.id}" style="display:none; margin-top:10px; border-top:1px solid var(--line); padding-top:10px;">
+        <div style="font-size:11.5px; color:#8a8478; margin-bottom:8px;">
+          (${formatoEuro(l.totalEu)} − ${formatoEuro(l.totalOutro)}) ÷ 2 = ${formatoEuro(Math.abs((l.totalEu - l.totalOutro) / 2))}
+        </div>
+        ${detalheDespesas}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleLiquidacaoDetalhe = function(id){
+  const el = document.getElementById('detalheLiquidacao-' + id);
+  if(el) el.style.display = (el.style.display === 'none' ? 'block' : 'none');
+};
 
 // Texto "▲ +12% que o mês passado", com cores diferentes consoante subiu/desceu/igual.
 function textoComparacaoMensal(atual, anterior, corSubiu, corDesceu, corIgual){
