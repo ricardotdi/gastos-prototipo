@@ -19,7 +19,9 @@ poupar tempo de configuração.
 - **Hosting**: GitHub Pages, branch `main`, ficheiro `index.html` na raiz.
   Repositório público (Pages grátis exige isso, a não ser que haja GitHub
   Pro/Team).
-- **Login**: Firebase Authentication, com **Google** e **Facebook**
+- **Login**: Firebase Authentication, **só com Google** (decisão final do
+  utilizador — ver histórico abaixo, chegou a ter Facebook implementado mas
+  foi removido a pedido para manter simples)
   (`signInWithPopup`), usando o SDK **compat** do Firebase via CDN
   (`firebase-app-compat.js`, `firebase-auth-compat.js`,
   `firebase-firestore-compat.js` — `https://www.gstatic.com/firebasejs/<versão>/...`).
@@ -54,7 +56,9 @@ poupar tempo de configuração.
       redirect URI `https://gastos-prototipo-ef57a.firebaseapp.com/__/auth/handler`),
       e colar o Client ID + Client Secret em Firebase → Authentication →
       Sign-in method → Microsoft.
-    - **Facebook**: implementado — precisa de uma app em
+    - **Facebook**: chegou a ser implementado (código + instruções dadas),
+      mas foi removido a pedido do utilizador para simplificar — decidiu ficar
+      só com Google. Se se quiser reintroduzir: precisa de uma app em
       developers.facebook.com com "Valid OAuth Redirect URI" =
       `https://gastos-prototipo-ef57a.firebaseapp.com/__/auth/handler`, e o
       App ID/Secret colados em Firebase → Authentication → Sign-in method →
