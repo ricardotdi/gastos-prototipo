@@ -371,7 +371,7 @@ Decisões já tomadas (respostas do utilizador, agosto 2026):
   nenhuma) — `privacidade.html`, bilingue PT/EN, cobre: dados recolhidos
   (conta Google, dados de gastos, dados de partilha em grupo), onde ficam
   (Firebase/Google Cloud, sem analítica/publicidade de terceiros), direito a
-  pedir eliminação de conta (contacto: ricardotdi@gmail.com). Link visível no
+  pedir eliminação de conta (contacto: geral.finmais@gmail.com). Link visível no
   ecrã de login e nas Definições (exigência da Play Store: link acessível
   dentro da própria app, não só na ficha da loja).
 
