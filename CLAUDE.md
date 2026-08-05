@@ -82,6 +82,11 @@ poupar tempo de configuração.
   adiciona-se a si próprio ao array `members` do grupo alvo (regras do
   Firestore permitem um não-membro auto-adicionar-se, mas só a si próprio, nada
   mais no documento).
+  - Código gerado por `gerarConviteUnico()`: usa uma **transação Firestore**
+    (lê + escreve num único passo atómico) em vez de `set()` direto, para
+    fechar a janela entre "verificar se o código já existe" e "gravá-lo".
+    Em caso de colisão (rara — alfabeto de 32 carateres sem 0/O/1/I, 6
+    posições = 32⁶ combinações), tenta outro código até 5 vezes.
 - **Regras de segurança do Firestore**: só membros de um grupo podem ler/escrever
   os dados desse grupo. As regras completas e atualizadas vivem só na consola
   Firebase (não há ficheiro `firestore.rules` neste repo) — se precisares delas,
@@ -105,7 +110,7 @@ poupar tempo de configuração.
   - Só faz sentido matematicamente para grupos de **exatamente 2 membros**
     (`outroMembroUid()` devolve `null` para outros tamanhos, escondendo a
     funcionalidade).
-  - Acesso: menu "⋯" → "Contas a Acertar" (overlay `#contasOverlay`), com 2
+  - Acesso: menu "Menu▾" → "Contas a Acertar" (overlay `#contasOverlay`), com 2
     colunas (uma por pessoa), botão "+ Adicionar despesa partilhada" que abre
     o **mesmo scanner/formulário do "+"** principal mas em `scanMode =
     'partilhada'` (variável global `scanMode`: `'gasto'` | `'partilhada'`,
@@ -122,6 +127,61 @@ poupar tempo de configuração.
 - **Sem build/CI**: por design. Se uma futura app precisar de mais complexidade
   (múltiplos ficheiros JS, testes), reconsiderar esta escolha nessa altura, não
   antes.
+- **Leitura de QR Code** (fatura portuguesa, formato AT — `parseFaturaQR`):
+  dois caminhos, câmara ao vivo ou foto da galeria, ambos a acabar na mesma
+  `onQrDecodedText(texto)`:
+  - **Câmara ao vivo**: `BarcodeDetector` nativo do browser (ML Kit no
+    Chrome/Android) quando disponível (`iniciarScannerNativo`), com fallback
+    para a biblioteca `html5-qrcode` via CDN (`iniciarScannerHtml5Qrcode`) em
+    browsers sem suporte nativo (ex: iOS Safari).
+  - **Foto da galeria** (`processarArquivoQR`, botão "ou ler QR de uma foto da
+    galeria"): mesmo padrão de fallback — `BarcodeDetector.detect()` sobre um
+    `createImageBitmap(file)` primeiro, senão `Html5Qrcode.scanFile()`.
+  - Confirmado a funcionar em produção pelo utilizador (fotos reais tiradas
+    antes, não só fatura ao vivo).
+- **Exportação para PDF** (`exportarHistoricoPDF`, botão "exportar PDF" no
+  Histórico): usa `jsPDF` via CDN para gerar um resumo por categoria do
+  período selecionado (não a lista de gastos individuais — decisão explícita
+  do utilizador para manter simples), com logótipo, total e tabela de
+  categorias. Tenta partilhar via `navigator.share` (Web Share API, com
+  `files`) para abrir o menu nativo de partilha do telemóvel — deve continuar
+  a funcionar numa futura app Android via TWA; se não houver suporte, cai
+  para `doc.save()` (download direto).
+  - **Limitação descoberta e contornada**: a fonte base do jsPDF (Helvetica
+    core, sem TTF embutido) não tem o glifo do símbolo "€" nem do travessão
+    "—" — ficam em branco/apagados no PDF gerado (confirmado por inspeção
+    direta dos bytes do PDF, não só visualmente). $, £, R$ e Kz renderizam
+    bem na mesma fonte. Por isso o PDF usa sempre `moedaAtual().simboloPDF`
+    em vez de `moedaAtual().simbolo` para os valores monetários (ver secção
+    "Idioma e moeda" abaixo) — no ecrã continua tudo normal com "€"/"£"/etc.,
+    é só uma limitação da biblioteca de PDF. Se um dia se quiser reintroduzir
+    o símbolo "€" no PDF, a solução seria embutir uma fonte TTF com esse
+    glifo via `doc.addFont()`, não tentar contornar de outra forma.
+- **Idioma e moeda** (Definições, menu → "Definições"/"Settings"): dois
+  estados globais, `idioma` (`'pt'` | `'en'`) e `moedaCodigo` (`'EUR'` |
+  `'USD'` | `'GBP'` | `'BRL'` | `'AOA'`, ver array `MOEDAS`), guardados por
+  **conta** em `users/{uid}.idioma` / `users/{uid}.moeda` (não por aparelho/
+  `localStorage`) — decisão explícita do utilizador para sincronizar entre
+  dispositivos e permitir que cada pessoa num grupo partilhado (casal) tenha
+  a sua própria preferência mesmo partilhando os mesmos gastos.
+  - **Moeda**: só muda o símbolo apresentado (`formatoEuro`/`formatoEuroPDF`
+    usam `moedaAtual().simbolo`/`.simboloPDF`) — decisão explícita de não
+    fazer conversão cambial real (sem API de taxas de câmbio, sem
+    complexidade extra). Os valores numéricos guardados nunca mudam.
+  - **Idioma**: cobre toda a interface via dicionário `T = { pt: {...}, en:
+    {...} }` + função `t(chave, vars)` (interpolação tipo `{nome}` nas
+    strings). Texto estático em HTML tem `id` próprio e é aplicado por
+    `aplicarTraducoes()` (chamada no arranque e sempre que o idioma muda);
+    texto gerado em JS (listas, histórico, mensagens de erro/confirmação)
+    chama `t()` diretamente. Nomes de meses em `MESES.pt`/`MESES.en`;
+    formatação de datas/números usa `localeAtual()` (`'pt-PT'` ou `'en-GB'`)
+    em vez de `'pt-PT'` fixo.
+  - **Categorias de despesas não são traduzidas** — são dados escritos pelo
+    próprio utilizador (`categoriasAtuais`), não texto da interface.
+  - Ao adicionar uma nova string de interface: adicionar a chave em **ambos**
+    `T.pt` e `T.en` (há um teste ad-hoc feito em sessões anteriores que
+    compara as chaves usadas com `t(...)` contra as duas listas — vale a pena
+    repetir esse tipo de verificação antes de publicar).
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
@@ -189,6 +249,14 @@ limpa manualmente na consola se algum dia incomodar.
 - **Logótipo**: `Fin_plus_logo_euro.png` (wordmark "Fin+" em gradiente
   cobre/dourado-rosado, com símbolo de euro por cima, fundo transparente).
   Fica no topo do ecrã de login e no cabeçalho principal, acima do eyebrow.
+- **Ícone da app** (`icons/icon-192.png`, `icons/icon-512.png`): gerado a
+  partir do símbolo "€" recortado do logótipo (bounding box aproximado
+  x:342–555, y:25–229 em `Fin_plus_logo_euro.png`), centrado sobre um fundo
+  navy sólido (`#1A3C5E`, sem transparência — necessário para o ícone da
+  Play Store). Gerado com a biblioteca `jimp` (script ad-hoc, não fica no
+  repo). Se for preciso regenerar ou fazer variantes, repetir o recorte do
+  símbolo "€" (a wordmark "Fin+" completa é larga demais para um ícone
+  quadrado legível a tamanhos pequenos).
 - **Tagline**: "Finanças Positivas" — texto eyebrow no topo, por cima do
   título da app.
 - **Paleta de cores** (definida em `:root` no CSS):
@@ -229,6 +297,17 @@ limpa manualmente na consola se algum dia incomodar.
   ficheiro real na conversa (colar a imagem inline no chat nem sempre fica
   acessível como ficheiro — já aconteceu falhar; upload direto no GitHub é o
   método mais fiável).
+- **Nota**: dependendo da sessão/ambiente, pode não haver acesso direto a
+  ferramentas GitHub nem sistema de ficheiros partilhado (ver acima); numa
+  sessão que tiver acesso a Bash/Git normal, o fluxo prático que funcionou
+  foi clonar o repo para um diretório scratch, editar lá, e `git push`.
+- **Sem Java, Android SDK, nem `keytool`** neste tipo de ambiente de
+  desenvolvimento — por isso não é possível correr `bubblewrap` (CLI oficial
+  da Google para gerar o `.aab` de uma TWA) localmente sem antes descarregar
+  JDK + Android SDK Command Line Tools (vários GB). Alternativa escolhida:
+  **PWABuilder.com** (Microsoft) — gera o `.aab` na nuvem a partir do URL
+  público do site, sem precisar de nada instalado localmente. Ver secção
+  "Empacotamento Android / Play Store" abaixo.
 
 ## Testar mudanças
 
@@ -243,29 +322,75 @@ Não há testes automatizados. Fluxo de verificação usado até agora:
 
 ## Funcionalidades já implementadas
 
-Login Google + partilha de grupo (convites), despesas fixas/recorrentes,
-orçamento mensal por categoria com aviso visual, comparação com o mês anterior
-(geral e por categoria), ecrã de Histórico navegável por mês/trimestre/
-semestre/ano/liquidações, categorias personalizáveis (criar/renomear com
-migração automática/remover), datas editáveis nos gastos, deteção de faturas
-duplicadas (mesmo NIF + valor + dia, só faz sentido em gastos vindos de QR),
-modal de confirmação próprio da app (não usar `confirm()`/`alert()` nativos do
-browser — mostram sempre o domínio do site e não são personalizáveis),
-logótipo/identidade Fin+, e **Contas a Acertar** (divisão de despesas entre
-casal, ver secção própria acima) com liquidação numerada nº/ano.
+Login Google + partilha de grupo (convites, geração atómica sem colisão),
+despesas fixas/recorrentes, orçamento mensal por categoria com aviso visual,
+comparação com o mês anterior (geral e por categoria), ecrã de Histórico
+navegável por mês/trimestre/semestre/ano/liquidações, categorias
+personalizáveis (criar/renomear com migração automática/remover), datas
+editáveis nos gastos, deteção de faturas duplicadas (mesmo NIF + valor + dia,
+só faz sentido em gastos vindos de QR), leitura de QR por câmara ao vivo **ou
+foto da galeria**, exportação/partilha em PDF do resumo do Histórico, escolha
+de idioma (PT/EN, cobre toda a interface) e moeda (símbolo apresentado, sem
+conversão cambial), modal de confirmação próprio da app (não usar
+`confirm()`/`alert()` nativos do browser — mostram sempre o domínio do site e
+não são personalizáveis), logótipo/identidade Fin+, e **Contas a Acertar**
+(divisão de despesas entre casal, ver secção própria acima) com liquidação
+numerada nº/ano.
 
-Testado e confirmado a funcionar em produção pelo utilizador (não é só
-"implementado", foi mesmo validado por ele) até e incluindo a funcionalidade
-de Contas a Acertar + separador Liquidações no Histórico.
+**Testado e confirmado a funcionar em produção pelo utilizador** (não é só
+"implementado", foi mesmo validado por ele): tudo o que está acima até e
+incluindo Contas a Acertar/Liquidações, e a leitura de QR a partir de foto da
+galeria. A exportação PDF, idioma/moeda e a troca do botão de menu "⋯" →
+"Menu▾" foram implementadas, testadas pelo Claude (sem login real — a app
+exige Google Sign-In, não é possível autenticar como o utilizador) e
+publicadas, mas **ainda sem confirmação explícita do utilizador em produção**.
+
+## Empacotamento Android / Play Store (em curso)
+
+Decisões já tomadas (respostas do utilizador, agosto 2026):
+- **Build do `.aab`**: via **PWABuilder.com**, não Bubblewrap local (ver nota
+  sobre falta de Java/Android SDK no ambiente de desenvolvimento, acima).
+- **Conta Google Play Console**: o utilizador ainda não tem — tem de a criar
+  e pagar (25 USD, pagamento único) em play.google.com/console; isto não pode
+  ser feito pelo Claude (conta/pagamento).
+- **Política de privacidade**: escrita pelo Claude (o utilizador não tinha
+  nenhuma) — `privacidade.html`, bilingue PT/EN, cobre: dados recolhidos
+  (conta Google, dados de gastos, dados de partilha em grupo), onde ficam
+  (Firebase/Google Cloud, sem analítica/publicidade de terceiros), direito a
+  pedir eliminação de conta (contacto: ricardotdi@gmail.com). Link visível no
+  ecrã de login e nas Definições (exigência da Play Store: link acessível
+  dentro da própria app, não só na ficha da loja).
+
+Já preparado no repo para a instalabilidade PWA (pré-requisito do
+PWABuilder):
+- `manifest.json` (nome "Fin+ Gastos", cores da marca, ícones 192/512).
+- `icons/icon-192.png`, `icons/icon-512.png` (ver secção "Identidade visual"
+  acima para como foram gerados).
+- `<link rel="manifest">` + `<meta name="theme-color">` no `<head>` do
+  `index.html`.
+
+**Falta** (passos seguintes, fora do que o Claude consegue fazer sozinho):
+1. Utilizador cria a conta Google Play Console.
+2. Utilizador corre PWABuilder.com com o URL
+   `https://ricardotdi.github.io/gastos-prototipo/`, revê o manifest
+   detetado, gera o pacote Android (`.aab`) — isto cria/pede uma **chave de
+   assinatura** que tem de ser guardada em segurança pelo utilizador para
+   sempre (perdê-la impede atualizações futuras da app).
+3. Utilizador dá ao Claude o **SHA-256** da assinatura gerada nesse passo →
+   Claude prepara `.well-known/assetlinks.json` no repo (Digital Asset Links,
+   necessário para a TWA abrir sem barra de endereço do browser). Não
+   confundir com o SHA-1 do Firebase Google Sign-In nativo (não é necessário
+   para o caminho TWA).
+4. Ficha da Play Store: ícone 512×512 (já existe, `icons/icon-512.png`),
+   capturas de ecrã reais do telemóvel (o utilizador tem de tirar, não há
+   emulador Android disponível nesta sessão), descrição, link da política de
+   privacidade (`privacidade.html`), formulário de Data Safety (baseado no
+   conteúdo de `privacidade.html`).
+5. Submissão para revisão da Google.
 
 ## Próximos passos identificados (backlog)
 
-- Ler QR a partir de foto da galeria, não só câmara ao vivo
-- Empacotar como app Android instalável via TWA (Trusted Web Activity, usando
-  Bubblewrap) — reaproveita este site sem reescrever nada; só nessa fase é que
-  entra o SHA-256 do certificado de assinatura do APK (Digital Asset Links,
-  `assetlinks.json`), não confundir com o SHA-1 do Firebase Google Sign-In
-  nativo (que não é necessário para o caminho TWA).
+- Concluir o empacotamento Android/Play Store (ver secção própria acima).
 - Se algum dia se quiser melhorar a entrega de emails da Firebase (ex: reset de
   password, se for reintroduzido), a causa da entrega em spam é a falta de
   domínio próprio verificado — resolver isso implicaria o utilizador ter um
