@@ -301,6 +301,20 @@ limpa manualmente na consola se algum dia incomodar.
   ferramentas GitHub nem sistema de ficheiros partilhado (ver acima); numa
   sessão que tiver acesso a Bash/Git normal, o fluxo prático que funcionou
   foi clonar o repo para um diretório scratch, editar lá, e `git push`.
+- **Clone de trabalho em `C:\Users\User\Dropbox\Empresa Finmais\App Android\gastos-prototipo`**
+  (cópia de segurança pedida pelo utilizador, agosto 2026, ver memory
+  `project-gastos-prototipo`): por estar dentro de uma pasta sincronizada
+  pelo Dropbox, `.git/refs/remotes/` pode ter atributo `ReparsePoint` e o
+  `git fetch`/`git pull` pode falhar intermitentemente com
+  `error: couldn't set 'refs/remotes/origin/main'` (o Dropbox bloqueia
+  momentaneamente o ficheiro da referência interna do git). **O `git push`
+  em si não falha** — só a atualização da referência local de tracking.
+  Se acontecer: confirmar que o push chegou com
+  `git ls-remote origin main`, e corrigir a referência local manualmente,
+  ex.: `git update-ref refs/remotes/origin/main <sha>` ou recriar o ficheiro
+  à mão com `mv` (um `mv` direto costuma funcionar mesmo quando o git falha
+  a fazer o mesmo internamente). Não é perda de dados, é só bookkeeping
+  local a precisar de correção.
 - **Sem Java, Android SDK, nem `keytool`** neste tipo de ambiente de
   desenvolvimento — por isso não é possível correr `bubblewrap` (CLI oficial
   da Google para gerar o `.aab` de uma TWA) localmente sem antes descarregar
