@@ -368,25 +368,38 @@ PWABuilder):
   acima para como foram gerados).
 - `<link rel="manifest">` + `<meta name="theme-color">` no `<head>` do
   `index.html`.
+- `.nojekyll` (ficheiro vazio na raiz) — **necessário**: o GitHub Pages usa
+  Jekyll por padrão, que ignora pastas começadas por ponto (como
+  `.well-known/`); sem este ficheiro o `assetlinks.json` abaixo dava 404 e a
+  TWA nunca ficaria verificada (mostraria sempre a barra de endereço).
+- `.well-known/assetlinks.json` — Digital Asset Links, gerado automaticamente
+  pelo PWABuilder ao criar o pacote Android e copiado para o repo:
+  - Package name: `io.github.ricardotdi.twa`
+  - SHA-256 do certificado: `C8:34:71:69:96:A5:E4:35:81:42:E2:94:87:E3:51:FB:0F:A8:B5:3D:50:8A:64:95:93:A1:B5:3D:1B:A7:5D:8F`
+  - (Este SHA-256 é suposto ser público — não é secreto. Não confundir com o
+    SHA-1 do Firebase Google Sign-In nativo, que não é necessário para TWA.)
+
+**Chave de assinatura (`.keystore`)**: gerada pelo PWABuilder, **NUNCA está
+no repositório** (é público) — fica só em
+`C:\Users\User\Dropbox\Empresa Finmais\App Android\signing.keystore` +
+`signing-key-info.txt` (password, alias `my-key-alias`, dados do signer).
+Se precisares de reconstruir o `assetlinks.json` ou gerar uma nova versão do
+`.aab` no futuro, a chave e a password estão só ali — pede ao utilizador, o
+Claude não deve tentar guardar a password em lado nenhum do repo.
 
 **Falta** (passos seguintes, fora do que o Claude consegue fazer sozinho):
 1. Utilizador cria a conta Google Play Console.
-2. Utilizador corre PWABuilder.com com o URL
-   `https://ricardotdi.github.io/gastos-prototipo/`, revê o manifest
-   detetado, gera o pacote Android (`.aab`) — isto cria/pede uma **chave de
-   assinatura** que tem de ser guardada em segurança pelo utilizador para
-   sempre (perdê-la impede atualizações futuras da app).
-3. Utilizador dá ao Claude o **SHA-256** da assinatura gerada nesse passo →
-   Claude prepara `.well-known/assetlinks.json` no repo (Digital Asset Links,
-   necessário para a TWA abrir sem barra de endereço do browser). Não
-   confundir com o SHA-1 do Firebase Google Sign-In nativo (não é necessário
-   para o caminho TWA).
+2. ~~Gerar o pacote Android no PWABuilder~~ — feito (agosto 2026): `.aab`,
+   `.apk` e `.keystore` guardados em
+   `C:\Users\User\Dropbox\Empresa Finmais\App Android\`.
+3. ~~Preparar `assetlinks.json`~~ — feito, ver acima.
 4. Ficha da Play Store: ícone 512×512 (já existe, `icons/icon-512.png`),
    capturas de ecrã reais do telemóvel (o utilizador tem de tirar, não há
    emulador Android disponível nesta sessão), descrição, link da política de
    privacidade (`privacidade.html`), formulário de Data Safety (baseado no
    conteúdo de `privacidade.html`).
-5. Submissão para revisão da Google.
+5. Fazer upload do `Fin+ Gastos.aab` na Play Console e submeter para revisão
+   da Google.
 
 ## Próximos passos identificados (backlog)
 
