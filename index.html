@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gastos — Protótipo</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A3C5E">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
@@ -455,6 +459,7 @@
     </button>
 
     <div class="login-status" id="loginStatus"></div>
+    <p style="margin-top:24px;"><a href="privacidade.html" id="linkPrivacidadeLogin" style="color:rgba(255,255,255,.55); font-size:11.5px; text-decoration:underline;">Política de privacidade</a></p>
   </div>
 </div>
 
@@ -675,6 +680,7 @@
 
     <button class="confirm-btn" id="btnGuardarDefinicoes">Guardar</button>
     <div class="scan-status" id="definicoesStatus"></div>
+    <p class="hint" style="text-align:center; margin-top:18px; margin-bottom:0;"><a href="privacidade.html" id="linkPrivacidadeDefinicoes" target="_blank" rel="noopener" style="color:var(--navy);">Política de privacidade</a></p>
   </div>
 </div>
 
@@ -945,7 +951,8 @@ const T = {
     label_moeda: 'Moeda',
     btn_guardar_definicoes: 'Guardar',
     status_guardando_definicoes: 'A guardar…',
-    status_definicoes_guardadas: '✓ Guardado'
+    status_definicoes_guardadas: '✓ Guardado',
+    link_privacidade: 'Política de privacidade'
   },
   en: {
     login_eyebrow: 'Positive Finances',
@@ -1099,7 +1106,8 @@ const T = {
     label_moeda: 'Currency',
     btn_guardar_definicoes: 'Save',
     status_guardando_definicoes: 'Saving…',
-    status_definicoes_guardadas: '✓ Saved'
+    status_definicoes_guardadas: '✓ Saved',
+    link_privacidade: 'Privacy policy'
   }
 };
 
@@ -1241,6 +1249,8 @@ function aplicarTraducoes(){
   document.querySelector('#idiomaChips [data-idioma="en"]').textContent = t('chip_english');
   document.getElementById('labelMoeda').textContent = t('label_moeda');
   document.getElementById('btnGuardarDefinicoes').textContent = t('btn_guardar_definicoes');
+  document.getElementById('linkPrivacidadeLogin').textContent = t('link_privacidade');
+  document.getElementById('linkPrivacidadeDefinicoes').textContent = t('link_privacidade');
 
   document.documentElement.lang = idioma === 'en' ? 'en' : 'pt-PT';
 
