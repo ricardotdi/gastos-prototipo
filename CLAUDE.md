@@ -418,6 +418,22 @@ Claude não deve tentar guardar a password em lado nenhum do repo.
 5. Fazer upload do `Fin+ Gastos.aab` na Play Console e submeter para revisão
    da Google.
 
+**Descoberta importante (agosto 2026):** contas de developer novas na Play
+Console são **obrigadas a correr um "Closed testing"** (teste fechado) com
+**pelo menos 12 testers, durante no mínimo 14 dias consecutivos**, antes de
+poderem sequer pedir acesso à produção (publicação pública). Isto é uma
+política anti-spam da Google, aplica-se a todas as contas novas — não há como
+saltar este passo por este caminho. O utilizador confirmou que vai recrutar
+12 pessoas (família/amigos/clientes Fin+) para o teste fechado, em vez de
+distribuir o `.apk` diretamente fora da Play Store.
+
+**Progresso no Play Console** (app já criada):
+- Nome: `Fin+ Gastos`, Package name: `io.github.ricardotdi.twa`
+- App criada (Home → Fin+ Gastos), ainda por fazer: ficha da loja (usar
+  `play-store-listing.md`), depois publicar uma versão em "Closed testing"
+  com o `.aab`, adicionar a lista dos 12 testers (emails), gerar e partilhar
+  o link de opt-in, esperar os 14 dias, depois "Apply for production access".
+
 ## Próximos passos identificados (backlog)
 
 - Concluir o empacotamento Android/Play Store (ver secção própria acima).
