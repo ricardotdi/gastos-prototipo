@@ -408,13 +408,13 @@ Claude não deve tentar guardar a password em lado nenhum do repo.
    `.apk` e `.keystore` guardados em
    `C:\Users\User\Dropbox\Empresa Finmais\App Android\`.
 3. ~~Preparar `assetlinks.json`~~ — feito, ver acima.
-4. Ficha da Play Store: ícone 512×512 (já existe, `icons/icon-512.png`),
-   capturas de ecrã reais do telemóvel (o utilizador tem de tirar, não há
-   emulador Android disponível nesta sessão), descrição, link da política de
-   privacidade (`privacidade.html`), formulário de Data Safety (baseado no
-   conteúdo de `privacidade.html`). **Em curso** — ver rascunhos de texto
-   (título/descrição curta/longa) que o Claude for dando ao utilizador na
-   conversa; se não estiverem aqui é porque ainda não foram guardados.
+4. Ficha da Play Store: texto pronto (título, descrição curta/longa,
+   categoria, classificação de conteúdo, guia do formulário Data Safety,
+   link da política de privacidade, lista de capturas de ecrã a tirar) está
+   em **`play-store-listing.md`** neste repositório. Ícone 512×512 já existe
+   (`icons/icon-512.png`). Falta só: o utilizador tirar as capturas de ecrã
+   reais do telemóvel (não há emulador Android nesta sessão) e colar o texto
+   nos campos da Play Console.
 5. Fazer upload do `Fin+ Gastos.aab` na Play Console e submeter para revisão
    da Google.
 
