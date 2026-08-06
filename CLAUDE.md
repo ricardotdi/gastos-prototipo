@@ -429,10 +429,23 @@ distribuir o `.apk` diretamente fora da Play Store.
 
 **Progresso no Play Console** (app já criada):
 - Nome: `Fin+ Gastos`, Package name: `io.github.ricardotdi.twa`
-- App criada (Home → Fin+ Gastos), ainda por fazer: ficha da loja (usar
-  `play-store-listing.md`), depois publicar uma versão em "Closed testing"
-  com o `.aab`, adicionar a lista dos 12 testers (emails), gerar e partilhar
-  o link de opt-in, esperar os 14 dias, depois "Apply for production access".
+- App criada (Home → Fin+ Gastos), checklist "Finish setting up your app" em
+  curso.
+- **Sign-in details**: a Google exige uma conta de teste dedicada para os
+  revisores (não pode ser a conta pessoal do utilizador). Conta criada:
+  `finmaisteste@gmail.com`. Preencher em Play Console → App content →
+  Sign-in details → Add sign-in details: Name = `Google Test Account`;
+  email = `finmaisteste@gmail.com`; password = a que o utilizador definiu
+  (não guardada aqui); "Any other information" (em inglês) = instrução a
+  dizer para usar "Sign in with Google" com esta conta, sem 2-Step
+  Verification ativo; marcar a checkbox de acesso total; Add.
+- Ainda por fazer: confirmar 2-Step Verification desligado nessa conta,
+  concluir o resto do checklist (Ads, Content rating, Target audience, Data
+  safety — usar `play-store-listing.md` —, Government apps, Financial
+  features, Health, categoria/contactos, Store Listing), depois publicar uma
+  versão em "Closed testing" com o `.aab`, adicionar a lista dos 12 testers
+  (emails), gerar e partilhar o link de opt-in, esperar os 14 dias, depois
+  "Apply for production access".
 
 ## Próximos passos identificados (backlog)
 
