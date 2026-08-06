@@ -402,7 +402,8 @@ Se precisares de reconstruir o `assetlinks.json` ou gerar uma nova versão do
 Claude não deve tentar guardar a password em lado nenhum do repo.
 
 **Falta** (passos seguintes, fora do que o Claude consegue fazer sozinho):
-1. Utilizador cria a conta Google Play Console.
+1. ~~Utilizador cria a conta Google Play Console~~ — feito (confirmado pelo
+   utilizador: pagou os 25 USD e está certificado para publicar).
 2. ~~Gerar o pacote Android no PWABuilder~~ — feito (agosto 2026): `.aab`,
    `.apk` e `.keystore` guardados em
    `C:\Users\User\Dropbox\Empresa Finmais\App Android\`.
@@ -411,7 +412,9 @@ Claude não deve tentar guardar a password em lado nenhum do repo.
    capturas de ecrã reais do telemóvel (o utilizador tem de tirar, não há
    emulador Android disponível nesta sessão), descrição, link da política de
    privacidade (`privacidade.html`), formulário de Data Safety (baseado no
-   conteúdo de `privacidade.html`).
+   conteúdo de `privacidade.html`). **Em curso** — ver rascunhos de texto
+   (título/descrição curta/longa) que o Claude for dando ao utilizador na
+   conversa; se não estiverem aqui é porque ainda não foram guardados.
 5. Fazer upload do `Fin+ Gastos.aab` na Play Console e submeter para revisão
    da Google.
 
