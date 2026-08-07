@@ -345,6 +345,16 @@
     border-bottom:none;
     color:var(--danger);
   }
+  .menu-item-highlight{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:13px 14px;
+    margin:8px 0 16px;
+    text-align:center;
+    font-weight:600;
+  }
   .budget-row{
     margin-bottom:12px;
   }
@@ -617,6 +627,7 @@
     <div class="menu-item" id="menuJuntar">Juntar-me a um grupo</div>
     <div class="menu-item" id="menuOrcamentos">Orçamentos por categoria</div>
     <div class="menu-item" id="menuHistorico">Histórico</div>
+    <div class="menu-item menu-item-highlight" id="menuExportarPDF">📄 Exportar relatório PDF</div>
     <div class="menu-item" id="menuContas">Contas a Acertar</div>
     <div class="menu-item" id="menuDefinicoes">Definições</div>
     <div class="menu-item" id="menuSair">Sair</div>
@@ -706,11 +717,11 @@
       <button class="close-btn" id="btnHistoricoSeguinte" style="position:static; font-size:26px; padding:0 10px;">›</button>
     </div>
 
-    <div class="section-title" id="historicoSecaoTitulo" style="margin-top:24px; display:flex; justify-content:space-between; align-items:center;">
+    <div class="section-title" id="historicoSecaoTitulo" style="margin-top:24px;">
       <span id="historicoSecaoTituloTexto">Por categoria</span>
-      <span class="sair-link" id="btnExportarHistorico" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">exportar PDF</span>
     </div>
     <div id="historicoPorCategoria"></div>
+    <button class="confirm-btn" id="btnExportarHistorico">📄 Exportar PDF</button>
   </div>
 </div>
 
@@ -816,6 +827,7 @@ const T = {
     menu_juntar: 'Juntar-me a um grupo',
     menu_orcamentos: 'Orçamentos por categoria',
     menu_historico: 'Histórico',
+    menu_exportar_pdf: '📄 Exportar relatório PDF',
     menu_contas: 'Contas a Acertar',
     menu_definicoes: 'Definições',
     menu_sair: 'Sair',
@@ -900,7 +912,7 @@ const T = {
     chip_ano: 'Ano',
     chip_liquidacoes: 'Liquidações',
     titulo_por_categoria: 'Por categoria',
-    link_exportar_pdf: 'exportar PDF',
+    link_exportar_pdf: '📄 Exportar PDF',
     msg_sem_gastos_periodo: 'Sem gastos neste período.',
     msg_sem_ninguem_liquidacoes: 'Ainda não tens ninguém junto neste grupo para haver liquidações.',
     msg_sem_liquidacoes_registadas: 'Ainda sem liquidações registadas.',
@@ -944,6 +956,11 @@ const T = {
     pdf_valor: 'Valor',
     pdf_gerado_em: 'Gerado em {data} · Fin+ Finanças Positivas',
     pdf_share_titulo: 'Resumo de gastos',
+    pdf_titulo_comparacao_homologa: 'Comparação com o período homólogo',
+    pdf_periodo_atual: 'Este período ({periodo}): ',
+    pdf_periodo_homologo: 'Período homólogo ({periodo}): ',
+    pdf_variacao: 'Variação: ',
+    pdf_sem_dados_homologo: 'sem dados do período homólogo para comparar',
     titulo_definicoes: 'Definições',
     label_idioma: 'Idioma',
     chip_portugues: 'Português',
@@ -971,6 +988,7 @@ const T = {
     menu_juntar: 'Join a group',
     menu_orcamentos: 'Budgets by category',
     menu_historico: 'History',
+    menu_exportar_pdf: '📄 Export PDF report',
     menu_contas: 'Settle Up',
     menu_definicoes: 'Settings',
     menu_sair: 'Sign out',
@@ -1055,7 +1073,7 @@ const T = {
     chip_ano: 'Year',
     chip_liquidacoes: 'Settlements',
     titulo_por_categoria: 'By category',
-    link_exportar_pdf: 'export PDF',
+    link_exportar_pdf: '📄 Export PDF',
     msg_sem_gastos_periodo: 'No expenses in this period.',
     msg_sem_ninguem_liquidacoes: 'You don\'t have anyone in this group yet for there to be settlements.',
     msg_sem_liquidacoes_registadas: 'No settlements recorded yet.',
@@ -1099,6 +1117,11 @@ const T = {
     pdf_valor: 'Amount',
     pdf_gerado_em: 'Generated on {data} · Fin+ Positive Finances',
     pdf_share_titulo: 'Expense summary',
+    pdf_titulo_comparacao_homologa: 'Year-over-year comparison',
+    pdf_periodo_atual: 'This period ({periodo}): ',
+    pdf_periodo_homologo: 'Same period last year ({periodo}): ',
+    pdf_variacao: 'Change: ',
+    pdf_sem_dados_homologo: 'no data for the same period last year to compare',
     titulo_definicoes: 'Settings',
     label_idioma: 'Language',
     chip_portugues: 'Português',
@@ -1209,6 +1232,7 @@ function aplicarTraducoes(){
   document.getElementById('menuJuntar').textContent = t('menu_juntar');
   document.getElementById('menuOrcamentos').textContent = t('menu_orcamentos');
   document.getElementById('menuHistorico').textContent = t('menu_historico');
+  document.getElementById('menuExportarPDF').textContent = t('menu_exportar_pdf');
   document.getElementById('menuContas').textContent = t('menu_contas');
   document.getElementById('menuDefinicoes').textContent = t('menu_definicoes');
   document.getElementById('menuSair').textContent = t('menu_sair');
@@ -1380,6 +1404,12 @@ document.getElementById('closeOrcamentosSheet').onclick = () => {
 const historicoOverlay = document.getElementById('historicoOverlay');
 
 document.getElementById('menuHistorico').onclick = () => {
+  menuOverlay.classList.remove('open');
+  definirModoHistorico('mes');
+  historicoOverlay.classList.add('open');
+};
+
+document.getElementById('menuExportarPDF').onclick = () => {
   menuOverlay.classList.remove('open');
   definirModoHistorico('mes');
   historicoOverlay.classList.add('open');
@@ -2036,16 +2066,19 @@ function renderHistorico(){
 
   const navWrap = document.getElementById('historicoNavWrap');
   const secaoTitulo = document.getElementById('historicoSecaoTitulo');
+  const btnExportar = document.getElementById('btnExportarHistorico');
 
   if(historicoModo === 'liquidacoes'){
     navWrap.style.display = 'none';
     secaoTitulo.style.display = 'none';
+    btnExportar.style.display = 'none';
     renderHistoricoLiquidacoes();
     return;
   }
 
   navWrap.style.display = 'flex';
-  secaoTitulo.style.display = 'flex';
+  secaoTitulo.style.display = 'block';
+  btnExportar.style.display = 'block';
   document.getElementById('historicoSecaoTituloTexto').textContent = t('titulo_por_categoria');
 
   document.getElementById('historicoLabel').textContent = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
@@ -2074,10 +2107,34 @@ function formatoEuroPDF(v){
   return v.toLocaleString(localeAtual(), {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ' + moedaAtual().simboloPDF;
 }
 
+// Cria um gráfico Chart.js num canvas fora do ecrã (nunca visível) e devolve
+// a imagem em base64 — usado para embutir gráficos no PDF exportado, sem
+// mexer no gráfico principal da app.
+function gerarImagemGrafico(config, largura, altura){
+  return new Promise(resolve => {
+    const canvas = document.createElement('canvas');
+    canvas.width = largura;
+    canvas.height = altura;
+    canvas.style.position = 'fixed';
+    canvas.style.left = '-9999px';
+    canvas.style.top = '0';
+    document.body.appendChild(canvas);
+    const opcoes = Object.assign({ responsive:false, animation:false, devicePixelRatio:1 }, config.options || {});
+    const graficoTemp = new Chart(canvas, Object.assign({}, config, { options: opcoes }));
+    requestAnimationFrame(() => {
+      const imagem = graficoTemp.toBase64Image('image/png', 1);
+      graficoTemp.destroy();
+      canvas.remove();
+      resolve(imagem);
+    });
+  });
+}
+
 // Gera um PDF com o resumo por categoria do período do Histórico atualmente
-// selecionado, e tenta partilhá-lo (Web Share API — funciona também numa
-// futura app Android via TWA); se não for possível partilhar, descarrega o
-// ficheiro diretamente.
+// selecionado — com gráfico, e comparação com o mesmo período do ano
+// anterior (período homólogo), também com gráfico — e tenta partilhá-lo
+// (Web Share API — funciona também numa futura app Android via TWA); se não
+// for possível partilhar, descarrega o ficheiro diretamente.
 async function exportarHistoricoPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -2088,9 +2145,20 @@ async function exportarHistoricoPDF(){
   const porCategoria = gastoPorCategoriaHistorico(historicoAno, historicoModo, historicoPeriodo);
   const categoriasOrdenadas = Object.keys(porCategoria).sort((a, b) => porCategoria[b] - porCategoria[a]);
 
+  const anoHomologo = historicoAno - 1;
+  const labelHomologo = labelPeriodoHistorico(anoHomologo, historicoModo, historicoPeriodo);
+  const labelHomologoCap = labelHomologo.charAt(0).toUpperCase() + labelHomologo.slice(1);
+  const totalHomologo = totalHistorico(anoHomologo, historicoModo, historicoPeriodo);
+  const porCategoriaHomologo = gastoPorCategoriaHistorico(anoHomologo, historicoModo, historicoPeriodo);
+  const temDadosHomologos = totalHomologo > 0;
+  const diferenca = total - totalHomologo;
+  const percentagem = temDadosHomologos ? (diferenca / totalHomologo) * 100 : null;
+
   const logoImg = document.querySelector('header img');
   try{
-    doc.addImage(logoImg, 'PNG', 20, 15, 24, 10.5);
+    // compressão 'FAST' é essencial aqui: sem ela o jsPDF embute o logótipo
+    // como bitmap sem compressão (PDF de vários MB só com o logótipo).
+    doc.addImage(logoImg, 'PNG', 20, 15, 24, 10.5, undefined, 'FAST');
   } catch(e){ /* segue sem logótipo se a imagem ainda não estiver pronta */ }
 
   doc.setTextColor('#A19276');
@@ -2105,7 +2173,28 @@ async function exportarHistoricoPDF(){
   doc.setFontSize(24);
   doc.text(t('pdf_total') + formatoEuroPDF(total), 20, 58);
 
-  let y = 72;
+  let y = 70;
+  const garantirEspaco = (necessario) => {
+    if(y + necessario > 275){ doc.addPage(); y = 20; }
+  };
+
+  // ---- Gráfico por categoria do período selecionado ----
+  if(categoriasOrdenadas.length > 0){
+    const imagemGrafico = await gerarImagemGrafico({
+      type: 'bar',
+      data: {
+        labels: categoriasOrdenadas,
+        datasets: [{ data: categoriasOrdenadas.map(c => porCategoria[c]), backgroundColor: '#1A3C5E', borderRadius: 6 }]
+      },
+      options: { plugins: { legend: { display:false } }, scales: { y: { beginAtZero:true } } }
+    }, 860, 360);
+    garantirEspaco(80);
+    doc.addImage(imagemGrafico, 'PNG', 20, y, 170, 71, undefined, 'FAST');
+    y += 80;
+  }
+
+  // ---- Tabela por categoria ----
+  garantirEspaco(20);
   doc.setFontSize(11);
   doc.setTextColor('#12202E');
   doc.text(t('pdf_categoria'), 20, y);
@@ -2117,12 +2206,63 @@ async function exportarHistoricoPDF(){
 
   if(categoriasOrdenadas.length === 0){
     doc.text(t('msg_sem_gastos_periodo'), 20, y);
+    y += 8;
   } else {
     categoriasOrdenadas.forEach(cat => {
+      garantirEspaco(8);
       doc.text(cat, 20, y);
       doc.text(formatoEuroPDF(porCategoria[cat]), 190, y, { align: 'right' });
       y += 8;
     });
+  }
+
+  // ---- Comparação com o período homólogo (mesmo período, ano anterior) ----
+  garantirEspaco(40);
+  y += 8;
+  doc.setFontSize(14);
+  doc.setTextColor('#1A3C5E');
+  doc.text(t('pdf_titulo_comparacao_homologa'), 20, y);
+  y += 10;
+
+  doc.setFontSize(11);
+  doc.setTextColor('#12202E');
+  doc.text(t('pdf_periodo_atual', { periodo: labelCapitalizado }) + formatoEuroPDF(total), 20, y);
+  y += 7;
+  doc.text(t('pdf_periodo_homologo', { periodo: labelHomologoCap }) + formatoEuroPDF(totalHomologo), 20, y);
+  y += 7;
+
+  if(temDadosHomologos){
+    const subiu = diferenca > 0;
+    const desceu = diferenca < 0;
+    const sinal = subiu ? '+' : (desceu ? '-' : '');
+    const textoVariacao = `${sinal}${formatoEuroPDF(Math.abs(diferenca))} (${sinal}${Math.abs(percentagem).toFixed(1)}%)`;
+    doc.setTextColor(subiu ? '#C0392B' : (desceu ? '#2E8B57' : '#12202E'));
+    doc.text(t('pdf_variacao') + textoVariacao, 20, y);
+  } else {
+    doc.setTextColor('#8a8478');
+    doc.text(t('pdf_variacao') + t('pdf_sem_dados_homologo'), 20, y);
+  }
+  doc.setTextColor('#12202E');
+  y += 10;
+
+  const categoriasUniao = Array.from(new Set([...categoriasOrdenadas, ...Object.keys(porCategoriaHomologo)]))
+    .sort((a, b) => (porCategoria[b] || 0) - (porCategoria[a] || 0));
+
+  if(categoriasUniao.length > 0){
+    const imagemComparacao = await gerarImagemGrafico({
+      type: 'bar',
+      data: {
+        labels: categoriasUniao,
+        datasets: [
+          { label: labelCapitalizado, data: categoriasUniao.map(c => porCategoria[c] || 0), backgroundColor: '#1A3C5E', borderRadius: 6 },
+          { label: labelHomologoCap, data: categoriasUniao.map(c => porCategoriaHomologo[c] || 0), backgroundColor: '#A19276', borderRadius: 6 }
+        ]
+      },
+      options: { plugins: { legend: { display:true, position:'bottom' } }, scales: { y: { beginAtZero:true } } }
+    }, 860, 400);
+    garantirEspaco(90);
+    doc.addImage(imagemComparacao, 'PNG', 20, y, 170, 79, undefined, 'FAST');
+    y += 88;
   }
 
   doc.setFontSize(8);
