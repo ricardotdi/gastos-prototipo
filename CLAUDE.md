@@ -519,7 +519,7 @@ adicionar à lista "Email lists" da Play Console):
 7. Mãe — email: _por recolher_
 8. Hugo — m962774765@gmail.com
 9. Graça — email: _por recolher_
-10. Cátia — email: _por recolher_
+10. Cátia — catiavpinheiro@gmail.com
 11. Ricardo — email: _por recolher_
 12. Raquel — email: _por recolher_
 
