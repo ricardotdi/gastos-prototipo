@@ -99,6 +99,39 @@
     border-radius:14px;
     padding:14px;
   }
+  #relatorioMensalBanner{
+    background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color:#fff;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  #relatorioMensalBanner .rel-titulo{
+    font-weight:700;
+    font-size:14.5px;
+    margin-bottom:3px;
+  }
+  #relatorioMensalBanner .rel-sub{
+    font-size:12.5px;
+    color:rgba(255,255,255,.75);
+    line-height:1.4;
+  }
+  #btnVerRelatorioMensal{
+    background:var(--gold);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:9px 16px;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  #btnDispensarRelatorioMensal{
+    color:rgba(255,255,255,.65);
+    font-size:12.5px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
   .entry{
     background:#fff;
     border:1px solid var(--line);
@@ -501,6 +534,15 @@
   </header>
 
   <main>
+    <div id="relatorioMensalBanner" style="display:none;">
+      <div class="rel-titulo" id="relatorioMensalTitulo"></div>
+      <div class="rel-sub" id="relatorioMensalTexto"></div>
+      <div style="display:flex; gap:16px; align-items:center; margin-top:12px;">
+        <button id="btnVerRelatorioMensal"></button>
+        <span id="btnDispensarRelatorioMensal"></span>
+      </div>
+    </div>
+
     <div id="chart-wrap">
       <canvas id="catChart" height="160"></canvas>
     </div>
@@ -971,11 +1013,18 @@ const T = {
     pdf_valor: 'Valor',
     pdf_gerado_em: 'Gerado em {data} · Fin+ Finanças Positivas',
     pdf_share_titulo: 'Resumo de gastos',
-    pdf_titulo_comparacao_homologa: 'Comparação com o período homólogo',
+    pdf_titulo_comparacoes: 'Comparações',
     pdf_periodo_atual: 'Este período ({periodo}): ',
+    pdf_periodo_anterior: 'Período anterior ({periodo}): ',
     pdf_periodo_homologo: 'Período homólogo ({periodo}): ',
-    pdf_variacao: 'Variação: ',
+    pdf_variacao_anterior: 'Variação vs. período anterior: ',
+    pdf_variacao_homologa: 'Variação vs. período homólogo: ',
+    pdf_sem_dados_anterior: 'sem dados do período anterior para comparar',
     pdf_sem_dados_homologo: 'sem dados do período homólogo para comparar',
+    banner_relatorio_titulo: 'Relatório mensal disponível',
+    banner_relatorio_texto: 'O resumo de {periodo} já está pronto, com comparação face ao mês anterior e ao mesmo mês do ano passado.',
+    btn_ver_relatorio: '📄 Ver relatório',
+    btn_dispensar_relatorio: 'Agora não',
     titulo_definicoes: 'Definições',
     label_idioma: 'Idioma',
     chip_portugues: 'Português',
@@ -1133,11 +1182,18 @@ const T = {
     pdf_valor: 'Amount',
     pdf_gerado_em: 'Generated on {data} · Fin+ Positive Finances',
     pdf_share_titulo: 'Expense summary',
-    pdf_titulo_comparacao_homologa: 'Year-over-year comparison',
+    pdf_titulo_comparacoes: 'Comparisons',
     pdf_periodo_atual: 'This period ({periodo}): ',
+    pdf_periodo_anterior: 'Previous period ({periodo}): ',
     pdf_periodo_homologo: 'Same period last year ({periodo}): ',
-    pdf_variacao: 'Change: ',
+    pdf_variacao_anterior: 'Change vs. previous period: ',
+    pdf_variacao_homologa: 'Change vs. same period last year: ',
+    pdf_sem_dados_anterior: 'no data for the previous period to compare',
     pdf_sem_dados_homologo: 'no data for the same period last year to compare',
+    banner_relatorio_titulo: 'Monthly report available',
+    banner_relatorio_texto: 'The {periodo} summary is ready, with a comparison to last month and to the same month last year.',
+    btn_ver_relatorio: '📄 View report',
+    btn_dispensar_relatorio: 'Not now',
     titulo_definicoes: 'Settings',
     label_idioma: 'Language',
     chip_portugues: 'Português',
@@ -1195,6 +1251,7 @@ const joinStatus = document.getElementById('joinStatus');
 // Atualiza todo o texto estático da interface consoante o idioma escolhido.
 // Chamada uma vez no arranque e sempre que o idioma muda nas Definições.
 function aplicarTraducoes(){
+  atualizarTextoRelatorioMensal();
   document.getElementById('loginEyebrow').textContent = t('login_eyebrow');
   document.getElementById('loginTitulo').textContent = t('titulo_app');
   document.getElementById('loginSubtitulo').textContent = t('login_subtitulo');
@@ -1897,6 +1954,7 @@ auth.onAuthStateChanged(async (user) => {
     loginScreen.style.display = 'none';
     appShell.style.display = 'block';
     document.getElementById('userEmailLabel').textContent = user.displayName || user.email || '';
+    verificarRelatorioMensal();
     try{
       currentGroupId = await resolverGrupo(user);
       ligarSincronizacao(currentGroupId);
@@ -2045,6 +2103,54 @@ function labelPeriodoHistorico(ano, modo, periodo){
   return String(ano);
 }
 
+// ---- Aviso "relatório mensal disponível" (primeiros dias de cada mês) ----
+// Mostra um banner a convidar o utilizador a ver/exportar o resumo do mês
+// que acabou de fechar, já com as duas comparações (mês anterior e mês
+// homólogo do ano anterior). Só client-side (sem Cloud Functions/agendador
+// no servidor, que exigiriam o plano pago Blaze) — verifica a data local
+// sempre que a app abre, nos primeiros 7 dias do mês, e lembra em
+// localStorage se o utilizador já dispensou o aviso desse mês.
+function verificarRelatorioMensal(){
+  const hoje = new Date();
+  if(hoje.getDate() > 7) return;
+
+  const anterior = periodoAnterior(hoje.getFullYear(), 'mes', hoje.getMonth());
+  const chave = 'relatorioMensalDispensado_' + anterior.ano + '-' + anterior.periodo;
+  if(localStorage.getItem(chave)) return;
+
+  const banner = document.getElementById('relatorioMensalBanner');
+  banner.dataset.ano = anterior.ano;
+  banner.dataset.periodo = anterior.periodo;
+  banner.dataset.chave = chave;
+  banner.style.display = 'block';
+  atualizarTextoRelatorioMensal();
+}
+
+function atualizarTextoRelatorioMensal(){
+  const banner = document.getElementById('relatorioMensalBanner');
+  if(banner.style.display === 'none') return;
+  const label = labelPeriodoHistorico(Number(banner.dataset.ano), 'mes', Number(banner.dataset.periodo));
+  document.getElementById('relatorioMensalTitulo').textContent = t('banner_relatorio_titulo');
+  document.getElementById('relatorioMensalTexto').textContent = t('banner_relatorio_texto', { periodo: label });
+  document.getElementById('btnVerRelatorioMensal').textContent = t('btn_ver_relatorio');
+  document.getElementById('btnDispensarRelatorioMensal').textContent = t('btn_dispensar_relatorio');
+}
+
+document.getElementById('btnVerRelatorioMensal').onclick = () => {
+  const banner = document.getElementById('relatorioMensalBanner');
+  historicoModo = 'mes';
+  historicoAno = Number(banner.dataset.ano);
+  historicoPeriodo = Number(banner.dataset.periodo);
+  renderHistorico();
+  historicoOverlay.classList.add('open');
+};
+
+document.getElementById('btnDispensarRelatorioMensal').onclick = () => {
+  const banner = document.getElementById('relatorioMensalBanner');
+  localStorage.setItem(banner.dataset.chave, '1');
+  banner.style.display = 'none';
+};
+
 function definirModoHistorico(modo){
   const agora = new Date();
   historicoModo = modo;
@@ -2148,12 +2254,24 @@ function gerarImagemGrafico(config, largura, altura){
   });
 }
 
+// Devolve {ano, periodo} do período imediatamente anterior ao indicado, no
+// mesmo modo (mês anterior, trimestre anterior, semestre anterior ou ano
+// anterior) — mesma lógica de "andar para trás" usada em navegarHistorico(),
+// mas sem efeitos secundários (não mexe no estado global nem re-renderiza).
+function periodoAnterior(ano, modo, periodo){
+  if(modo === 'mes') return periodo === 0 ? { ano: ano - 1, periodo: 11 } : { ano, periodo: periodo - 1 };
+  if(modo === 'trimestre') return periodo === 1 ? { ano: ano - 1, periodo: 4 } : { ano, periodo: periodo - 1 };
+  if(modo === 'semestre') return periodo === 1 ? { ano: ano - 1, periodo: 2 } : { ano, periodo: periodo - 1 };
+  return { ano: ano - 1, periodo: 0 }; // ano
+}
+
 // Gera o documento PDF com o resumo por categoria do período do Histórico
-// atualmente selecionado — com gráfico, e comparação com o mesmo período do
-// ano anterior (período homólogo), também com gráfico. Devolve o documento
-// pronto (ainda não gravado nem partilhado) e o nome de ficheiro sugerido —
-// usado tanto pelo botão "Exportar PDF" (download direto) como pelo botão
-// "Partilhar" (Web Share API).
+// atualmente selecionado — com gráfico, e comparação de variações com o
+// período imediatamente anterior e com o período homólogo (mesmo período do
+// ano anterior), também com gráfico. Devolve o documento pronto (ainda não
+// gravado nem partilhado) e o nome de ficheiro sugerido — usado tanto pelo
+// botão "Exportar PDF" (download direto) como pelo botão "Partilhar" (Web
+// Share API).
 async function gerarDocumentoHistoricoPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -2163,6 +2281,15 @@ async function gerarDocumentoHistoricoPDF(){
   const total = totalHistorico(historicoAno, historicoModo, historicoPeriodo);
   const porCategoria = gastoPorCategoriaHistorico(historicoAno, historicoModo, historicoPeriodo);
   const categoriasOrdenadas = Object.keys(porCategoria).sort((a, b) => porCategoria[b] - porCategoria[a]);
+
+  const posAnterior = periodoAnterior(historicoAno, historicoModo, historicoPeriodo);
+  const labelAnterior = labelPeriodoHistorico(posAnterior.ano, historicoModo, posAnterior.periodo);
+  const labelAnteriorCap = labelAnterior.charAt(0).toUpperCase() + labelAnterior.slice(1);
+  const totalAnterior = totalHistorico(posAnterior.ano, historicoModo, posAnterior.periodo);
+  const porCategoriaAnterior = gastoPorCategoriaHistorico(posAnterior.ano, historicoModo, posAnterior.periodo);
+  const temDadosAnterior = totalAnterior > 0;
+  const diferencaAnterior = total - totalAnterior;
+  const percentagemAnterior = temDadosAnterior ? (diferencaAnterior / totalAnterior) * 100 : null;
 
   const anoHomologo = historicoAno - 1;
   const labelHomologo = labelPeriodoHistorico(anoHomologo, historicoModo, historicoPeriodo);
@@ -2235,36 +2362,52 @@ async function gerarDocumentoHistoricoPDF(){
     });
   }
 
-  // ---- Comparação com o período homólogo (mesmo período, ano anterior) ----
-  garantirEspaco(40);
+  // ---- Comparações: com o período anterior e com o período homólogo ----
+  garantirEspaco(56);
   y += 8;
   doc.setFontSize(14);
   doc.setTextColor('#1A3C5E');
-  doc.text(t('pdf_titulo_comparacao_homologa'), 20, y);
+  doc.text(t('pdf_titulo_comparacoes'), 20, y);
   y += 10;
 
   doc.setFontSize(11);
   doc.setTextColor('#12202E');
   doc.text(t('pdf_periodo_atual', { periodo: labelCapitalizado }) + formatoEuroPDF(total), 20, y);
   y += 7;
+
+  doc.text(t('pdf_periodo_anterior', { periodo: labelAnteriorCap }) + formatoEuroPDF(totalAnterior), 20, y);
+  y += 7;
+  if(temDadosAnterior){
+    const subiu = diferencaAnterior > 0;
+    const desceu = diferencaAnterior < 0;
+    const sinal = subiu ? '+' : (desceu ? '-' : '');
+    const textoVariacao = `${sinal}${formatoEuroPDF(Math.abs(diferencaAnterior))} (${sinal}${Math.abs(percentagemAnterior).toFixed(1)}%)`;
+    doc.setTextColor(subiu ? '#C0392B' : (desceu ? '#2E8B57' : '#12202E'));
+    doc.text(t('pdf_variacao_anterior') + textoVariacao, 20, y);
+  } else {
+    doc.setTextColor('#8a8478');
+    doc.text(t('pdf_variacao_anterior') + t('pdf_sem_dados_anterior'), 20, y);
+  }
+  doc.setTextColor('#12202E');
+  y += 9;
+
   doc.text(t('pdf_periodo_homologo', { periodo: labelHomologoCap }) + formatoEuroPDF(totalHomologo), 20, y);
   y += 7;
-
   if(temDadosHomologos){
     const subiu = diferenca > 0;
     const desceu = diferenca < 0;
     const sinal = subiu ? '+' : (desceu ? '-' : '');
     const textoVariacao = `${sinal}${formatoEuroPDF(Math.abs(diferenca))} (${sinal}${Math.abs(percentagem).toFixed(1)}%)`;
     doc.setTextColor(subiu ? '#C0392B' : (desceu ? '#2E8B57' : '#12202E'));
-    doc.text(t('pdf_variacao') + textoVariacao, 20, y);
+    doc.text(t('pdf_variacao_homologa') + textoVariacao, 20, y);
   } else {
     doc.setTextColor('#8a8478');
-    doc.text(t('pdf_variacao') + t('pdf_sem_dados_homologo'), 20, y);
+    doc.text(t('pdf_variacao_homologa') + t('pdf_sem_dados_homologo'), 20, y);
   }
   doc.setTextColor('#12202E');
   y += 10;
 
-  const categoriasUniao = Array.from(new Set([...categoriasOrdenadas, ...Object.keys(porCategoriaHomologo)]))
+  const categoriasUniao = Array.from(new Set([...categoriasOrdenadas, ...Object.keys(porCategoriaAnterior), ...Object.keys(porCategoriaHomologo)]))
     .sort((a, b) => (porCategoria[b] || 0) - (porCategoria[a] || 0));
 
   if(categoriasUniao.length > 0){
@@ -2274,6 +2417,7 @@ async function gerarDocumentoHistoricoPDF(){
         labels: categoriasUniao,
         datasets: [
           { label: labelCapitalizado, data: categoriasUniao.map(c => porCategoria[c] || 0), backgroundColor: '#1A3C5E', borderRadius: 6 },
+          { label: labelAnteriorCap, data: categoriasUniao.map(c => porCategoriaAnterior[c] || 0), backgroundColor: '#8FA6BC', borderRadius: 6 },
           { label: labelHomologoCap, data: categoriasUniao.map(c => porCategoriaHomologo[c] || 0), backgroundColor: '#A19276', borderRadius: 6 }
         ]
       },
