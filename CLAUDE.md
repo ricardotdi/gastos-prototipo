@@ -149,19 +149,47 @@ poupar tempo de configuração.
   gastos individuais — decisão explícita do utilizador para manter simples),
   logótipo, total, **gráfico de barras por categoria** (Chart.js, gerado num
   canvas fora do ecrã via `gerarImagemGrafico()`), tabela de categorias, e
-  uma secção **"Comparação com o período homólogo"** (mesmo período do ano
-  anterior — `historicoAno - 1`, mesmo `historicoModo`/`historicoPeriodo`):
-  totais dos dois períodos, variação em valor e percentagem (a vermelho se
-  subiu, verde se desceu) e um **gráfico de barras agrupadas** por categoria
-  (período atual vs. homólogo). Pagina automaticamente (`garantirEspaco()`)
-  se o conteúdo não couber numa página A4. Rodapé com "Gerado em {data} ·
-  Fin+ Finanças Positivas" e "www.finmais.pt" centrado.
+  uma secção **"Comparações"** com duas comparações lado a lado (pedido
+  explícito do utilizador, agosto/2026: "quero comparação com o mês anterior
+  E com o mês homólogo do ano anterior"):
+  - **Período anterior** — `periodoAnterior(ano, modo, periodo)` devolve
+    `{ano, periodo}` do período imediatamente anterior no mesmo modo (mês
+    anterior/trimestre anterior/semestre anterior/ano anterior — mesma
+    lógica de "andar para trás" do `navegarHistorico()`, mas pura, sem
+    efeitos secundários).
+  - **Período homólogo** — mesmo período do ano anterior (`historicoAno - 1`).
+  - Cada uma mostra o total do período e a variação em valor e percentagem
+    (a vermelho se subiu, verde se desceu), e as duas partilham um único
+    **gráfico de barras agrupadas por categoria com 3 séries** (atual/
+    anterior/homólogo — navy/azul-claro `#8FA6BC`/dourado). Pagina
+    automaticamente (`garantirEspaco()`) se o conteúdo não couber numa
+    página A4. Rodapé com "Gerado em {data} · Fin+ Finanças Positivas" e
+    "www.finmais.pt" centrado.
   - `exportarHistoricoPDF()` (botão "Exportar PDF"): gera o documento e
     `doc.save()` — download direto, sem tentar partilhar.
   - `partilharHistoricoPDF()` (botão "Partilhar"): gera o documento e tenta
     `navigator.share` (Web Share API, com `files`) para abrir o menu nativo
     de partilha do telemóvel — deve continuar a funcionar numa futura app
     Android via TWA; se não houver suporte, cai também para `doc.save()`.
+- **Aviso "relatório mensal disponível"** (`verificarRelatorioMensal()`,
+  banner navy no topo do ecrã principal, dentro de `<main>`): pedido
+  explícito do utilizador (agosto/2026) para o relatório do mês que acabou
+  de fechar "ficar disponível no 1º dia do mês". Implementação **só
+  client-side** — decisão deliberada, não pedida ao utilizador porque decorre
+  diretamente da regra já estabelecida "não quero nada pago": notificação
+  push ou email agendados exigiriam Cloud Functions + Cloud Scheduler, que
+  só funcionam no plano pago Blaze do Firebase. Em vez disso, sempre que a
+  app abre (`auth.onAuthStateChanged`, depois do login), `verificarRelatorioMensal()`
+  corre no cliente: se o dia do mês for ≤ 7, calcula o mês anterior via
+  `periodoAnterior()` e mostra o banner a convidar a ver/exportar esse
+  relatório (o botão "Ver relatório" abre o Histórico já nesse mês — mesma
+  função `gerarDocumentoHistoricoPDF()` acima, com as duas comparações). O
+  botão "Agora não" guarda uma chave `relatorioMensalDispensado_{ano}-{mes}`
+  em `localStorage` (por dispositivo, não sincronizado entre contas/telemóveis
+  — aceitável para um simples lembrete) para não voltar a incomodar nesse mês.
+  Testado (Playwright, sem login real): banner aparece com o texto certo,
+  "Ver relatório" abre o Histórico no mês certo, "Agora não" persiste e não
+  volta a aparecer.
   - **Bug pré-existente encontrado e corrigido nesta alteração**: `doc.
     addImage()` sem o parâmetro de compressão embute imagens de
     `HTMLImageElement`/canvas sem qualquer compressão — o logótipo sozinho
