@@ -139,24 +139,29 @@ poupar tempo de configuração.
     `createImageBitmap(file)` primeiro, senão `Html5Qrcode.scanFile()`.
   - Confirmado a funcionar em produção pelo utilizador (fotos reais tiradas
     antes, não só fatura ao vivo).
-- **Exportação para PDF** (`exportarHistoricoPDF`, botão real `📄 Exportar
-  PDF` no Histórico + atalho `📄 Exportar relatório PDF` destacado no menu
-  principal, ambos antes eram um link de texto pequeno "escondido" — pedido
-  explícito do utilizador em agosto/2026 para tornar isto mais visível): usa
-  `jsPDF` via CDN para gerar um resumo por categoria do período selecionado
-  (não a lista de gastos individuais — decisão explícita do utilizador para
-  manter simples), com logótipo, total, **gráfico de barras por categoria**
-  (Chart.js, gerado num canvas fora do ecrã via `gerarImagemGrafico()`),
-  tabela de categorias, e uma secção **"Comparação com o período homólogo"**
-  (mesmo período do ano anterior — `historicoAno - 1`, mesmo `historicoModo`/
-  `historicoPeriodo`): totais dos dois períodos, variação em valor e
-  percentagem (a vermelho se subiu, verde se desceu) e um **gráfico de barras
-  agrupadas** por categoria (período atual vs. homólogo). Pagina
-  automaticamente (`garantirEspaco()`) se o conteúdo não couber numa página
-  A4. Tenta partilhar via `navigator.share` (Web Share API, com `files`) para
-  abrir o menu nativo de partilha do telemóvel — deve continuar a funcionar
-  numa futura app Android via TWA; se não houver suporte, cai para
-  `doc.save()` (download direto).
+- **Exportação para PDF** (botão real `📄 Exportar PDF` + `🔗 Partilhar` no
+  Histórico, lado a lado, e atalho `📄 Exportar relatório PDF` destacado no
+  menu principal que abre o Histórico — antes tudo isto era um único link de
+  texto pequeno "escondido" — pedido explícito do utilizador em agosto/2026
+  para tornar isto mais visível, e depois para separar download de partilha
+  em dois botões distintos): `gerarDocumentoHistoricoPDF()` monta o `jsPDF`
+  (via CDN) com o resumo por categoria do período selecionado (não a lista de
+  gastos individuais — decisão explícita do utilizador para manter simples),
+  logótipo, total, **gráfico de barras por categoria** (Chart.js, gerado num
+  canvas fora do ecrã via `gerarImagemGrafico()`), tabela de categorias, e
+  uma secção **"Comparação com o período homólogo"** (mesmo período do ano
+  anterior — `historicoAno - 1`, mesmo `historicoModo`/`historicoPeriodo`):
+  totais dos dois períodos, variação em valor e percentagem (a vermelho se
+  subiu, verde se desceu) e um **gráfico de barras agrupadas** por categoria
+  (período atual vs. homólogo). Pagina automaticamente (`garantirEspaco()`)
+  se o conteúdo não couber numa página A4. Rodapé com "Gerado em {data} ·
+  Fin+ Finanças Positivas" e "www.finmais.pt" centrado.
+  - `exportarHistoricoPDF()` (botão "Exportar PDF"): gera o documento e
+    `doc.save()` — download direto, sem tentar partilhar.
+  - `partilharHistoricoPDF()` (botão "Partilhar"): gera o documento e tenta
+    `navigator.share` (Web Share API, com `files`) para abrir o menu nativo
+    de partilha do telemóvel — deve continuar a funcionar numa futura app
+    Android via TWA; se não houver suporte, cai também para `doc.save()`.
   - **Bug pré-existente encontrado e corrigido nesta alteração**: `doc.
     addImage()` sem o parâmetro de compressão embute imagens de
     `HTMLImageElement`/canvas sem qualquer compressão — o logótipo sozinho
