@@ -2268,6 +2268,7 @@ async function exportarHistoricoPDF(){
   doc.setFontSize(8);
   doc.setTextColor('#8a8478');
   doc.text(t('pdf_gerado_em', { data: new Date().toLocaleDateString(localeAtual()) }), 20, 285);
+  doc.text('www.finmais.pt', 105, 291, { align: 'center' });
 
   const nomeFicheiro = 'gastos-' + labelPeriodo.replace(/\s+/g, '-') + '.pdf';
   const blob = doc.output('blob');
