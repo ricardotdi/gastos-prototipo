@@ -732,7 +732,10 @@
       <span id="historicoSecaoTituloTexto">Por categoria</span>
     </div>
     <div id="historicoPorCategoria"></div>
-    <button class="confirm-btn" id="btnExportarHistorico">📄 Exportar PDF</button>
+    <div id="historicoAcoesPDF" style="display:flex; gap:10px;">
+      <button class="confirm-btn" id="btnExportarHistorico" style="flex:1;">📄 Exportar PDF</button>
+      <button class="confirm-btn" id="btnPartilharHistorico" style="flex:1; background:var(--gold);">🔗 Partilhar</button>
+    </div>
   </div>
 </div>
 
@@ -924,6 +927,7 @@ const T = {
     chip_liquidacoes: 'Liquidações',
     titulo_por_categoria: 'Por categoria',
     link_exportar_pdf: '📄 Exportar PDF',
+    btn_partilhar_pdf: '🔗 Partilhar',
     msg_sem_gastos_periodo: 'Sem gastos neste período.',
     msg_sem_ninguem_liquidacoes: 'Ainda não tens ninguém junto neste grupo para haver liquidações.',
     msg_sem_liquidacoes_registadas: 'Ainda sem liquidações registadas.',
@@ -1085,6 +1089,7 @@ const T = {
     chip_liquidacoes: 'Settlements',
     titulo_por_categoria: 'By category',
     link_exportar_pdf: '📄 Export PDF',
+    btn_partilhar_pdf: '🔗 Share',
     msg_sem_gastos_periodo: 'No expenses in this period.',
     msg_sem_ninguem_liquidacoes: 'You don\'t have anyone in this group yet for there to be settlements.',
     msg_sem_liquidacoes_registadas: 'No settlements recorded yet.',
@@ -1268,6 +1273,7 @@ function aplicarTraducoes(){
     chip.textContent = t(chaves[chip.dataset.modo]);
   });
   document.getElementById('btnExportarHistorico').textContent = t('link_exportar_pdf');
+  document.getElementById('btnPartilharHistorico').textContent = t('btn_partilhar_pdf');
 
   document.getElementById('confirmModalTitle').textContent = t('titulo_confirmar');
   document.getElementById('confirmModalNo').textContent = t('btn_cancelar');
@@ -1575,6 +1581,7 @@ document.querySelectorAll('.hist-modo-chip').forEach(chip => {
 document.getElementById('btnHistoricoAnterior').onclick = () => navegarHistorico(-1);
 document.getElementById('btnHistoricoSeguinte').onclick = () => navegarHistorico(1);
 document.getElementById('btnExportarHistorico').onclick = () => exportarHistoricoPDF();
+document.getElementById('btnPartilharHistorico').onclick = () => partilharHistoricoPDF();
 
 // Modal de confirmação próprio da app (em vez de confirm() nativo do browser,
 // que mostra sempre o domínio do site no título e não se pode personalizar).
@@ -2077,19 +2084,19 @@ function renderHistorico(){
 
   const navWrap = document.getElementById('historicoNavWrap');
   const secaoTitulo = document.getElementById('historicoSecaoTitulo');
-  const btnExportar = document.getElementById('btnExportarHistorico');
+  const acoesPDF = document.getElementById('historicoAcoesPDF');
 
   if(historicoModo === 'liquidacoes'){
     navWrap.style.display = 'none';
     secaoTitulo.style.display = 'none';
-    btnExportar.style.display = 'none';
+    acoesPDF.style.display = 'none';
     renderHistoricoLiquidacoes();
     return;
   }
 
   navWrap.style.display = 'flex';
   secaoTitulo.style.display = 'block';
-  btnExportar.style.display = 'block';
+  acoesPDF.style.display = 'flex';
   document.getElementById('historicoSecaoTituloTexto').textContent = t('titulo_por_categoria');
 
   document.getElementById('historicoLabel').textContent = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
@@ -2141,12 +2148,13 @@ function gerarImagemGrafico(config, largura, altura){
   });
 }
 
-// Gera um PDF com o resumo por categoria do período do Histórico atualmente
-// selecionado — com gráfico, e comparação com o mesmo período do ano
-// anterior (período homólogo), também com gráfico — e tenta partilhá-lo
-// (Web Share API — funciona também numa futura app Android via TWA); se não
-// for possível partilhar, descarrega o ficheiro diretamente.
-async function exportarHistoricoPDF(){
+// Gera o documento PDF com o resumo por categoria do período do Histórico
+// atualmente selecionado — com gráfico, e comparação com o mesmo período do
+// ano anterior (período homólogo), também com gráfico. Devolve o documento
+// pronto (ainda não gravado nem partilhado) e o nome de ficheiro sugerido —
+// usado tanto pelo botão "Exportar PDF" (download direto) como pelo botão
+// "Partilhar" (Web Share API).
+async function gerarDocumentoHistoricoPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
@@ -2282,6 +2290,21 @@ async function exportarHistoricoPDF(){
   doc.text('www.finmais.pt', 105, 291, { align: 'center' });
 
   const nomeFicheiro = 'gastos-' + labelPeriodo.replace(/\s+/g, '-') + '.pdf';
+  return { doc, nomeFicheiro, labelCapitalizado };
+}
+
+// Botão "Exportar PDF": gera o relatório e descarrega-o diretamente.
+async function exportarHistoricoPDF(){
+  const { doc, nomeFicheiro } = await gerarDocumentoHistoricoPDF();
+  doc.save(nomeFicheiro);
+}
+
+// Botão "Partilhar": gera o relatório e abre o menu nativo de partilha do
+// telemóvel (Web Share API, com ficheiro anexado — funciona também numa app
+// Android via TWA); se o dispositivo/browser não suportar partilha de
+// ficheiros, cai para download direto tal como o botão "Exportar PDF".
+async function partilharHistoricoPDF(){
+  const { doc, nomeFicheiro, labelCapitalizado } = await gerarDocumentoHistoricoPDF();
   const blob = doc.output('blob');
   const ficheiro = new File([blob], nomeFicheiro, { type: 'application/pdf' });
 
