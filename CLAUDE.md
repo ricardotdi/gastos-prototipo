@@ -139,14 +139,32 @@ poupar tempo de configuração.
     `createImageBitmap(file)` primeiro, senão `Html5Qrcode.scanFile()`.
   - Confirmado a funcionar em produção pelo utilizador (fotos reais tiradas
     antes, não só fatura ao vivo).
-- **Exportação para PDF** (`exportarHistoricoPDF`, botão "exportar PDF" no
-  Histórico): usa `jsPDF` via CDN para gerar um resumo por categoria do
-  período selecionado (não a lista de gastos individuais — decisão explícita
-  do utilizador para manter simples), com logótipo, total e tabela de
-  categorias. Tenta partilhar via `navigator.share` (Web Share API, com
-  `files`) para abrir o menu nativo de partilha do telemóvel — deve continuar
-  a funcionar numa futura app Android via TWA; se não houver suporte, cai
-  para `doc.save()` (download direto).
+- **Exportação para PDF** (`exportarHistoricoPDF`, botão real `📄 Exportar
+  PDF` no Histórico + atalho `📄 Exportar relatório PDF` destacado no menu
+  principal, ambos antes eram um link de texto pequeno "escondido" — pedido
+  explícito do utilizador em agosto/2026 para tornar isto mais visível): usa
+  `jsPDF` via CDN para gerar um resumo por categoria do período selecionado
+  (não a lista de gastos individuais — decisão explícita do utilizador para
+  manter simples), com logótipo, total, **gráfico de barras por categoria**
+  (Chart.js, gerado num canvas fora do ecrã via `gerarImagemGrafico()`),
+  tabela de categorias, e uma secção **"Comparação com o período homólogo"**
+  (mesmo período do ano anterior — `historicoAno - 1`, mesmo `historicoModo`/
+  `historicoPeriodo`): totais dos dois períodos, variação em valor e
+  percentagem (a vermelho se subiu, verde se desceu) e um **gráfico de barras
+  agrupadas** por categoria (período atual vs. homólogo). Pagina
+  automaticamente (`garantirEspaco()`) se o conteúdo não couber numa página
+  A4. Tenta partilhar via `navigator.share` (Web Share API, com `files`) para
+  abrir o menu nativo de partilha do telemóvel — deve continuar a funcionar
+  numa futura app Android via TWA; se não houver suporte, cai para
+  `doc.save()` (download direto).
+  - **Bug pré-existente encontrado e corrigido nesta alteração**: `doc.
+    addImage()` sem o parâmetro de compressão embute imagens de
+    `HTMLImageElement`/canvas sem qualquer compressão — o logótipo sozinho
+    inflacionava o PDF para ~2,3 MB. Corrigido passando `'FAST'` como
+    parâmetro de compressão em todas as chamadas a `addImage` (logótipo e os
+    dois gráficos) — reduz um PDF de teste de ~4,9 MB para ~145 KB, sem perda
+    visível de qualidade. Se adicionar mais `addImage()` no futuro, incluir
+    sempre este parâmetro.
   - **Limitação descoberta e contornada**: a fonte base do jsPDF (Helvetica
     core, sem TTF embutido) não tem o glifo do símbolo "€" nem do travessão
     "—" — ficam em branco/apagados no PDF gerado (confirmado por inspeção
@@ -157,6 +175,15 @@ poupar tempo de configuração.
     é só uma limitação da biblioteca de PDF. Se um dia se quiser reintroduzir
     o símbolo "€" no PDF, a solução seria embutir uma fonte TTF com esse
     glifo via `doc.addFont()`, não tentar contornar de outra forma.
+  - **Como testar isto no ambiente de desenvolvimento**: o sandbox bloqueia
+    `cdnjs.cloudflare.com` (Chart.js/jsPDF) e `gstatic.com` (Firebase) por
+    política de rede — não dá para abrir a app real no browser aqui. Testado
+    com sucesso via Playwright interceptando esses pedidos (`page.route()`)
+    e servindo cópias locais das mesmas versões instaladas via `npm install
+    chart.js@4.4.0 jspdf@4.2.1`, com um stub mínimo do `firebase` global, a
+    chamar `exportarHistoricoPDF()` real da página com dados fictícios em
+    `gastos`/`historicoAno`/etc. — confirma que a função corre sem erros e
+    inspeciona o PDF gerado (o `Read` tool lê PDFs diretamente).
 - **Idioma e moeda** (Definições, menu → "Definições"/"Settings"): dois
   estados globais, `idioma` (`'pt'` | `'en'`) e `moedaCodigo` (`'EUR'` |
   `'USD'` | `'GBP'` | `'BRL'` | `'AOA'`, ver array `MOEDAS`), guardados por
