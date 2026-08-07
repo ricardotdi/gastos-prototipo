@@ -507,6 +507,28 @@ distribuir o `.apk` diretamente fora da Play Store.
   (emails), gerar e partilhar o link de opt-in, esperar os 14 dias, depois
   "Apply for production access".
 
+**Os 12 testers escolhidos** (agosto/2026, nomes confirmados pelo
+utilizador — falta recolher o email de conta Google de cada um antes de os
+adicionar à lista "Email lists" da Play Console):
+1. André — email: _por recolher_
+2. Aires — email: _por recolher_
+3. Paula — email: _por recolher_
+4. Marina — email: _por recolher_
+5. Nuno — email: _por recolher_
+6. Pai — email: _por recolher_
+7. Mãe — email: _por recolher_
+8. Hugo — email: _por recolher_
+9. Graça — email: _por recolher_
+10. Cátia — email: _por recolher_
+11. Ricardo — email: _por recolher_
+12. Raquel — email: _por recolher_
+
+Mensagem pronta para pedir os emails e explicar o que têm de fazer (opt-in +
+instalar + abrir a app uma vez) está guardada como referência nesta
+conversa; se precisares de a recriar, o essencial é: pedir o email da conta
+Google de cada um, e depois (quando houver link de opt-in) pedir para
+abrirem o link, tocarem em "Tornar-me testador", instalarem e abrirem a app.
+
 ## Próximos passos identificados (backlog)
 
 - Concluir o empacotamento Android/Play Store (ver secção própria acima).
