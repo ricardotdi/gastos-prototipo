@@ -413,11 +413,11 @@ numerada nº/ano.
 
 **Testado e confirmado a funcionar em produção pelo utilizador** (não é só
 "implementado", foi mesmo validado por ele): tudo o que está acima até e
-incluindo Contas a Acertar/Liquidações, e a leitura de QR a partir de foto da
-galeria. A exportação PDF, idioma/moeda e a troca do botão de menu "⋯" →
-"Menu▾" foram implementadas, testadas pelo Claude (sem login real — a app
-exige Google Sign-In, não é possível autenticar como o utilizador) e
-publicadas, mas **ainda sem confirmação explícita do utilizador em produção**.
+incluindo Contas a Acertar/Liquidações, a leitura de QR a partir de foto da
+galeria, idioma/moeda, o botão de menu "Menu▾", e agora também **toda a
+exportação/partilha de PDF** (botões "Exportar PDF"/"Partilhar" no Histórico,
+gráficos, comparação com período anterior e homólogo, aviso de relatório
+mensal) — utilizador confirmou em agosto/2026 que testou e gostou.
 
 ## Empacotamento Android / Play Store (em curso)
 
