@@ -510,14 +510,14 @@ distribuir o `.apk` diretamente fora da Play Store.
 **Os 12 testers escolhidos** (agosto/2026, nomes confirmados pelo
 utilizador — falta recolher o email de conta Google de cada um antes de os
 adicionar à lista "Email lists" da Play Console):
-1. André — email: _por recolher_
+1. André — andfbcoelho@gmail.com
 2. Aires — email: _por recolher_
 3. Paula — email: _por recolher_
 4. Marina — email: _por recolher_
 5. Nuno — email: _por recolher_
 6. Pai — email: _por recolher_
 7. Mãe — email: _por recolher_
-8. Hugo — email: _por recolher_
+8. Hugo — m962774765@gmail.com
 9. Graça — email: _por recolher_
 10. Cátia — email: _por recolher_
 11. Ricardo — email: _por recolher_
