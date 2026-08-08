@@ -513,7 +513,7 @@ adicionar à lista "Email lists" da Play Console):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
 3. Paula — email: _por recolher_
-4. Marina — email: _por recolher_
+4. Marina — mcm.uac@gmail.com
 5. Nuno — nmbarrosorodrigues@gmail.com
 6. Pai — email: _por recolher_
 7. Mãe — email: _por recolher_
