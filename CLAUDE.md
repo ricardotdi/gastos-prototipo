@@ -511,7 +511,7 @@ distribuir o `.apk` diretamente fora da Play Store.
 utilizador — falta recolher o email de conta Google de cada um antes de os
 adicionar à lista "Email lists" da Play Console):
 1. André — andfbcoelho@gmail.com
-2. Aires — email: _por recolher_
+2. Aires — airesmcmedeiros.bc@gmail.com
 3. Paula — email: _por recolher_
 4. Marina — email: _por recolher_
 5. Nuno — email: _por recolher_
