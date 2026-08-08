@@ -525,6 +525,8 @@ gerar o link de opt-in e enviá-lo a todos:
     ser conta Google na mesma — confirmar que ela consegue entrar na Play
     Store com este email antes do opt-in)
 12. Madalena — madalenacampelo@gmail.com (substitui a Cátia)
+13. (extra/reserva) César — Cesarraposo2020@hotmail.com — só usar se
+    alguém da lista dos 12 desistir ou não conseguir instalar a app.
 
 ~~Cátia~~ — removida (tem iPhone, não consegue instalar uma app Android da
 Play Store).
