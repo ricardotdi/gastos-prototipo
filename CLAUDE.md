@@ -519,7 +519,7 @@ adicionar à lista "Email lists" da Play Console):
 7. Mãe — email: _por recolher_
 8. Hugo — m962774765@gmail.com
 9. ~~Graça~~ → Sandra — sandra.carreiro.furtado28@gmail.com (substitui a Graça)
-10. Ricardo — email: _por recolher_
+10. ~~Ricardo~~ → Catarina — catarina.louro.silva@gmail.com (substitui o Ricardo)
 11. Raquel — email: _por recolher_
 12. Madalena — madalenacampelo@gmail.com (substitui a Cátia)
 
