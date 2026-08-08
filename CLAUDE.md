@@ -512,7 +512,7 @@ utilizador — falta recolher o email de conta Google de cada um antes de os
 adicionar à lista "Email lists" da Play Console):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
-3. Paula — email: _por recolher_
+3. Paula — Paula.pavao.medeiros.at@gmail.com
 4. Marina — mcm.uac@gmail.com
 5. Nuno — nmbarrosorodrigues@gmail.com
 6. Pai — manuelsacustodio@gmail.com
