@@ -515,7 +515,7 @@ adicionar à lista "Email lists" da Play Console):
 3. Paula — email: _por recolher_
 4. Marina — mcm.uac@gmail.com
 5. Nuno — nmbarrosorodrigues@gmail.com
-6. Pai — email: _por recolher_
+6. Pai — manuelsacustodio@gmail.com
 7. Mãe — email: _por recolher_
 8. Hugo — m962774765@gmail.com
 9. ~~Graça~~ → Sandra — sandra.carreiro.furtado28@gmail.com (substitui a Graça)
