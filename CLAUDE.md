@@ -521,10 +521,10 @@ adicionar à lista "Email lists" da Play Console):
 9. Graça — email: _por recolher_
 10. Ricardo — email: _por recolher_
 11. Raquel — email: _por recolher_
+12. Madalena — madalenacampelo@gmail.com (substitui a Cátia)
 
 ~~Cátia~~ — removida (tem iPhone, não consegue instalar uma app Android da
-Play Store). **Só ficam 11 pessoas — falta arranjar mais 1 substituta/o para
-voltar aos 12 mínimos exigidos pela Google.**
+Play Store).
 
 Mensagem pronta para pedir os emails e explicar o que têm de fazer (opt-in +
 instalar + abrir a app uma vez) está guardada como referência nesta
