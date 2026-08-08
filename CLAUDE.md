@@ -507,9 +507,10 @@ distribuir o `.apk` diretamente fora da Play Store.
   (emails), gerar e partilhar o link de opt-in, esperar os 14 dias, depois
   "Apply for production access".
 
-**Os 12 testers escolhidos** (agosto/2026, nomes confirmados pelo
-utilizador — falta recolher o email de conta Google de cada um antes de os
-adicionar à lista "Email lists" da Play Console):
+**Os 12 testers escolhidos — lista de emails completa** (agosto/2026).
+Próximo passo: colar estes 12 emails em Play Console → Closed testing →
+Testers → "Create email list", depois publicar a versão com o `.aab` para
+gerar o link de opt-in e enviá-lo a todos:
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
 3. Paula — Paula.pavao.medeiros.at@gmail.com
@@ -520,7 +521,9 @@ adicionar à lista "Email lists" da Play Console):
 8. Hugo — m962774765@gmail.com
 9. ~~Graça~~ → Sandra — sandra.carreiro.furtado28@gmail.com (substitui a Graça)
 10. ~~Ricardo~~ → Catarina — catarina.louro.silva@gmail.com (substitui o Ricardo)
-11. Raquel — email: _por recolher_
+11. Raquel — Sofiatorres2009@hotmail.com (nota: não é Gmail, mas dá para
+    ser conta Google na mesma — confirmar que ela consegue entrar na Play
+    Store com este email antes do opt-in)
 12. Madalena — madalenacampelo@gmail.com (substitui a Cátia)
 
 ~~Cátia~~ — removida (tem iPhone, não consegue instalar uma app Android da
