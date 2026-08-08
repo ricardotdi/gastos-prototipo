@@ -514,7 +514,7 @@ adicionar à lista "Email lists" da Play Console):
 2. Aires — airesmcmedeiros.bc@gmail.com
 3. Paula — email: _por recolher_
 4. Marina — email: _por recolher_
-5. Nuno — email: _por recolher_
+5. Nuno — nmbarrosorodrigues@gmail.com
 6. Pai — email: _por recolher_
 7. Mãe — email: _por recolher_
 8. Hugo — m962774765@gmail.com
