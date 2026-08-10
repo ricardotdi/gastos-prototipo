@@ -252,6 +252,50 @@ poupar tempo de configuração.
     `T.pt` e `T.en` (há um teste ad-hoc feito em sessões anteriores que
     compara as chaves usadas com `t(...)` contra as duas listas — vale a pena
     repetir esse tipo de verificação antes de publicar).
+- **Bloqueio por biometria** (Definições → "Bloqueio por biometria", opção
+  opcional/opt-in, pedido explícito do utilizador em agosto/2026): usa a
+  **WebAuthn API** do próprio browser/telemóvel (`navigator.credentials.
+  create()`/`.get()`, autenticador "platform" — impressão digital ou
+  reconhecimento facial nativos do dispositivo).
+  - **Importante — não é autenticação "a sério"**: é só uma camada extra de
+    conveniência/privacidade local (ex: telemóvel partilhado) por cima do
+    login Google real, que continua a ser a única autenticação que conta.
+    Uma verificação WebAuthn criptograficamente completa exigiria um
+    servidor a validar a assinatura contra a chave pública guardada — isso
+    precisaria de Cloud Functions (plano pago Blaze). Em vez disso, o
+    código confia diretamente no resultado do prompt biométrico do próprio
+    dispositivo (se `navigator.credentials.get()` não lançar erro, considera
+    desbloqueado) — o mesmo padrão usado no "desbloqueio rápido" de muitas
+    apps de telemóvel. Documentar isto claramente se algum dia isto for
+    revisto/auditado.
+  - **É por dispositivo, não por conta**: a credencial e o estado
+    ativado/desativado ficam em `localStorage` (`bioLockAtivo_{uid}`,
+    `bioCredId_{uid}`), nunca no Firestore — não sincroniza entre
+    telemóveis, tem de ser ativado em cada dispositivo separadamente. Isto é
+    inerente ao WebAuthn (a credencial é gerada e guardada localmente pelo
+    próprio autenticador do dispositivo).
+  - **Deteção de suporte**: `suportaBiometria()` verifica
+    `PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()` —
+    a opção só aparece nas Definições em dispositivos que suportam. Nunca
+    bloqueia ninguém em dispositivos sem biometria configurada.
+  - **Fluxo**: login Google normal → se `bioAtiva(uid)` (aparece
+    `#lockScreen`, ecrã cheio estilo `.login-screen`) → utilizador toca em
+    "Desbloquear com biometria" → `pedirDesbloqueioBiometrico()` → sucesso
+    revela `#appShell` (que só nesse momento passa a `display:block`).
+  - **Chega automaticamente a todos os testers/utilizadores** assim que
+    publicado (é só JS/HTML no `index.html`, TWA carrega sempre a versão ao
+    vivo — sem precisar de novo `.aab` nem nova submissão à Play Store), mas
+    fica **desativado por omissão** para ninguém ficar bloqueado sem querer
+    a meio do período de Closed Testing — cada pessoa tem de ativar
+    manualmente nas Definições do seu próprio telemóvel.
+  - Testado com sucesso via Playwright + autenticador WebAuthn virtual do
+    Chrome DevTools Protocol (`WebAuthn.addVirtualAuthenticator`,
+    `automaticPresenceSimulation:true`) — simula a impressão digital real:
+    deteção de suporte, registo da credencial, ecrã de bloqueio a aparecer,
+    desbloqueio com sucesso, e desativação, tudo confirmado. **Nota técnica
+    de teste**: WebAuthn recusa `127.0.0.1` como relying party ("invalid
+    domain") — usar sempre `localhost` (ou HTTPS com domínio real, como em
+    produção) ao testar isto localmente.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
