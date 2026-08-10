@@ -517,10 +517,17 @@ distribuir o `.apk` diretamente fora da Play Store.
   (emails), gerar e partilhar o link de opt-in, esperar os 14 dias, depois
   "Apply for production access".
 
-**Os 12 testers escolhidos — lista de emails completa** (agosto/2026).
-Próximo passo: colar estes 12 emails em Play Console → Closed testing →
-Testers → "Create email list", depois publicar a versão com o `.aab` para
-gerar o link de opt-in e enviá-lo a todos:
+**Estado atual (10 agosto 2026): Closed testing publicado e ativo.** Versão
+1 (1.0.0.0) do `.aab` enviada para revisão e aprovada no mesmo dia
+("Published"). Lista de emails "Fin+ Gastos - Testers" com os 13 emails
+associada à track. Link de opt-in já ativo e enviado aos 13 testers:
+`https://play.google.com/apps/testing/io.github.ricardotdi.twa`
+Falta: confirmar que os 13 aceitaram, instalaram e abriram a app pelo menos
+uma vez (só assim contam para o requisito); a contagem dos 14 dias
+consecutivos começa a partir do opt-in de cada um. Depois de completos os
+14 dias, "Apply for production access" na Play Console.
+
+**Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
 3. Paula — Paula.pavao.medeiros.at@gmail.com
