@@ -541,6 +541,19 @@
   </div>
 </div>
 
+<div class="login-screen" id="lockScreen" style="display:none;">
+  <div class="login-card">
+    <div style="font-size:52px; margin-bottom:12px;">🔒</div>
+    <div class="eyebrow" id="lockEyebrow">Finanças Positivas</div>
+    <h1 class="login-title" id="lockTitulo">App bloqueada</h1>
+    <p class="login-sub" id="lockSubtitulo">Confirma a tua identidade para continuares.</p>
+    <button class="oauth-btn" id="btnDesbloquear">
+      <span id="btnDesbloquearTexto">👆 Desbloquear com biometria</span>
+    </button>
+    <div class="login-status" id="lockStatus"></div>
+  </div>
+</div>
+
 <div id="appShell" style="display:none">
   <header>
     <img src="Fin_plus_logo_euro.png" alt="Fin+" style="height:40px; display:block; margin-bottom:8px;">
@@ -770,6 +783,7 @@
       <div class="ajuda-secao">
         <h3>⚙️ Idioma, moeda e privacidade</h3>
         <p>Em <strong>Menu → Definições</strong>, escolhe o idioma (Português/English) e a moeda apresentada. Consulta a nossa <a href="privacidade.html" target="_blank" style="color:var(--navy);">Política de Privacidade</a> a qualquer momento a partir das Definições.</p>
+        <p>Se o teu telemóvel tiver impressão digital ou reconhecimento facial, podes ativar o <strong>"Bloqueio por biometria"</strong> aí mesmo, para a app pedir confirmação sempre que a abrires nesse dispositivo — útil se partilhares o telemóvel com alguém.</p>
       </div>
     </div>
 
@@ -825,6 +839,7 @@
       <div class="ajuda-secao">
         <h3>⚙️ Language, currency and privacy</h3>
         <p>In <strong>Menu → Settings</strong>, choose the language (Português/English) and the currency shown. You can check our <a href="privacidade.html" target="_blank" style="color:var(--navy);">Privacy Policy</a> at any time from Settings.</p>
+        <p>If your phone has a fingerprint sensor or face recognition, you can turn on <strong>"Biometric lock"</strong> right there, so the app asks for confirmation every time you open it on that device — handy if you share your phone with someone.</p>
       </div>
     </div>
   </div>
@@ -883,6 +898,16 @@
     <div class="form-row">
       <label id="labelMoeda">Moeda</label>
       <div class="cats" id="moedaChips"></div>
+    </div>
+
+    <div class="form-row" id="linhaBiometria" style="display:none;">
+      <label id="labelBiometria">Bloqueio por biometria</label>
+      <p class="hint" id="hintBiometria" style="margin:-2px 0 8px;">Pede impressão digital ou reconhecimento facial sempre que abrires a app neste dispositivo. Não substitui a segurança da tua conta Google.</p>
+      <div class="cats">
+        <div class="cat-chip" id="chipBiometriaOn" data-bio="on">Ativado</div>
+        <div class="cat-chip" id="chipBiometriaOff" data-bio="off">Desativado</div>
+      </div>
+      <div class="scan-status" id="biometriaStatus"></div>
     </div>
 
     <button class="confirm-btn" id="btnGuardarDefinicoes">Guardar</button>
@@ -1014,6 +1039,11 @@ const T = {
     titulo_app: 'Os meus gastos',
     login_subtitulo: 'Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.',
     btn_entrar_google: 'Entrar com Google',
+    titulo_app_bloqueada: 'App bloqueada',
+    lock_subtitulo: 'Confirma a tua identidade para continuares.',
+    btn_desbloquear_biometria: '👆 Desbloquear com biometria',
+    status_a_verificar_biometria: 'A verificar…',
+    erro_biometria: 'Não foi possível confirmar. Tenta novamente.',
     erro_login_nao_ativado: 'Este método de login ainda não está ativado. Tenta outro por agora.',
     erro_login_conta_existe: 'Já tens conta com outro método de login (ex: Google) associado a este email — usa esse.',
     erro_login_popup_bloqueado: 'O browser bloqueou a janela de login. Permite pop-ups para este site e tenta novamente.',
@@ -1176,6 +1206,13 @@ const T = {
     chip_portugues: 'Português',
     chip_english: 'English',
     label_moeda: 'Moeda',
+    label_biometria: 'Bloqueio por biometria',
+    hint_biometria: 'Pede impressão digital ou reconhecimento facial sempre que abrires a app neste dispositivo. Não substitui a segurança da tua conta Google.',
+    chip_ativado: 'Ativado',
+    chip_desativado: 'Desativado',
+    status_a_ativar_biometria: 'A configurar…',
+    status_biometria_ativada: '✓ Ativado neste dispositivo',
+    erro_ativar_biometria: 'Não foi possível ativar. Verifica se o teu telemóvel tem biometria configurada e tenta novamente.',
     btn_guardar_definicoes: 'Guardar',
     status_guardando_definicoes: 'A guardar…',
     status_definicoes_guardadas: '✓ Guardado',
@@ -1186,6 +1223,11 @@ const T = {
     titulo_app: 'My expenses',
     login_subtitulo: 'Sign in to save your expenses and sync them across devices.',
     btn_entrar_google: 'Sign in with Google',
+    titulo_app_bloqueada: 'App locked',
+    lock_subtitulo: 'Confirm your identity to continue.',
+    btn_desbloquear_biometria: '👆 Unlock with biometrics',
+    status_a_verificar_biometria: 'Verifying…',
+    erro_biometria: 'Could not confirm. Try again.',
     erro_login_nao_ativado: 'This login method isn\'t enabled yet. Try another one for now.',
     erro_login_conta_existe: 'You already have an account with another login method (e.g. Google) linked to this email — use that one.',
     erro_login_popup_bloqueado: 'The browser blocked the login window. Allow pop-ups for this site and try again.',
@@ -1348,6 +1390,13 @@ const T = {
     chip_portugues: 'Português',
     chip_english: 'English',
     label_moeda: 'Currency',
+    label_biometria: 'Biometric lock',
+    hint_biometria: 'Asks for your fingerprint or face every time you open the app on this device. Does not replace your Google account security.',
+    chip_ativado: 'On',
+    chip_desativado: 'Off',
+    status_a_ativar_biometria: 'Setting up…',
+    status_biometria_ativada: '✓ Enabled on this device',
+    erro_ativar_biometria: 'Could not enable. Check that your phone has biometrics set up and try again.',
     btn_guardar_definicoes: 'Save',
     status_guardando_definicoes: 'Saving…',
     status_definicoes_guardadas: '✓ Saved',
@@ -1405,6 +1454,10 @@ function aplicarTraducoes(){
   document.getElementById('loginTitulo').textContent = t('titulo_app');
   document.getElementById('loginSubtitulo').textContent = t('login_subtitulo');
   document.getElementById('btnEntrarGoogleTexto').textContent = t('btn_entrar_google');
+  document.getElementById('lockEyebrow').textContent = t('login_eyebrow');
+  document.getElementById('lockTitulo').textContent = t('titulo_app_bloqueada');
+  document.getElementById('lockSubtitulo').textContent = t('lock_subtitulo');
+  document.getElementById('btnDesbloquearTexto').textContent = t('btn_desbloquear_biometria');
   document.getElementById('headerEyebrow').textContent = t('login_eyebrow');
   document.getElementById('headerTitulo').textContent = t('titulo_app');
   document.getElementById('tituloOrcamentosMes').textContent = t('titulo_orcamentos_mes');
@@ -1500,6 +1553,10 @@ function aplicarTraducoes(){
   document.querySelector('#idiomaChips [data-idioma="pt"]').textContent = t('chip_portugues');
   document.querySelector('#idiomaChips [data-idioma="en"]').textContent = t('chip_english');
   document.getElementById('labelMoeda').textContent = t('label_moeda');
+  document.getElementById('labelBiometria').textContent = t('label_biometria');
+  document.getElementById('hintBiometria').textContent = t('hint_biometria');
+  document.getElementById('chipBiometriaOn').textContent = t('chip_ativado');
+  document.getElementById('chipBiometriaOff').textContent = t('chip_desativado');
   document.getElementById('btnGuardarDefinicoes').textContent = t('btn_guardar_definicoes');
   document.getElementById('linkPrivacidadeLogin').textContent = t('link_privacidade');
   document.getElementById('linkPrivacidadeDefinicoes').textContent = t('link_privacidade');
@@ -1683,14 +1740,44 @@ function montarChipsMoeda(){
   });
 }
 
-document.getElementById('menuDefinicoes').onclick = () => {
+function atualizarChipsBiometria(){
+  const ativo = currentUser && bioAtiva(currentUser.uid);
+  document.getElementById('chipBiometriaOn').classList.toggle('active', !!ativo);
+  document.getElementById('chipBiometriaOff').classList.toggle('active', !ativo);
+}
+
+document.getElementById('menuDefinicoes').onclick = async () => {
   menuOverlay.classList.remove('open');
   document.querySelectorAll('#idiomaChips .cat-chip').forEach(chip => {
     chip.classList.toggle('active', chip.dataset.idioma === idioma);
   });
   montarChipsMoeda();
   definicoesStatus.textContent = '';
+  document.getElementById('biometriaStatus').textContent = '';
+  const linhaBiometria = document.getElementById('linhaBiometria');
+  linhaBiometria.style.display = (await suportaBiometria()) ? 'block' : 'none';
+  atualizarChipsBiometria();
   definicoesOverlay.classList.add('open');
+};
+
+document.getElementById('chipBiometriaOn').onclick = async () => {
+  if(!currentUser) return;
+  const status = document.getElementById('biometriaStatus');
+  status.textContent = t('status_a_ativar_biometria');
+  try{
+    await ativarBiometria(currentUser.uid);
+    atualizarChipsBiometria();
+    status.textContent = t('status_biometria_ativada');
+  } catch(e){
+    status.textContent = t('erro_ativar_biometria');
+  }
+};
+
+document.getElementById('chipBiometriaOff').onclick = () => {
+  if(!currentUser) return;
+  desativarBiometria(currentUser.uid);
+  atualizarChipsBiometria();
+  document.getElementById('biometriaStatus').textContent = '';
 };
 
 document.getElementById('closeDefinicoesSheet').onclick = () => {
@@ -2113,13 +2200,108 @@ function ligarSincronizacao(groupId){
     });
 }
 
+// ---- Bloqueio por biometria (WebAuthn, só neste dispositivo/browser) ----
+// Camada extra de conveniência/privacidade local (ex: telemóvel partilhado)
+// — NÃO substitui a autenticação real da conta, que continua a ser feita
+// via Google Sign-In. Uma verificação criptográfica completa exigiria um
+// servidor a validar a assinatura (Cloud Function = plano pago Blaze), por
+// isso aqui confiamos diretamente no resultado do prompt biométrico do
+// próprio dispositivo/browser, tal como o "desbloqueio rápido" de muitas
+// apps. A credencial fica guardada em localStorage, por isso é por
+// dispositivo — não sincroniza entre telemóveis.
+async function suportaBiometria(){
+  if(!window.PublicKeyCredential || !PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) return false;
+  return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);
+}
+
+function bioAtiva(uid){
+  return localStorage.getItem('bioLockAtivo_' + uid) === '1';
+}
+
+function bufferParaBase64(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
+function base64ParaBuffer(b64){
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+}
+
+async function ativarBiometria(uid){
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const credential = await navigator.credentials.create({
+    publicKey: {
+      challenge,
+      rp: { name: 'Fin+ Gastos' },
+      user: {
+        id: new TextEncoder().encode(uid),
+        name: uid,
+        displayName: 'Fin+ Gastos'
+      },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
+      timeout: 60000
+    }
+  });
+  localStorage.setItem('bioLockAtivo_' + uid, '1');
+  localStorage.setItem('bioCredId_' + uid, bufferParaBase64(credential.rawId));
+}
+
+function desativarBiometria(uid){
+  localStorage.removeItem('bioLockAtivo_' + uid);
+  localStorage.removeItem('bioCredId_' + uid);
+}
+
+async function pedirDesbloqueioBiometrico(uid){
+  const credId = localStorage.getItem('bioCredId_' + uid);
+  if(!credId){ desativarBiometria(uid); return; } // sem credencial guardada, não bloqueia
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  await navigator.credentials.get({
+    publicKey: {
+      challenge,
+      allowCredentials: [{ id: base64ParaBuffer(credId), type: 'public-key' }],
+      userVerification: 'required',
+      timeout: 60000
+    }
+  });
+}
+
+function desbloquearApp(){
+  document.getElementById('lockScreen').style.display = 'none';
+  appShell.style.display = 'block';
+  verificarRelatorioMensal();
+}
+
+function mostrarEcraBloqueio(user){
+  const lockScreen = document.getElementById('lockScreen');
+  const status = document.getElementById('lockStatus');
+  const btn = document.getElementById('btnDesbloquear');
+  status.textContent = '';
+  lockScreen.style.display = 'flex';
+
+  btn.onclick = async () => {
+    btn.disabled = true;
+    status.textContent = t('status_a_verificar_biometria');
+    try{
+      await pedirDesbloqueioBiometrico(user.uid);
+      desbloquearApp();
+    } catch(e){
+      status.textContent = t('erro_biometria');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+}
+
 auth.onAuthStateChanged(async (user) => {
   currentUser = user;
   if(user){
     loginScreen.style.display = 'none';
-    appShell.style.display = 'block';
     document.getElementById('userEmailLabel').textContent = user.displayName || user.email || '';
-    verificarRelatorioMensal();
+    if(bioAtiva(user.uid)){
+      mostrarEcraBloqueio(user);
+    } else {
+      appShell.style.display = 'block';
+      verificarRelatorioMensal();
+    }
     try{
       currentGroupId = await resolverGrupo(user);
       ligarSincronizacao(currentGroupId);
@@ -2145,6 +2327,7 @@ auth.onAuthStateChanged(async (user) => {
     aplicarTraducoes();
     loginScreen.style.display = 'flex';
     appShell.style.display = 'none';
+    document.getElementById('lockScreen').style.display = 'none';
     loginStatus.textContent = '';
   }
 });
