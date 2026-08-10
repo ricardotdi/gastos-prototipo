@@ -389,6 +389,30 @@
     border-bottom:none;
     color:var(--danger);
   }
+  .ajuda-secao{ margin-bottom:20px; }
+  .ajuda-secao:last-child{ margin-bottom:0; }
+  .ajuda-secao h3{
+    font-size:14px;
+    color:var(--navy);
+    margin:0 0 6px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .ajuda-secao p{
+    font-size:13.5px;
+    line-height:1.55;
+    color:var(--ink);
+    margin:0 0 6px;
+  }
+  .ajuda-secao ul{
+    margin:6px 0 6px 18px;
+    padding:0;
+    font-size:13.5px;
+    line-height:1.55;
+    color:var(--ink);
+  }
+  .ajuda-secao li{ margin-bottom:4px; }
   .menu-item-highlight{
     background:var(--navy);
     color:#fff;
@@ -682,8 +706,125 @@
     <div class="menu-item" id="menuHistorico">Histórico</div>
     <div class="menu-item menu-item-highlight" id="menuExportarPDF">📄 Exportar relatório PDF</div>
     <div class="menu-item" id="menuContas">Contas a Acertar</div>
+    <div class="menu-item" id="menuAjuda">Como utilizar a app</div>
     <div class="menu-item" id="menuDefinicoes">Definições</div>
     <div class="menu-item" id="menuSair">Sair</div>
+  </div>
+</div>
+
+<div class="overlay" id="ajudaOverlay">
+  <div class="sheet">
+    <button class="close-btn" id="closeAjudaSheet">✕</button>
+    <h2 id="tituloAjuda">Como utilizar a app</h2>
+    <p class="hint" id="hintAjuda">Um resumo rápido de tudo o que a Fin+ Gastos faz e como usar cada funcionalidade.</p>
+
+    <div id="ajudaConteudoPT">
+      <div class="ajuda-secao">
+        <h3>💶 O que é a Fin+ Gastos</h3>
+        <p>Uma app gratuita para controlares os teus gastos do dia a dia, sozinho/a ou a par com alguém (parceiro/a, família). Os teus dados ficam associados à tua conta Google e sincronizam automaticamente entre dispositivos.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>➕ Registar um gasto</h3>
+        <p>Toca no botão <strong>"＋"</strong> no ecrã principal e escolhe uma destas opções:</p>
+        <ul>
+          <li><strong>Câmara:</strong> aponta ao QR Code de uma fatura portuguesa — o valor fica registado automaticamente.</li>
+          <li><strong>Foto da galeria:</strong> se já tiveres tirado a foto da fatura antes, podes ler o QR a partir dela.</li>
+          <li><strong>Manual:</strong> insere o valor à mão, sem precisares de fatura.</li>
+        </ul>
+        <p>Se leres duas vezes a mesma fatura (mesmo NIF, valor e dia), a app avisa-te para evitares duplicados.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🔁 Despesas fixas</h3>
+        <p>Para gastos que se repetem todos os meses (renda, subscrições, ginásio, seguros), regista-os uma vez em <strong>"+ adicionar"</strong>, na secção "Despesas fixas" do ecrã principal. Contam automaticamente em todos os meses seguintes, sem teres de os inserir de novo.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🎯 Orçamentos por categoria</h3>
+        <p>Em <strong>Menu → Orçamentos por categoria</strong>, define um limite mensal para cada categoria (ex: 200€ em Alimentação). A barra de progresso muda de cor consoante te aproximas ou ultrapassas o valor definido.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>📊 Histórico e relatórios</h3>
+        <p>Em <strong>Menu → Histórico</strong>, navega os teus gastos por mês, trimestre, semestre ou ano. Podes exportar ou partilhar um relatório em PDF com gráficos e comparação com o período anterior e com o mesmo período do ano passado.</p>
+        <p>Nos primeiros dias de cada mês, a app mostra um aviso no ecrã principal a convidar-te a ver o relatório do mês que acabou de fechar.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🤝 Contas a Acertar</h3>
+        <p>Pensado para casais/família: convida alguém (ver secção "Partilhar" abaixo) e passem a dividir despesas em conjunto. Cada um regista o que pagou em <strong>Menu → Contas a Acertar</strong>, a app calcula automaticamente quem deve o quê, e quando decidirem acertar contas fica tudo registado com um número de referência (nº/ano). Isto é completamente separado dos teus gastos mensais normais.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>👥 Partilhar com alguém</h3>
+        <p>Em <strong>Menu → Partilhar gastos (convidar)</strong>, gera um código e envia-o à pessoa que queres juntar. Ela deve introduzi-lo em <strong>Menu → Juntar-me a um grupo</strong>, na app dela. A partir daí, os gastos ficam visíveis e sincronizados para os dois.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🏷️ Categorias</h3>
+        <p>Em Orçamentos por categoria, toca em <strong>"gerir categorias"</strong> para criar, renomear ou remover categorias — a app adapta-se às tuas necessidades.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>⚙️ Idioma, moeda e privacidade</h3>
+        <p>Em <strong>Menu → Definições</strong>, escolhe o idioma (Português/English) e a moeda apresentada. Consulta a nossa <a href="privacidade.html" target="_blank" style="color:var(--navy);">Política de Privacidade</a> a qualquer momento a partir das Definições.</p>
+      </div>
+    </div>
+
+    <div id="ajudaConteudoEN" style="display:none;">
+      <div class="ajuda-secao">
+        <h3>💶 What is Fin+ Gastos</h3>
+        <p>A free app to track your everyday expenses, alone or together with someone (partner, family). Your data is linked to your Google account and syncs automatically across devices.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>➕ Recording an expense</h3>
+        <p>Tap the <strong>"＋"</strong> button on the main screen and choose one of these options:</p>
+        <ul>
+          <li><strong>Camera:</strong> point it at the QR code on a Portuguese invoice — the amount is recorded automatically.</li>
+          <li><strong>Gallery photo:</strong> if you already took a photo of the invoice, you can read its QR code from there.</li>
+          <li><strong>Manual:</strong> enter the amount by hand, no invoice needed.</li>
+        </ul>
+        <p>If you scan the same invoice twice (same tax ID, amount and day), the app warns you to avoid duplicates.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🔁 Fixed expenses</h3>
+        <p>For expenses that repeat every month (rent, subscriptions, gym, insurance), add them once using <strong>"+ add"</strong> in the "Fixed expenses" section of the main screen. They count automatically every following month, with nothing more to do.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🎯 Budgets by category</h3>
+        <p>In <strong>Menu → Budgets by category</strong>, set a monthly limit for each category (e.g. €200 for Food). The progress bar changes colour as you get close to or go over the limit.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>📊 History and reports</h3>
+        <p>In <strong>Menu → History</strong>, browse your expenses by month, quarter, half-year or year. You can export or share a PDF report with charts and a comparison to the previous period and to the same period last year.</p>
+        <p>In the first few days of each month, the app shows a banner on the main screen inviting you to view the report for the month that just closed.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🤝 Settle Up</h3>
+        <p>Designed for couples/families: invite someone (see "Share" below) and start splitting expenses together. Each of you records what you paid in <strong>Menu → Settle Up</strong>, the app automatically works out who owes whom, and once you settle up it's recorded with a reference number. This is completely separate from your regular monthly expenses.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>👥 Sharing with someone</h3>
+        <p>In <strong>Menu → Share expenses (invite)</strong>, generate a code and send it to the person you want to invite. They should enter it in <strong>Menu → Join a group</strong>, in their own app. From then on, expenses are visible and synced for both of you.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>🏷️ Categories</h3>
+        <p>In Budgets by category, tap <strong>"manage categories"</strong> to create, rename or remove categories — the app adapts to your needs.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>⚙️ Language, currency and privacy</h3>
+        <p>In <strong>Menu → Settings</strong>, choose the language (Português/English) and the currency shown. You can check our <a href="privacidade.html" target="_blank" style="color:var(--navy);">Privacy Policy</a> at any time from Settings.</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -885,8 +1026,11 @@ const T = {
     menu_historico: 'Histórico',
     menu_exportar_pdf: '📄 Exportar relatório PDF',
     menu_contas: 'Contas a Acertar',
+    menu_ajuda: 'Como utilizar a app',
     menu_definicoes: 'Definições',
     menu_sair: 'Sair',
+    titulo_ajuda: 'Como utilizar a app',
+    hint_ajuda: 'Um resumo rápido de tudo o que a Fin+ Gastos faz e como usar cada funcionalidade.',
     titulo_orcamentos_mes: 'Orçamentos do mês',
     link_editar: 'editar',
     titulo_despesas_fixas: 'Despesas fixas',
@@ -1054,8 +1198,11 @@ const T = {
     menu_historico: 'History',
     menu_exportar_pdf: '📄 Export PDF report',
     menu_contas: 'Settle Up',
+    menu_ajuda: 'How to use the app',
     menu_definicoes: 'Settings',
     menu_sair: 'Sign out',
+    titulo_ajuda: 'How to use the app',
+    hint_ajuda: 'A quick rundown of everything Fin+ Gastos does and how to use each feature.',
     titulo_orcamentos_mes: 'This month\'s budgets',
     link_editar: 'edit',
     titulo_despesas_fixas: 'Fixed expenses',
@@ -1307,7 +1454,12 @@ function aplicarTraducoes(){
   document.getElementById('menuHistorico').textContent = t('menu_historico');
   document.getElementById('menuExportarPDF').textContent = t('menu_exportar_pdf');
   document.getElementById('menuContas').textContent = t('menu_contas');
+  document.getElementById('menuAjuda').textContent = t('menu_ajuda');
   document.getElementById('menuDefinicoes').textContent = t('menu_definicoes');
+  document.getElementById('tituloAjuda').textContent = t('titulo_ajuda');
+  document.getElementById('hintAjuda').textContent = t('hint_ajuda');
+  document.getElementById('ajudaConteudoPT').style.display = idioma === 'pt' ? 'block' : 'none';
+  document.getElementById('ajudaConteudoEN').style.display = idioma === 'en' ? 'block' : 'none';
   document.getElementById('menuSair').textContent = t('menu_sair');
 
   document.getElementById('tituloOrcamentos').textContent = t('titulo_orcamentos');
@@ -1499,6 +1651,17 @@ document.getElementById('menuContas').onclick = () => {
 
 document.getElementById('closeContasSheet').onclick = () => {
   contasOverlay.classList.remove('open');
+};
+
+const ajudaOverlay = document.getElementById('ajudaOverlay');
+
+document.getElementById('menuAjuda').onclick = () => {
+  menuOverlay.classList.remove('open');
+  ajudaOverlay.classList.add('open');
+};
+
+document.getElementById('closeAjudaSheet').onclick = () => {
+  ajudaOverlay.classList.remove('open');
 };
 
 // ---- Definições (idioma e moeda, por utilizador) ----
