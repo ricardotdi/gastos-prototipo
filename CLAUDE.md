@@ -190,6 +190,16 @@ poupar tempo de configuração.
   Testado (Playwright, sem login real): banner aparece com o texto certo,
   "Ver relatório" abre o Histórico no mês certo, "Agora não" persiste e não
   volta a aparecer.
+- **"Como utilizar a app"** (item de menu, `#ajudaOverlay`) — pedido
+  explícito do utilizador (agosto/2026): guia dentro da própria app com o
+  que cada funcionalidade faz e como usar (registar gasto, despesas fixas,
+  orçamentos, histórico/PDF, Contas a Acertar, partilhar, categorias,
+  definições). Implementado como dois blocos de HTML completos, um por
+  idioma (`#ajudaConteudoPT` / `#ajudaConteudoEN`), alternados por
+  `display:block/none` em `aplicarTraducoes()` consoante `idioma` — não usa
+  o dicionário `t()` porque é texto longo/formatado (títulos, parágrafos,
+  listas), ao contrário do resto da app. Se editar o conteúdo, editar os
+  dois blocos em paralelo para não desalinhar PT/EN.
   - **Bug pré-existente encontrado e corrigido nesta alteração**: `doc.
     addImage()` sem o parâmetro de compressão embute imagens de
     `HTMLImageElement`/canvas sem qualquer compressão — o logótipo sozinho
