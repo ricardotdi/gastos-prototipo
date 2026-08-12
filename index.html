@@ -642,7 +642,8 @@
     <div class="scan-status" id="scanStatus"></div>
     <div class="manual-toggle" id="galeriaToggle">ou ler QR de uma foto da galeria</div>
     <input type="file" accept="image/*" id="qrFileInput" style="display:none">
-    <div class="manual-toggle" id="ocrToggle">ou ler valor por foto (sem QR)</div>
+    <div class="manual-toggle" id="ocrToggle">ou ler valor por câmara (sem QR)</div>
+    <div class="manual-toggle" id="ocrGaleriaToggle">ou ler valor de uma foto da galeria (sem QR)</div>
     <input type="file" accept="image/*" id="ocrFileInput" style="display:none">
     <div class="manual-toggle" id="manualToggle">ou inserir valor manualmente</div>
 
@@ -1100,7 +1101,8 @@ const T = {
     titulo_adicionar_gasto: 'Adicionar gasto',
     hint_adicionar_gasto: 'Aponta a câmara ao QR Code da fatura',
     toggle_galeria: 'ou ler QR de uma foto da galeria',
-    toggle_ocr: 'ou ler valor por foto (sem QR)',
+    toggle_ocr: 'ou ler valor por câmara (sem QR)',
+    toggle_ocr_galeria: 'ou ler valor de uma foto da galeria (sem QR)',
     toggle_manual: 'ou inserir valor manualmente',
     label_valor_moeda: 'Valor ({moeda})',
     label_valor_detetado: 'Valor detetado',
@@ -1121,6 +1123,8 @@ const T = {
     status_lendo_ocr: 'A ler o valor da foto…',
     status_ocr_valor_detetado: '✓ Valor detetado por OCR — confirma que está correto.',
     status_ocr_nao_encontrado: 'Não foi possível reconhecer um valor na foto — tenta outra foto ou insere manualmente.',
+    status_aponta_camara_ocr: 'Aponta a câmara ao valor total da fatura e tira a foto.',
+    btn_capturar_foto: '📷 Tirar foto',
     aria_ocultar_total: 'Ocultar valor',
     aria_mostrar_total: 'Mostrar valor',
     alerta_valor_invalido: 'Introduz um valor válido.',
@@ -1290,7 +1294,8 @@ const T = {
     titulo_adicionar_gasto: 'Add expense',
     hint_adicionar_gasto: 'Point the camera at the invoice\'s QR code',
     toggle_galeria: 'or read QR from a gallery photo',
-    toggle_ocr: 'or scan a photo for the amount (no QR)',
+    toggle_ocr: 'or scan the amount with the camera (no QR)',
+    toggle_ocr_galeria: 'or scan a gallery photo for the amount (no QR)',
     toggle_manual: 'or enter amount manually',
     label_valor_moeda: 'Amount ({moeda})',
     label_valor_detetado: 'Detected amount',
@@ -1311,6 +1316,8 @@ const T = {
     status_lendo_ocr: 'Reading the amount from the photo…',
     status_ocr_valor_detetado: '✓ Amount detected via OCR — please confirm it\'s correct.',
     status_ocr_nao_encontrado: 'Could not recognize an amount in the photo — try another photo or enter manually.',
+    status_aponta_camara_ocr: 'Point the camera at the invoice total and take the photo.',
+    btn_capturar_foto: '📷 Take photo',
     aria_ocultar_total: 'Hide amount',
     aria_mostrar_total: 'Show amount',
     alerta_valor_invalido: 'Enter a valid amount.',
@@ -1513,6 +1520,7 @@ function aplicarTraducoes(){
   document.getElementById('hintAdicionarGasto').textContent = t('hint_adicionar_gasto');
   document.getElementById('galeriaToggle').textContent = t('toggle_galeria');
   document.getElementById('ocrToggle').textContent = t('toggle_ocr');
+  document.getElementById('ocrGaleriaToggle').textContent = t('toggle_ocr_galeria');
   document.getElementById('manualToggle').textContent = t('toggle_manual');
   aplicarEstadoTotalOculto();
   document.getElementById('labelValorManual').textContent = t('label_valor_moeda', { moeda: moedaAtual().simbolo });
@@ -3275,6 +3283,10 @@ document.getElementById('qrFileInput').addEventListener('change', (e) => {
 });
 
 document.getElementById('ocrToggle').onclick = () => {
+  iniciarCameraOCR();
+};
+
+document.getElementById('ocrGaleriaToggle').onclick = () => {
   document.getElementById('ocrFileInput').click();
 };
 
@@ -3493,14 +3505,15 @@ function extrairValorOCR(texto){
 }
 
 // Leitura do valor de uma fatura/talão sem QR Code, via OCR (Tesseract.js, local no browser).
-async function processarArquivoOCR(file){
-  pararScanner();
+// Recebe tanto um ficheiro (galeria) como uma imagem/canvas (foto tirada pela câmara ao vivo) —
+// o Tesseract aceita ambos diretamente.
+async function lerValorPorOCR(imagem){
   document.getElementById('qr-reader').innerHTML = '';
   nifDetetado = null;
   scanStatus.textContent = t('status_lendo_ocr');
 
   try{
-    const resultado = await Tesseract.recognize(file, 'por');
+    const resultado = await Tesseract.recognize(imagem, 'por');
     const valor = extrairValorOCR(resultado.data.text);
     if(valor === null){
       scanStatus.textContent = t('status_ocr_nao_encontrado');
@@ -3517,6 +3530,65 @@ async function processarArquivoOCR(file){
   }
 }
 
+function processarArquivoOCR(file){
+  pararScanner();
+  lerValorPorOCR(file);
+}
+
+let ocrStream = null;
+let ocrVideoEl = null;
+
+// Mostra a câmara ao vivo dentro da app (tal como o QR) para o utilizador apontar
+// ao valor da fatura e tirar a foto, em vez de ter de sair para a galeria/câmara do sistema.
+async function iniciarCameraOCR(){
+  pararScanner();
+  scanStatus.textContent = t('status_abrindo_camara');
+  try{
+    ocrStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
+    });
+  } catch(err){
+    scanStatus.textContent = t('status_sem_camera');
+    console.error(err);
+    return;
+  }
+
+  const reader = document.getElementById('qr-reader');
+  reader.innerHTML = '';
+  ocrVideoEl = document.createElement('video');
+  ocrVideoEl.setAttribute('playsinline', '');
+  ocrVideoEl.setAttribute('muted', '');
+  ocrVideoEl.style.width = '100%';
+  ocrVideoEl.style.display = 'block';
+  ocrVideoEl.srcObject = ocrStream;
+  reader.appendChild(ocrVideoEl);
+  await ocrVideoEl.play();
+
+  const btnCapturar = document.createElement('button');
+  btnCapturar.className = 'confirm-btn';
+  btnCapturar.id = 'btnCapturarOCR';
+  btnCapturar.style.marginTop = '10px';
+  btnCapturar.textContent = t('btn_capturar_foto');
+  btnCapturar.onclick = capturarFotoOCR;
+  reader.appendChild(btnCapturar);
+
+  scanStatus.textContent = t('status_aponta_camara_ocr');
+}
+
+async function capturarFotoOCR(){
+  if(!ocrVideoEl) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = ocrVideoEl.videoWidth;
+  canvas.height = ocrVideoEl.videoHeight;
+  canvas.getContext('2d').drawImage(ocrVideoEl, 0, 0);
+  pararScanner();
+  await lerValorPorOCR(canvas);
+}
+
 function pararScanner(){
   if(nativeDetectLoop){
     cancelAnimationFrame(nativeDetectLoop);
@@ -3531,6 +3603,11 @@ function pararScanner(){
     html5QrCode.stop().catch(()=>{});
     html5QrCode = null;
   }
+  if(ocrStream){
+    ocrStream.getTracks().forEach(t=>t.stop());
+    ocrStream = null;
+  }
+  ocrVideoEl = null;
 }
 
 // Converte um <input type="date"> (YYYY-MM-DD) num ISO string ao meio-dia local,

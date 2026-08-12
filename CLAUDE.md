@@ -297,16 +297,29 @@ poupar tempo de configuração.
     domain") — usar sempre `localhost` (ou HTTPS com domínio real, como em
     produção) ao testar isto localmente.
 - **Leitura de valor por OCR** (ecrã "Adicionar gasto" → "ou ler valor por
-  foto (sem QR)", pedido do utilizador em agosto/2026 depois de ver a
+  câmara (sem QR)", pedido do utilizador em agosto/2026 depois de ver a
   concorrente "Para Onde Foi" ter essa funcionalidade): usa **Tesseract.js**
   (`tesseract.min.js` via CDN, carregado no `<head>` tal como o
   `html5-qrcode`), 100% no browser, sem backend/custo — cobre faturas/talões
   sem QR fiscal.
-  - `processarArquivoOCR(file)` → `Tesseract.recognize(file, 'por')` →
-    `extrairValorOCR(texto)` tenta primeiro encontrar uma linha com a palavra
-    "total" e extrair o último valor monetário dessa linha (mais fiável); se
-    não encontrar, assume que o **maior valor monetário reconhecido no
-    talão** é o total (heurística razoável, mas não perfeita).
+  - **Câmara ao vivo dentro da app** (`iniciarCameraOCR()`, tal como o QR) em
+    vez de abrir logo a galeria/câmara do sistema — pedido explícito do
+    utilizador depois de a primeira versão abrir só a galeria. Mostra o
+    vídeo em `#qr-reader` com um botão "📷 Tirar foto"
+    (`capturarFotoOCR()`), que desenha o frame atual num `<canvas>` e passa
+    isso ao Tesseract (não faz deteção contínua por frame como o QR, seria
+    pesado a mais). Há também um "ou ler valor de uma foto da galeria (sem
+    QR)" como alternativa, tal como o QR tem.
+  - `lerValorPorOCR(imagem)` (aceita ficheiro ou canvas) → chamada tanto por
+    `capturarFotoOCR()` como por `processarArquivoOCR(file)` (galeria) →
+    `Tesseract.recognize(imagem, 'por')` → `extrairValorOCR(texto)` tenta
+    primeiro encontrar uma linha com a palavra "total" e extrair o último
+    valor monetário dessa linha (mais fiável); se não encontrar, assume que
+    o **maior valor monetário reconhecido no talão** é o total (heurística
+    razoável, mas não perfeita).
+  - A stream da câmara do OCR (`ocrStream`/`ocrVideoEl`) é parada dentro do
+    `pararScanner()` já existente, tal como a do QR — garante que trocar de
+    opção (galeria/manual) ou fechar a folha nunca deixa a câmara ligada.
   - `valorMonetarioParaNumero()` normaliza formatos PT ("1.234,56", "12,50")
     e EN ("12.50") para float.
   - Ao contrário do QR (que também extrai NIF e deteta duplicados), o OCR só
