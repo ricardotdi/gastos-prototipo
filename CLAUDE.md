@@ -493,6 +493,18 @@ Não há testes automatizados. Fluxo de verificação usado até agora:
 4. Pedir ao utilizador para testar em aba anónima no telemóvel (para evitar
    cache) e reportar o resultado.
 
+## Regra fixa: manter a página de ajuda atualizada
+
+Sempre que se adicionar uma funcionalidade nova visível ao utilizador, a
+página **"Como utilizar a app"** (`#ajudaConteudoPT` e `#ajudaConteudoEN`,
+dentro de `menu_ajuda`) tem de ser atualizada **no mesmo commit** — em
+ambos os idiomas. Já aconteceu esquecer isto (OCR e o botão de ocultar o
+total ficaram por documentar aí durante um commit inteiro, o utilizador
+teve de pedir explicitamente). Antes de dar uma funcionalidade por
+terminada, confirmar: (1) o código está feito e testado, (2) o `CLAUDE.md`
+está atualizado, (3) a página de ajuda dentro da própria app está
+atualizada.
+
 ## Funcionalidades já implementadas
 
 Login Google + partilha de grupo (convites, geração atómica sem colisão),
