@@ -296,6 +296,38 @@ poupar tempo de configuração.
     de teste**: WebAuthn recusa `127.0.0.1` como relying party ("invalid
     domain") — usar sempre `localhost` (ou HTTPS com domínio real, como em
     produção) ao testar isto localmente.
+- **Leitura de valor por OCR** (ecrã "Adicionar gasto" → "ou ler valor por
+  foto (sem QR)", pedido do utilizador em agosto/2026 depois de ver a
+  concorrente "Para Onde Foi" ter essa funcionalidade): usa **Tesseract.js**
+  (`tesseract.min.js` via CDN, carregado no `<head>` tal como o
+  `html5-qrcode`), 100% no browser, sem backend/custo — cobre faturas/talões
+  sem QR fiscal.
+  - `processarArquivoOCR(file)` → `Tesseract.recognize(file, 'por')` →
+    `extrairValorOCR(texto)` tenta primeiro encontrar uma linha com a palavra
+    "total" e extrair o último valor monetário dessa linha (mais fiável); se
+    não encontrar, assume que o **maior valor monetário reconhecido no
+    talão** é o total (heurística razoável, mas não perfeita).
+  - `valorMonetarioParaNumero()` normaliza formatos PT ("1.234,56", "12,50")
+    e EN ("12.50") para float.
+  - Ao contrário do QR (que também extrai NIF e deteta duplicados), o OCR só
+    preenche o valor — comerciante/data/categoria ficam por preencher pelo
+    utilizador, e a mensagem de estado deixa explícito que é preciso
+    confirmar o valor (`status_ocr_valor_detetado`), por ser uma heurística
+    e não uma leitura exata como o QR.
+  - Reutiliza o mesmo ecrã de confirmação do QR (`confirmFields`,
+    `configurarCamposConfirmacao()`), só muda a forma como se chega lá.
+- **Botão para ocultar o total do mês** (ícone de olho 👁️/🙈 ao lado do
+  valor no cabeçalho, pedido do utilizador em agosto/2026 para privacidade
+  ao fazer scan de faturas em público): aplica `filter:blur(9px)` ao
+  `#totalMes` e ao `#comparacaoMensal` (a comparação com o mês anterior
+  também revela o valor em euros, por isso é ocultada em conjunto).
+  - Estado guardado em `localStorage` (`totalOculto`, chave global do
+    dispositivo, não por conta) — persiste entre sessões e recarregamentos,
+    por omissão começa visível (`'0'`/ausente).
+  - `aplicarEstadoTotalOculto()` alterna a classe `.oculto`, o ícone, e o
+    `aria-label` (`aria_ocultar_total`/`aria_mostrar_total`); chamada no
+    clique do botão e sempre que `aplicarTraducoes()` corre (para o
+    aria-label acompanhar a mudança de idioma).
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 

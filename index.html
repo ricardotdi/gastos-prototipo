@@ -9,6 +9,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-app-compat.js"></script>
@@ -56,11 +57,33 @@
   .total-card{
     margin-top:14px;
   }
+  .total-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
   .total-value{
     font-size:40px;
     font-weight:700;
     font-variant-numeric:tabular-nums;
     letter-spacing:-0.02em;
+    transition:filter .15s ease;
+  }
+  .total-value.oculto, .comparacao-mensal.oculto{
+    filter:blur(9px);
+    user-select:none;
+  }
+  #btnOcultarTotal{
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:17px;
+    opacity:.7;
+    padding:4px;
+    line-height:1;
+  }
+  #btnOcultarTotal:active{
+    opacity:1;
   }
   .total-label{
     font-size:12px;
@@ -71,6 +94,7 @@
     font-size:12px;
     color:rgba(255,255,255,.7);
     margin-top:6px;
+    transition:filter .15s ease;
   }
   .month-nav{
     display:flex;
@@ -564,7 +588,10 @@
       <button id="btnMenu">Menu ▾</button>
     </div>
     <div class="total-card">
-      <div class="total-value" id="totalMes">0,00 €</div>
+      <div class="total-row">
+        <div class="total-value" id="totalMes">0,00 €</div>
+        <button id="btnOcultarTotal" aria-label="Ocultar valor">👁️</button>
+      </div>
       <div class="total-label" id="mesLabel">a carregar…</div>
       <div class="comparacao-mensal" id="comparacaoMensal"></div>
     </div>
@@ -615,6 +642,8 @@
     <div class="scan-status" id="scanStatus"></div>
     <div class="manual-toggle" id="galeriaToggle">ou ler QR de uma foto da galeria</div>
     <input type="file" accept="image/*" id="qrFileInput" style="display:none">
+    <div class="manual-toggle" id="ocrToggle">ou ler valor por foto (sem QR)</div>
+    <input type="file" accept="image/*" id="ocrFileInput" style="display:none">
     <div class="manual-toggle" id="manualToggle">ou inserir valor manualmente</div>
 
     <div id="manualFields" style="display:none">
@@ -1071,6 +1100,7 @@ const T = {
     titulo_adicionar_gasto: 'Adicionar gasto',
     hint_adicionar_gasto: 'Aponta a câmara ao QR Code da fatura',
     toggle_galeria: 'ou ler QR de uma foto da galeria',
+    toggle_ocr: 'ou ler valor por foto (sem QR)',
     toggle_manual: 'ou inserir valor manualmente',
     label_valor_moeda: 'Valor ({moeda})',
     label_valor_detetado: 'Valor detetado',
@@ -1088,6 +1118,11 @@ const T = {
     status_qr_sem_valor: 'QR lido mas sem valor total reconhecido — tenta manual.',
     status_lendo_imagem: 'A ler QR Code da imagem…',
     status_qr_nao_encontrado: 'Não foi encontrado nenhum QR Code na imagem — tenta manual.',
+    status_lendo_ocr: 'A ler o valor da foto…',
+    status_ocr_valor_detetado: '✓ Valor detetado por OCR — confirma que está correto.',
+    status_ocr_nao_encontrado: 'Não foi possível reconhecer um valor na foto — tenta outra foto ou insere manualmente.',
+    aria_ocultar_total: 'Ocultar valor',
+    aria_mostrar_total: 'Mostrar valor',
     alerta_valor_invalido: 'Introduz um valor válido.',
     alerta_escolher_quem_pagou: 'Escolhe quem pagou esta despesa.',
     alerta_nao_guardado: 'Não foi possível guardar. Tenta novamente.',
@@ -1255,6 +1290,7 @@ const T = {
     titulo_adicionar_gasto: 'Add expense',
     hint_adicionar_gasto: 'Point the camera at the invoice\'s QR code',
     toggle_galeria: 'or read QR from a gallery photo',
+    toggle_ocr: 'or scan a photo for the amount (no QR)',
     toggle_manual: 'or enter amount manually',
     label_valor_moeda: 'Amount ({moeda})',
     label_valor_detetado: 'Detected amount',
@@ -1272,6 +1308,11 @@ const T = {
     status_qr_sem_valor: 'QR read but no total amount recognized — try manual.',
     status_lendo_imagem: 'Reading QR code from image…',
     status_qr_nao_encontrado: 'No QR code found in the image — try manual.',
+    status_lendo_ocr: 'Reading the amount from the photo…',
+    status_ocr_valor_detetado: '✓ Amount detected via OCR — please confirm it\'s correct.',
+    status_ocr_nao_encontrado: 'Could not recognize an amount in the photo — try another photo or enter manually.',
+    aria_ocultar_total: 'Hide amount',
+    aria_mostrar_total: 'Show amount',
     alerta_valor_invalido: 'Enter a valid amount.',
     alerta_escolher_quem_pagou: 'Choose who paid this expense.',
     alerta_nao_guardado: 'Could not save. Try again.',
@@ -1434,6 +1475,7 @@ let despesasPartilhadas = [];
 let liquidacoes = [];
 let scanMode = 'gasto'; // 'gasto' | 'partilhada'
 let pagoPorPartilhadaEscolhido = null; // 'eu' | 'outro'
+let totalOculto = localStorage.getItem('totalOculto') === '1';
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -1470,7 +1512,9 @@ function aplicarTraducoes(){
   document.getElementById('tituloAdicionarGasto').textContent = t('titulo_adicionar_gasto');
   document.getElementById('hintAdicionarGasto').textContent = t('hint_adicionar_gasto');
   document.getElementById('galeriaToggle').textContent = t('toggle_galeria');
+  document.getElementById('ocrToggle').textContent = t('toggle_ocr');
   document.getElementById('manualToggle').textContent = t('toggle_manual');
+  aplicarEstadoTotalOculto();
   document.getElementById('labelValorManual').textContent = t('label_valor_moeda', { moeda: moedaAtual().simbolo });
   document.getElementById('labelValorDetetado').textContent = t('label_valor_detetado');
   document.getElementById('labelComerciante').textContent = t('label_comerciante');
@@ -1593,6 +1637,21 @@ function entrarComProvider(provider){
 document.getElementById('btnEntrarGoogle').onclick = () => {
   entrarComProvider(new firebase.auth.GoogleAuthProvider());
 };
+
+function aplicarEstadoTotalOculto(){
+  document.getElementById('totalMes').classList.toggle('oculto', totalOculto);
+  document.getElementById('comparacaoMensal').classList.toggle('oculto', totalOculto);
+  document.getElementById('btnOcultarTotal').textContent = totalOculto ? '🙈' : '👁️';
+  document.getElementById('btnOcultarTotal').setAttribute('aria-label', totalOculto ? t('aria_mostrar_total') : t('aria_ocultar_total'));
+}
+
+document.getElementById('btnOcultarTotal').onclick = () => {
+  totalOculto = !totalOculto;
+  localStorage.setItem('totalOculto', totalOculto ? '1' : '0');
+  aplicarEstadoTotalOculto();
+};
+
+aplicarEstadoTotalOculto();
 
 const menuOverlay = document.getElementById('menuOverlay');
 
@@ -3215,6 +3274,16 @@ document.getElementById('qrFileInput').addEventListener('change', (e) => {
   if(file) processarArquivoQR(file);
 });
 
+document.getElementById('ocrToggle').onclick = () => {
+  document.getElementById('ocrFileInput').click();
+};
+
+document.getElementById('ocrFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(file) processarArquivoOCR(file);
+});
+
 document.getElementById('manualValor').addEventListener('input', (e)=>{
   document.getElementById('valorDetetado').value = e.target.value;
 });
@@ -3385,6 +3454,67 @@ function lerQRDeImagemHtml5Qrcode(file){
       scanStatus.textContent = t('status_qr_nao_encontrado');
     })
     .finally(() => leitorArquivo.clear().catch(()=>{}));
+}
+
+// Normaliza um número monetário reconhecido por OCR ("1.234,56", "12,50", "12.50") para float.
+function valorMonetarioParaNumero(str){
+  let s = str.trim();
+  if(s.includes(',') && s.includes('.')){
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if(s.includes(',')){
+    s = s.replace(',', '.');
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+function extrairUltimoValorMonetario(linha){
+  const matches = [...linha.matchAll(/\d{1,3}(?:[.\s]\d{3})*[,.]\d{2}/g)];
+  if(matches.length === 0) return null;
+  return valorMonetarioParaNumero(matches[matches.length - 1][0]);
+}
+
+// Tenta encontrar o valor total num texto lido por OCR: primeiro procura uma linha
+// com "total" (o mais fiável), e se não encontrar, assume que o maior valor
+// monetário do talão é o total (heurística razoável para recibos sem QR).
+function extrairValorOCR(texto){
+  const linhas = texto.split('\n');
+  for(const linha of linhas){
+    if(/total/i.test(linha)){
+      const valor = extrairUltimoValorMonetario(linha);
+      if(valor !== null) return valor;
+    }
+  }
+  const valores = [...texto.matchAll(/\d{1,3}(?:[.\s]\d{3})*[,.]\d{2}/g)]
+    .map(m => valorMonetarioParaNumero(m[0]))
+    .filter(v => v !== null);
+  if(valores.length === 0) return null;
+  return Math.max(...valores);
+}
+
+// Leitura do valor de uma fatura/talão sem QR Code, via OCR (Tesseract.js, local no browser).
+async function processarArquivoOCR(file){
+  pararScanner();
+  document.getElementById('qr-reader').innerHTML = '';
+  nifDetetado = null;
+  scanStatus.textContent = t('status_lendo_ocr');
+
+  try{
+    const resultado = await Tesseract.recognize(file, 'por');
+    const valor = extrairValorOCR(resultado.data.text);
+    if(valor === null){
+      scanStatus.textContent = t('status_ocr_nao_encontrado');
+      return;
+    }
+    scanStatus.textContent = t('status_ocr_valor_detetado');
+    confirmFields.style.display = 'block';
+    document.getElementById('valorDetetado').value = valor.toFixed(2);
+    document.getElementById('comercianteInput').value = '';
+    configurarCamposConfirmacao();
+  } catch(e){
+    console.error(e);
+    scanStatus.textContent = t('status_ocr_nao_encontrado');
+  }
 }
 
 function pararScanner(){
