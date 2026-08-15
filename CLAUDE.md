@@ -341,6 +341,13 @@ poupar tempo de configuração.
     `aria-label` (`aria_ocultar_total`/`aria_mostrar_total`); chamada no
     clique do botão e sempre que `aplicarTraducoes()` corre (para o
     aria-label acompanhar a mudança de idioma).
+- **Botão "Liquidações" em Contas a Acertar** (`#btnLiquidacoesHistorico`,
+  junto ao título "Liquidações anteriores", pedido do utilizador em
+  agosto/2026): é só um atalho — fecha `contasOverlay`, chama
+  `definirModoHistorico('liquidacoes')` e abre `historicoOverlay` já na aba
+  "Liquidações" (a mesma aba a que se chega manualmente pelos chips do
+  Histórico). Reutiliza o texto `chip_liquidacoes` já existente para o
+  label, para ficar sempre igual ao nome da aba.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 

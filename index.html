@@ -799,6 +799,7 @@
         <h3>🤝 Contas a Acertar</h3>
         <p>Pensado para casais/família: convida alguém (ver secção "Partilhar" abaixo) e passem a dividir despesas em conjunto. Cada um regista o que pagou em <strong>Menu → Contas a Acertar</strong>, a app calcula automaticamente quem deve o quê, e quando decidirem acertar contas fica tudo registado com um número de referência (nº/ano). Isto é completamente separado dos teus gastos mensais normais.</p>
         <p><strong>Exemplo:</strong> vives em casal com separação de despesas — registas as faturas que pagaste tu, e a tua parceira/parceiro regista as que pagou ela/ele. No fim, a app mostra o resultado: quem deve o quê a quem.</p>
+        <p>O botão <strong>"Liquidações"</strong>, junto às liquidações anteriores, leva-te diretamente ao Histórico já na aba de Liquidações, para veres todas de uma vez.</p>
       </div>
 
       <div class="ajuda-secao">
@@ -857,6 +858,7 @@
         <h3>🤝 Settle Up</h3>
         <p>Designed for couples/families: invite someone (see "Share" below) and start splitting expenses together. Each of you records what you paid in <strong>Menu → Settle Up</strong>, the app automatically works out who owes whom, and once you settle up it's recorded with a reference number. This is completely separate from your regular monthly expenses.</p>
         <p><strong>Example:</strong> you live as a couple with separate expenses — you record the invoices you paid, and your partner records the ones they paid. In the end, the app shows the result: who owes what to whom.</p>
+        <p>The <strong>"Settlements"</strong> button, next to your past settlements, takes you straight to History already on the Settlements tab, so you can see them all at once.</p>
       </div>
 
       <div class="ajuda-secao">
@@ -1018,7 +1020,10 @@
 
       <button class="confirm-btn" id="btnLiquidar" style="margin-top:20px; background:var(--good);">Liquidado</button>
 
-      <div class="section-title" style="margin-top:24px;" id="tituloLiquidacoesAnteriores">Liquidações anteriores</div>
+      <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">
+        <span id="tituloLiquidacoesAnteriores">Liquidações anteriores</span>
+        <span class="sair-link" id="btnLiquidacoesHistorico" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">Liquidações</span>
+      </div>
       <div id="listaLiquidacoes"></div>
     </div>
   </div>
@@ -1603,6 +1608,7 @@ function aplicarTraducoes(){
   document.getElementById('btnAddDespesaPartilhada').textContent = t('btn_add_despesa_partilhada');
   document.getElementById('btnLiquidar').textContent = t('btn_liquidado');
   document.getElementById('tituloLiquidacoesAnteriores').textContent = t('titulo_liquidacoes_anteriores');
+  document.getElementById('btnLiquidacoesHistorico').textContent = t('chip_liquidacoes');
 
   document.getElementById('tituloDefinicoes').textContent = t('titulo_definicoes');
   document.getElementById('labelIdioma').textContent = t('label_idioma');
@@ -1781,6 +1787,12 @@ document.getElementById('menuContas').onclick = () => {
 
 document.getElementById('closeContasSheet').onclick = () => {
   contasOverlay.classList.remove('open');
+};
+
+document.getElementById('btnLiquidacoesHistorico').onclick = () => {
+  contasOverlay.classList.remove('open');
+  definirModoHistorico('liquidacoes');
+  historicoOverlay.classList.add('open');
 };
 
 const ajudaOverlay = document.getElementById('ajudaOverlay');
