@@ -226,6 +226,9 @@
     z-index:50;
   }
   .overlay.open{display:flex;}
+  #confirmModalOverlay{
+    z-index:150; /* tem de ficar sempre acima de qualquer outra folha (.overlay) já aberta */
+  }
   .sheet{
     background:#fff;
     width:100%;
