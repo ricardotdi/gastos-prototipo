@@ -348,6 +348,14 @@ poupar tempo de configuração.
   "Liquidações" (a mesma aba a que se chega manualmente pelos chips do
   Histórico). Reutiliza o texto `chip_liquidacoes` já existente para o
   label, para ficar sempre igual ao nome da aba.
+- **"Categorias" no menu principal** (`#menuCategorias`, pedido do
+  utilizador em agosto/2026): atalho direto para a gestão de categorias,
+  sem precisar de passar por "Orçamentos por categoria" primeiro. Reutiliza
+  a função `abrirCategorias()` já existente — o único código novo é o
+  `onclick` que fecha o `menuOverlay` antes de a chamar (a própria
+  `abrirCategorias()` só fecha o `orcamentosOverlay`, que não está aberto
+  quando se chega por aqui, por isso é inofensivo). O caminho antigo
+  ("gerir categorias" dentro de Orçamentos) continua a funcionar na mesma.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 

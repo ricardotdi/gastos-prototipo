@@ -757,6 +757,7 @@
     <div class="menu-item" id="menuPartilhar">Partilhar gastos (convidar)</div>
     <div class="menu-item" id="menuJuntar">Juntar-me a um grupo</div>
     <div class="menu-item" id="menuOrcamentos">Orçamentos por categoria</div>
+    <div class="menu-item" id="menuCategorias">Categorias</div>
     <div class="menu-item" id="menuHistorico">Histórico</div>
     <div class="menu-item menu-item-highlight" id="menuExportarPDF">📄 Exportar relatório PDF</div>
     <div class="menu-item" id="menuContas">Contas a Acertar</div>
@@ -820,7 +821,7 @@
 
       <div class="ajuda-secao">
         <h3>🏷️ Categorias</h3>
-        <p>Em Orçamentos por categoria, toca em <strong>"gerir categorias"</strong> para criar, renomear ou remover categorias — a app adapta-se às tuas necessidades.</p>
+        <p>Em <strong>Menu → Categorias</strong> (ou em Orçamentos por categoria, tocando em "gerir categorias"), cria, renomeia ou remove categorias — a app adapta-se às tuas necessidades.</p>
       </div>
 
       <div class="ajuda-secao">
@@ -879,7 +880,7 @@
 
       <div class="ajuda-secao">
         <h3>🏷️ Categories</h3>
-        <p>In Budgets by category, tap <strong>"manage categories"</strong> to create, rename or remove categories — the app adapts to your needs.</p>
+        <p>In <strong>Menu → Categories</strong> (or in Budgets by category, tapping "manage categories"), create, rename or remove categories — the app adapts to your needs.</p>
       </div>
 
       <div class="ajuda-secao">
@@ -1105,6 +1106,7 @@ const T = {
     menu_partilhar: 'Partilhar gastos (convidar)',
     menu_juntar: 'Juntar-me a um grupo',
     menu_orcamentos: 'Orçamentos por categoria',
+    menu_categorias: 'Categorias',
     menu_historico: 'Histórico',
     menu_exportar_pdf: '📄 Exportar relatório PDF',
     menu_contas: 'Contas a Acertar',
@@ -1298,6 +1300,7 @@ const T = {
     menu_partilhar: 'Share expenses (invite)',
     menu_juntar: 'Join a group',
     menu_orcamentos: 'Budgets by category',
+    menu_categorias: 'Categories',
     menu_historico: 'History',
     menu_exportar_pdf: '📄 Export PDF report',
     menu_contas: 'Settle Up',
@@ -1579,6 +1582,7 @@ function aplicarTraducoes(){
   document.getElementById('menuPartilhar').textContent = t('menu_partilhar');
   document.getElementById('menuJuntar').textContent = t('menu_juntar');
   document.getElementById('menuOrcamentos').textContent = t('menu_orcamentos');
+  document.getElementById('menuCategorias').textContent = t('menu_categorias');
   document.getElementById('menuHistorico').textContent = t('menu_historico');
   document.getElementById('menuExportarPDF').textContent = t('menu_exportar_pdf');
   document.getElementById('menuContas').textContent = t('menu_contas');
@@ -1770,6 +1774,11 @@ function abrirOrcamentos(){
 
 document.getElementById('menuOrcamentos').onclick = abrirOrcamentos;
 document.getElementById('btnEditarOrcamentos').onclick = abrirOrcamentos;
+
+document.getElementById('menuCategorias').onclick = () => {
+  menuOverlay.classList.remove('open');
+  abrirCategorias();
+};
 
 document.getElementById('closeOrcamentosSheet').onclick = () => {
   orcamentosOverlay.classList.remove('open');
