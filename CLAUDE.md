@@ -446,6 +446,18 @@ limpa manualmente na consola se algum dia incomodar.
 - **Tom**: sóbrio, "banca privada"/consultoria financeira — não é uma app
   gamificada ou colorida. Cantos arredondados moderados, sem gradientes
   berrantes, sem emojis na UI (só nos ícones de estado tipo ✕ e ✓).
+- **Links clicáveis vs. botões** (decisão de agosto/2026, a pedido do
+  utilizador): opções clicáveis importantes — ex: os 4 caminhos para
+  registar um gasto ("ler QR de galeria", "ler valor por câmara", "ler
+  valor de galeria (OCR)", "inserir manualmente"), ou "+ adicionar
+  categoria" — usam a classe `.toggle-btn` (botão sólido azul/`--navy`,
+  `<button>` real), **não** `.manual-toggle` (link de texto sublinhado). O
+  utilizador achou que texto sublinhado passa despercebido para ações
+  importantes. `.manual-toggle` continua a ser usado para ações
+  secundárias/menos importantes (ex: "Cancelar" no modal de confirmação,
+  "gerir categorias" dentro de Orçamentos). Ao adicionar uma opção nova que
+  seja um caminho de ação principal (não um "cancelar" ou link acessório),
+  preferir `.toggle-btn`.
 
 ## Ambiente de desenvolvimento (contexto da sessão Claude Code)
 

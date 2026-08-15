@@ -268,6 +268,23 @@
     text-decoration:underline;
     cursor:pointer;
   }
+  .toggle-btn{
+    display:block;
+    width:100%;
+    margin-top:10px;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:var(--navy);
+    color:#fff;
+    font-size:13.5px;
+    font-weight:600;
+    text-align:center;
+    cursor:pointer;
+  }
+  .toggle-btn:active{
+    opacity:.85;
+  }
   .form-row{margin-top:14px;}
   .form-row label{
     display:block;
@@ -651,12 +668,12 @@
     <div id="qr-reader"></div>
     <button class="confirm-btn" id="btnCapturarOCR" style="display:none; margin-top:10px;">📷 Tirar foto</button>
     <div class="scan-status" id="scanStatus"></div>
-    <div class="manual-toggle" id="galeriaToggle">ou ler QR de uma foto da galeria</div>
+    <button class="toggle-btn" id="galeriaToggle">ou ler QR de uma foto da galeria</button>
     <input type="file" accept="image/*" id="qrFileInput" style="display:none">
-    <div class="manual-toggle" id="ocrToggle">ou ler valor por câmara (sem QR)</div>
-    <div class="manual-toggle" id="ocrGaleriaToggle">ou ler valor de uma foto da galeria (sem QR)</div>
+    <button class="toggle-btn" id="ocrToggle">ou ler valor por câmara (sem QR)</button>
+    <button class="toggle-btn" id="ocrGaleriaToggle">ou ler valor de uma foto da galeria (sem QR)</button>
     <input type="file" accept="image/*" id="ocrFileInput" style="display:none">
-    <div class="manual-toggle" id="manualToggle">ou inserir valor manualmente</div>
+    <button class="toggle-btn" id="manualToggle">ou inserir valor manualmente</button>
 
     <div id="manualFields" style="display:none">
       <div class="form-row">
@@ -911,7 +928,7 @@
     <h2 id="tituloCategorias">Categorias</h2>
     <p class="hint" id="hintCategorias">Edita o nome de uma categoria para a renomear (atualiza também os gastos já registados). Apaga o texto de uma linha para a remover — os gastos antigos mantêm o nome antigo.</p>
     <div id="categoriasForm"></div>
-    <div class="manual-toggle" id="btnAddCategoriaRow">+ adicionar categoria</div>
+    <button class="toggle-btn" id="btnAddCategoriaRow">+ adicionar categoria</button>
     <button class="confirm-btn" id="btnGuardarCategorias">Guardar categorias</button>
     <div class="scan-status" id="categoriasStatus"></div>
   </div>
