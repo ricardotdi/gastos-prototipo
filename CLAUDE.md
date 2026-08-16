@@ -692,6 +692,46 @@ PWABuilder):
   - (Este SHA-256 é suposto ser público — não é secreto. Não confundir com o
     SHA-1 do Firebase Google Sign-In nativo, que não é necessário para TWA.)
 
+**A verificação do Digital Asset Links tem de estar na RAIZ do domínio, não
+num subcaminho** — problema real que já demorou dias a resolver (agosto
+2026), documentado aqui para não se repetir:
+- A verificação da Google (e do Android/Chrome) para `assetlinks.json`
+  opera **sempre sobre a origem nua** (esquema + host, sem caminho) — nunca
+  sobre um subcaminho. Confirmado diretamente pela própria API:
+  `https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=...`
+  devolve erro explícito "Invalid site (URL cannot contain a path
+  component...)" se se tentar passar um caminho.
+- Isto significa que um repositório de **projeto** do GitHub Pages
+  (`ricardotdi.github.io/gastos-prototipo/`, o site principal desta app)
+  **nunca pode** servir o seu próprio `assetlinks.json` no sítio certo — só
+  um repositório de **utilizador** GitHub (nome especial
+  `ricardotdi.github.io`) serve a raiz do domínio.
+- **Solução**: criado um segundo repositório, `ricardotdi/ricardotdi.github.io`
+  (site pessoal do GitHub, distinto deste `gastos-prototipo`), só para
+  alojar `.well-known/assetlinks.json` na raiz do domínio (mesmo
+  package/fingerprint documentados acima), mais um `index.html` mínimo que
+  redireciona para `https://ricardotdi.github.io/gastos-prototipo/`.
+- **Sub-armadilha nesse segundo repositório**: mesmo com `.nojekyll`
+  presente, o workflow automático de Pages baseado em Actions ainda corria
+  o Jekyll por padrão, que **excluía silenciosamente** a pasta
+  `.well-known/` (pastas começadas por ponto) do site publicado — confirmado
+  ao inspecionar diretamente os logs do "Archive artifact" da GitHub
+  Action. Corrigido com um `_config.yml` na raiz desse repo:
+  ```yaml
+  include: [".well-known"]
+  ```
+  Depois desta alteração, o build seguinte passou a **saltar** o passo do
+  Jekyll por completo (o workflow deteta que não precisa dele).
+- **Propagação lenta, sem forma de acelerar**: mesmo depois do ficheiro
+  estar certo em todo o lado, demorou até ao dia seguinte a refletir-se —
+  a cache da Google (`digitalassetlinks.googleapis.com`) tem `maxAge`
+  ~600s mas parecia renovar-se a cada verificação repetida; e mais
+  importante, o Android tem o seu próprio agente de verificação de
+  domínio, separado do Chrome, com o seu próprio ciclo, sem forma de forçar
+  a partir daqui. **Confirmado pelo utilizador em agosto/2026 que já
+  funciona** — a app abre sem barra de endereço do Chrome, como TWA
+  "confiada" a sério.
+
 **Chave de assinatura (`.keystore`)**: gerada pelo PWABuilder, **NUNCA está
 no repositório** (é público) — fica só em
 `C:\Users\User\Dropbox\Empresa Finmais\App Android\signing.keystore` +
