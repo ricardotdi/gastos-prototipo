@@ -431,6 +431,32 @@ poupar tempo de configuração.
        "Total: $" ou "Total Due: $"), em vez de "o último valor da linha
        inteira que contém a palavra total". Sem essa proximidade, cai no
        fallback antigo (maior valor do texto todo).
+  - **Testado também com Suíça** (QR-bill/Swiss Payments Standards, formato
+    multi-linha estruturado começado por "SPC" — funciona via o fallback do
+    maior valor, sem precisar de parser dedicado, porque o IBAN/morada não
+    têm formato de valor monetário) **e Itália** (talão com "Totale" E
+    "Subtotale" ao mesmo tempo — `\btotal\b` não reconhece "Totale" como
+    "total" — dado que não há fronteira de palavra entre "l" e "e" — mas o
+    resultado final continua certo por acaso, porque o total costuma ser
+    sempre o maior valor do talão; não é 100% garantido se um dia houver um
+    valor maior que o total no mesmo talão, ex: desconto grande).
+  - **Limitação conhecida e documentada, encontrada com o teste do Japão**:
+    a deteção da palavra "total" só reconhece a grafia
+    latina (`total`/`Total`/`totale`, etc. — línguas com "total" como raiz
+    reconhecível). Não reconhece o equivalente em idiomas com escrita
+    diferente (ex: `合計` em japonês/chinês, `합계` em coreano) — cai sempre
+    no fallback do maior valor, que costuma acertar mas não está garantido.
+    Corrigir isto por completo implicaria manter uma lista de palavras
+    "total" em dezenas de idiomas — fora do âmbito razoável desta função.
+  - **Bug relacionado, também do teste do Japão, este sim corrigido**: o
+    iene japonês (e outras moedas, ex: won coreano, rupia indiana) não usa
+    casas decimais na prática (`¥270`, não `¥270.00`) —
+    `REGEX_VALOR_MONETARIO` exige sempre separador decimal, por isso nunca
+    apanhava estes valores (retornava sempre "sem valor"). Adicionado
+    `REGEX_VALOR_SEM_DECIMAIS` (símbolo de moeda `¥`/`₩`/`₹` + número
+    inteiro), usado como último fallback, só depois de as tentativas com
+    decimais falharem — evita aumentar o risco de apanhar números que não
+    são valores monetários nos outros formatos.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 

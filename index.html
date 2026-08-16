@@ -3622,6 +3622,12 @@ function valorMonetarioParaNumero(str){
 const FONTE_VALOR_MONETARIO = '\\d+(?:[.,\\s]\\d{3})*[,.]\\d{2}';
 const REGEX_VALOR_MONETARIO = new RegExp(FONTE_VALOR_MONETARIO, 'g');
 
+// Algumas moedas praticamente não usam casas decimais nos recibos do dia a dia
+// (ex: iene japonês "¥270", não "¥270.00") — REGEX_VALOR_MONETARIO exige sempre
+// separador decimal, por isso nunca apanharia estes valores. Este padrão à
+// parte cobre esse caso: símbolo de moeda + número inteiro (sem decimais).
+const REGEX_VALOR_SEM_DECIMAIS = /[¥₩₹]\s?(\d{1,3}(?:[.,\s]\d{3})*)(?!\d)/g;
+
 // Tenta encontrar o valor total num texto lido por OCR ou QR: primeiro procura
 // o valor logo a seguir à palavra "total" (\b = fronteira de palavra, para não
 // apanhar "Subtotal"; até 20 caracteres não-numéricos de intervalo, para cobrir
@@ -3630,6 +3636,15 @@ const REGEX_VALOR_MONETARIO = new RegExp(FONTE_VALOR_MONETARIO, 'g');
 // "...?total=45.67&tax=3.20", onde o valor errado (tax) vem depois do certo).
 // Se não encontrar nada perto de "total", assume que o maior valor monetário
 // do texto é o total (heurística menos fiável, mas melhor que nada).
+//
+// LIMITAÇÃO CONHECIDA: só reconhece a palavra "total" tal como se escreve em
+// português/inglês/espanhol/francês/italiano (com fronteira de palavra — não
+// confunde "Subtotal", mas também não reconhece "Totale" a meio de outra
+// palavra em idiomas onde isso aconteça). Não reconhece a palavra equivalente
+// em idiomas com escrita diferente (ex: "合計" em japonês/chinês, "합계" em
+// coreano) — nesses casos cai sempre no fallback do maior valor do texto, que
+// costuma acertar por o total ser tipicamente o maior número no talão, mas
+// não é garantido.
 function extrairValorOCR(texto){
   const regexPertoDeTotal = new RegExp('\\btotal\\b[^\\d]{0,20}(' + FONTE_VALOR_MONETARIO + ')', 'i');
   const pertoDeTotal = texto.match(regexPertoDeTotal);
@@ -3637,11 +3652,17 @@ function extrairValorOCR(texto){
     const valor = valorMonetarioParaNumero(pertoDeTotal[1]);
     if(valor !== null) return valor;
   }
-  const valores = [...texto.matchAll(REGEX_VALOR_MONETARIO)]
+  const valoresComDecimais = [...texto.matchAll(REGEX_VALOR_MONETARIO)]
     .map(m => valorMonetarioParaNumero(m[0]))
     .filter(v => v !== null);
-  if(valores.length === 0) return null;
-  return Math.max(...valores);
+  if(valoresComDecimais.length > 0) return Math.max(...valoresComDecimais);
+
+  const valoresSemDecimais = [...texto.matchAll(REGEX_VALOR_SEM_DECIMAIS)]
+    .map(m => parseInt(m[1].replace(/[.,\s]/g, ''), 10))
+    .filter(v => !isNaN(v));
+  if(valoresSemDecimais.length > 0) return Math.max(...valoresSemDecimais);
+
+  return null;
 }
 
 // Leitura do valor de uma fatura/talão sem QR Code, via OCR (Tesseract.js, local no browser).
