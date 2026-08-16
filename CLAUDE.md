@@ -486,6 +486,22 @@ poupar tempo de configuração.
     monetário), arredondamento em dinheiro ao 10 cêntimos mais próximo
     (Subtotal $24.97, Rounding -$0.07, Total $24.90), e URL de recibo
     digital.
+  - **Bug encontrado e corrigido com o teste do México (CFDI, formato
+    oficial de faturação eletrónica do SAT)**: o QR de um CFDI é uma URL
+    de verificação com o total no parâmetro `tt=`, mas frequentemente com
+    **mais de 2 casas decimais** (ex: `tt=1500.000000`, `tt=88.335000`) —
+    o schema do CFDI permite até 6 casas. `FONTE_VALOR_MONETARIO` exigia
+    sempre exatamente 2 dígitos decimais no final, por isso valores com
+    dígitos não-zero para além da 2ª casa ficavam mal cortados (`88.335000`
+    lido como `88.33`, perdendo o `5`, em vez de deixar o arredondamento
+    normal da app tratar do valor completo). Corrigido: o final da
+    expressão regular passou de `\d{2}` fixo para `\d{2,6}`, captura a
+    precisão toda disponível (até 6 casas, cobre CFDI e semelhantes) e o
+    `.toFixed(2)` já existente ao gravar o valor trata do arredondamento
+    correto. Testado também: CFDI com zeros a mais (não muda o valor), CFDI
+    com valor típico, e talão simples mexicano com "TOTAL" em espanhol.
+    Reconfirmados os 38 casos de teste anteriores de todos os países, sem
+    regressões.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
