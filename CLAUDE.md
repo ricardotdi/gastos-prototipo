@@ -473,6 +473,13 @@ poupar tempo de configuração.
   - **Resto do talão canadiano testado sem problemas**: formato com
     GST/HST + Subtotal + Total (Ontário), URL de recibo digital, e talão
     simples só com "Total".
+  - **Testado também com a Austrália, sem bugs novos**: Subtotal + GST +
+    Total, "Total (incl. GST)" com texto a seguir ao valor, URL de recibo
+    digital, e o caso mais interessante, **arredondamento em dinheiro**
+    (a Austrália não usa moedas de 1/2 cêntimos): talão com Subtotal
+    $12.47, linha "Rounding -$0.02", Total $12.45 — confirmado que a app
+    apanha o total final arredondado (12.45), não o subtotal nem a linha
+    de arredondamento.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
