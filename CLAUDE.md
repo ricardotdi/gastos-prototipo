@@ -380,6 +380,19 @@ poupar tempo de configuração.
   - Faturas não-PT nunca têm NIF (`nifEmitente: null`), por isso nunca
     passam pela deteção de duplicados (que depende do NIF) — comportamento
     aceite, não há forma fiável de identificar duplicados sem esse campo.
+  - **Testado também** com Espanha (URL oficial Veri*Factu/AEAT, campo
+    `importe=` em vírgula decimal), França (sem formato QR único — testado
+    com URL genérica e talão de texto com "TOTAL") e Índia (GST e-invoice,
+    formato **JSON**, campo `TotInvVal`). O caso da Índia revelou um bug
+    real: `REGEX_VALOR_MONETARIO` (partilhado por `extrairUltimoValorMonetario`
+    e `extrairValorOCR`) só reconhecia números agrupados aos milhares
+    (`\d{1,3}` no início) — um valor "em bruto" tipo `1250.75` (sem separador
+    de milhares, comum em JSON) era mal cortado para `250.75`. Corrigido
+    para `\d+` no início do regex. Aproveitado para tornar
+    `valorMonetarioParaNumero()` mais robusto: em vez de assumir sempre o
+    formato europeu quando há vírgula E ponto, usa agora "o separador mais à
+    direita é o decimal" — funciona tanto para `1.234,56` (europeu) como
+    `1,234.56` (EUA/UK), testado com ambos.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 

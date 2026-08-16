@@ -3566,19 +3566,30 @@ function lerQRDeImagemHtml5Qrcode(file){
 }
 
 // Normaliza um número monetário reconhecido por OCR ("1.234,56", "12,50", "12.50") para float.
+// O separador (vírgula ou ponto) que aparece mais à direita é sempre o
+// decimal — funciona tanto para "1.234,56" (europeu) como "1,234.56" (EUA/UK)
+// como "1250.75"/"45,50" (sem separador de milhares).
 function valorMonetarioParaNumero(str){
   let s = str.trim();
-  if(s.includes(',') && s.includes('.')){
-    s = s.replace(/\./g, '').replace(',', '.');
-  } else if(s.includes(',')){
-    s = s.replace(',', '.');
+  const ultimaVirgula = s.lastIndexOf(',');
+  const ultimoPonto = s.lastIndexOf('.');
+  if(ultimaVirgula > ultimoPonto){
+    s = s.replace(/[.\s]/g, '').replace(',', '.');
+  } else if(ultimoPonto > ultimaVirgula){
+    s = s.replace(/[,\s]/g, '');
   }
   const n = parseFloat(s);
   return isNaN(n) ? null : n;
 }
 
+// Casa números monetários tanto agrupados por milhares ("1.234,56", "1,234.56")
+// como "em bruto", sem agrupamento (ex: "1250.75", comum em valores JSON de
+// faturação eletrónica de outros países) — o "\d+" inicial (em vez de "\d{1,3}")
+// é o que permite este segundo caso.
+const REGEX_VALOR_MONETARIO = /\d+(?:[.,\s]\d{3})*[,.]\d{2}/g;
+
 function extrairUltimoValorMonetario(linha){
-  const matches = [...linha.matchAll(/\d{1,3}(?:[.\s]\d{3})*[,.]\d{2}/g)];
+  const matches = [...linha.matchAll(REGEX_VALOR_MONETARIO)];
   if(matches.length === 0) return null;
   return valorMonetarioParaNumero(matches[matches.length - 1][0]);
 }
@@ -3594,7 +3605,7 @@ function extrairValorOCR(texto){
       if(valor !== null) return valor;
     }
   }
-  const valores = [...texto.matchAll(/\d{1,3}(?:[.\s]\d{3})*[,.]\d{2}/g)]
+  const valores = [...texto.matchAll(REGEX_VALOR_MONETARIO)]
     .map(m => valorMonetarioParaNumero(m[0]))
     .filter(v => v !== null);
   if(valores.length === 0) return null;
