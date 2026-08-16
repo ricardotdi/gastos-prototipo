@@ -800,7 +800,7 @@
         <h3>➕ Registar um gasto</h3>
         <p>Toca no botão <strong>"＋"</strong> no ecrã principal e escolhe uma destas opções:</p>
         <ul>
-          <li><strong>Câmara:</strong> aponta ao QR Code de uma fatura portuguesa — o valor fica registado automaticamente.</li>
+          <li><strong>Câmara:</strong> aponta ao QR Code de uma fatura — o valor fica registado automaticamente. Funciona com faturas portuguesas e também com QR Codes de faturas de outros países (a app tenta sempre reconhecer o valor, mas nesses casos pede-te para confirmares).</li>
           <li><strong>Foto da galeria:</strong> se já tiveres tirado a foto da fatura antes, podes ler o QR a partir dela.</li>
           <li><strong>Ler valor por câmara (sem QR):</strong> para talões sem QR Code — aponta ao valor total e tira a foto; a app tenta reconhecer o valor automaticamente (confirma sempre antes de guardar).</li>
           <li><strong>Manual:</strong> insere o valor à mão, sem precisares de fatura.</li>
@@ -859,7 +859,7 @@
         <h3>➕ Recording an expense</h3>
         <p>Tap the <strong>"＋"</strong> button on the main screen and choose one of these options:</p>
         <ul>
-          <li><strong>Camera:</strong> point it at the QR code on a Portuguese invoice — the amount is recorded automatically.</li>
+          <li><strong>Camera:</strong> point it at the QR code on an invoice — the amount is recorded automatically. Works with Portuguese invoices and also with QR codes on invoices from other countries (the app always tries to recognize the amount, but in those cases it asks you to confirm it).</li>
           <li><strong>Gallery photo:</strong> if you already took a photo of the invoice, you can read its QR code from there.</li>
           <li><strong>Scan the amount with the camera (no QR):</strong> for receipts without a QR code — point at the total amount and take a photo; the app tries to recognize the amount automatically (always confirm it before saving).</li>
           <li><strong>Manual:</strong> enter the amount by hand, no invoice needed.</li>
@@ -1156,6 +1156,7 @@ const T = {
     status_abrindo_camara: 'A abrir câmara…',
     status_sem_camera: 'Sem acesso à câmara. Usa a opção manual.',
     status_fatura_lida: '✓ Fatura lida com sucesso',
+    status_fatura_lida_confirmar: '✓ Valor detetado no QR — confirma que está correto.',
     status_qr_sem_valor: 'QR lido mas sem valor total reconhecido — tenta manual.',
     status_lendo_imagem: 'A ler QR Code da imagem…',
     status_qr_nao_encontrado: 'Não foi encontrado nenhum QR Code na imagem — tenta manual.',
@@ -1350,6 +1351,7 @@ const T = {
     status_abrindo_camara: 'Opening camera…',
     status_sem_camera: 'No camera access. Use the manual option.',
     status_fatura_lida: '✓ Invoice read successfully',
+    status_fatura_lida_confirmar: '✓ Amount detected in the QR code — please confirm it\'s correct.',
     status_qr_sem_valor: 'QR read but no total amount recognized — try manual.',
     status_lendo_imagem: 'Reading QR code from image…',
     status_qr_nao_encontrado: 'No QR code found in the image — try manual.',
@@ -3243,7 +3245,9 @@ window.removerRecorrente = async function(id){
 // ---- Parsing do QR Code das faturas portuguesas ----
 // Formato AT: campos separados por '*', cada campo "Letra:valor"
 // O campo O = Total do documento com impostos (o que queremos)
-function parseFaturaQR(texto){
+// Formato oficial das faturas portuguesas (Autoridade Tributária): pares
+// chave:valor separados por "*", campo "O" é o total, "A" é o NIF do emitente.
+function parseFaturaQRPortuguesa(texto){
   const campos = {};
   texto.split('*').forEach(par=>{
     const idx = par.indexOf(':');
@@ -3256,7 +3260,44 @@ function parseFaturaQR(texto){
   const total = campos['O'] ? parseFloat(campos['O'].replace(',', '.')) : null;
   const nifEmitente = campos['A'] || null;
 
-  return { total, nifEmitente, valido: total !== null && !isNaN(total) };
+  return { total, nifEmitente, valido: total !== null && !isNaN(total), origem: 'pt' };
+}
+
+// Formato EPC/SEPA ("scan to pay"), comum em faturas de vários países da UE
+// (Alemanha, Áustria, etc.): texto multi-linha começado por "BCD", com o
+// montante numa linha isolada tipo "EUR123.45" (moeda ISO + valor com ponto).
+function parseFaturaQREPC(texto){
+  if(!texto.startsWith('BCD')) return { total: null, nifEmitente: null, valido: false };
+  const linhas = texto.split('\n');
+  for(const linha of linhas){
+    const m = linha.trim().match(/^[A-Z]{3}(\d+(?:\.\d{1,2})?)$/);
+    if(m){
+      const total = parseFloat(m[1]);
+      if(!isNaN(total)) return { total, nifEmitente: null, valido: true, origem: 'epc' };
+    }
+  }
+  return { total: null, nifEmitente: null, valido: false };
+}
+
+// Fallback genérico para QR codes de faturas de outros países sem formato
+// conhecido (ex: URLs de portais de verificação com o total na query string,
+// JSON de faturação eletrónica, etc.) — reaproveita a mesma heurística usada
+// no OCR: procura uma linha com "total" ou assume o maior valor monetário do
+// texto. Menos fiável que os formatos estruturados acima, por isso pede
+// sempre confirmação ao utilizador.
+function parseFaturaQRGenerica(texto){
+  const total = extrairValorOCR(texto);
+  return { total, nifEmitente: null, valido: total !== null, origem: 'generica' };
+}
+
+function parseFaturaQR(texto){
+  const portuguesa = parseFaturaQRPortuguesa(texto);
+  if(portuguesa.valido) return portuguesa;
+
+  const epc = parseFaturaQREPC(texto);
+  if(epc.valido) return epc;
+
+  return parseFaturaQRGenerica(texto);
 }
 
 // ---- Scanner ----
@@ -3385,7 +3426,7 @@ function onQrDecodedText(decodedText){
   if(resultado.valido){
     pararScanner();
     document.getElementById('qr-reader').innerHTML = '';
-    scanStatus.textContent = t('status_fatura_lida');
+    scanStatus.textContent = resultado.origem === 'pt' ? t('status_fatura_lida') : t('status_fatura_lida_confirmar');
     confirmFields.style.display = 'block';
     document.getElementById('valorDetetado').value = resultado.total.toFixed(2);
     document.getElementById('comercianteInput').value = '';

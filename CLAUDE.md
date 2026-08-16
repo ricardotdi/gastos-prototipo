@@ -356,6 +356,30 @@ poupar tempo de configuração.
   `abrirCategorias()` só fecha o `orcamentosOverlay`, que não está aberto
   quando se chega por aqui, por isso é inofensivo). O caminho antigo
   ("gerir categorias" dentro de Orçamentos) continua a funcionar na mesma.
+- **Leitura de QR de faturas de outros países** (pedido do utilizador em
+  agosto/2026): `parseFaturaQR(texto)` deixou de assumir sempre o formato
+  português e passou a tentar, por ordem:
+  1. `parseFaturaQRPortuguesa()` — formato oficial da Autoridade Tributária
+     (campo `O` = total, `A` = NIF do emitente). Inalterado, continua a ser
+     o mais fiável (é o único que também deteta faturas duplicadas, por
+     depender do NIF).
+  2. `parseFaturaQREPC()` — formato EPC/SEPA ("scan to pay"), comum em
+     faturas de vários países da UE (Alemanha, Áustria, etc.): texto
+     multi-linha a começar por `BCD`, valor numa linha isolada tipo
+     `EUR45.90`.
+  3. `parseFaturaQRGenerica()` — fallback para qualquer outro formato (URLs
+     de portais de verificação com o total na query string, JSON de
+     faturação eletrónica, etc.): reaproveita `extrairValorOCR()` (a mesma
+     heurística do OCR) diretamente sobre o texto do QR.
+  - Como os formatos 2 e 3 não são garantidamente o "total da fatura" (podem
+    apanhar outro valor por engano), `onQrDecodedText()` mostra uma
+    mensagem diferente consoante a origem (`resultado.origem`): faturas PT
+    mostram "Fatura lida com sucesso"; as outras mostram
+    `status_fatura_lida_confirmar`, a pedir confirmação explícita — o mesmo
+    padrão já usado no OCR.
+  - Faturas não-PT nunca têm NIF (`nifEmitente: null`), por isso nunca
+    passam pela deteção de duplicados (que depende do NIF) — comportamento
+    aceite, não há forma fiável de identificar duplicados sem esse campo.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
