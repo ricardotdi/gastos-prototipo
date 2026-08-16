@@ -384,8 +384,8 @@ poupar tempo de configuração.
     `importe=` em vírgula decimal), França (sem formato QR único — testado
     com URL genérica e talão de texto com "TOTAL") e Índia (GST e-invoice,
     formato **JSON**, campo `TotInvVal`). O caso da Índia revelou um bug
-    real: `REGEX_VALOR_MONETARIO` (partilhado por `extrairUltimoValorMonetario`
-    e `extrairValorOCR`) só reconhecia números agrupados aos milhares
+    real: `REGEX_VALOR_MONETARIO`/`FONTE_VALOR_MONETARIO` (partilhado com
+    `extrairValorOCR`) só reconhecia números agrupados aos milhares
     (`\d{1,3}` no início) — um valor "em bruto" tipo `1250.75` (sem separador
     de milhares, comum em JSON) era mal cortado para `250.75`. Corrigido
     para `\d+` no início do regex. Aproveitado para tornar
@@ -414,6 +414,23 @@ poupar tempo de configuração.
     (valor da transação) quando existe. Payloads EMV **nunca** caem na
     heurística genérica — se não tiverem tag `54` (QR de valor não fixo),
     o resultado é sempre "sem valor", nunca um número inventado.
+  - **Dois bugs mais encontrados e corrigidos com o teste dos EUA** (talões
+    de retalho típicos, formato "Subtotal + Tax + Total"):
+    1. A busca por "total" usava `/total/i` sem fronteira de palavra, por
+       isso "**Sub**total: $21.49" também contava como match — apanhava o
+       subtotal em vez do total final. Corrigido para `\btotal\b`
+       ("Subtotal" não tem fronteira de palavra antes de "total", já que
+       "b" e "t" são ambos caracteres de palavra — só bate certo com
+       "Total" isolado).
+    2. Em texto de uma única linha (ex: URL `...?total=45.67&tax=3.20`), a
+       função antiga (`extrairUltimoValorMonetario`) devolvia sempre o
+       **último** valor monetário de toda a linha — apanhava o `tax` em
+       vez do `total`, por vir depois na mesma linha. `extrairValorOCR()`
+       foi reescrita para procurar o valor **logo a seguir** à palavra
+       "total" (até 20 caracteres não-numéricos de intervalo, para cobrir
+       "Total: $" ou "Total Due: $"), em vez de "o último valor da linha
+       inteira que contém a palavra total". Sem essa proximidade, cai no
+       fallback antigo (maior valor do texto todo).
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 

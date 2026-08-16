@@ -3619,24 +3619,23 @@ function valorMonetarioParaNumero(str){
 // como "em bruto", sem agrupamento (ex: "1250.75", comum em valores JSON de
 // faturação eletrónica de outros países) — o "\d+" inicial (em vez de "\d{1,3}")
 // é o que permite este segundo caso.
-const REGEX_VALOR_MONETARIO = /\d+(?:[.,\s]\d{3})*[,.]\d{2}/g;
+const FONTE_VALOR_MONETARIO = '\\d+(?:[.,\\s]\\d{3})*[,.]\\d{2}';
+const REGEX_VALOR_MONETARIO = new RegExp(FONTE_VALOR_MONETARIO, 'g');
 
-function extrairUltimoValorMonetario(linha){
-  const matches = [...linha.matchAll(REGEX_VALOR_MONETARIO)];
-  if(matches.length === 0) return null;
-  return valorMonetarioParaNumero(matches[matches.length - 1][0]);
-}
-
-// Tenta encontrar o valor total num texto lido por OCR: primeiro procura uma linha
-// com "total" (o mais fiável), e se não encontrar, assume que o maior valor
-// monetário do talão é o total (heurística razoável para recibos sem QR).
+// Tenta encontrar o valor total num texto lido por OCR ou QR: primeiro procura
+// o valor logo a seguir à palavra "total" (\b = fronteira de palavra, para não
+// apanhar "Subtotal"; até 20 caracteres não-numéricos de intervalo, para cobrir
+// coisas como "Total: $" ou "Total Due: $" sem "saltar" para outro valor mais
+// à frente no mesmo texto — importante em URLs de uma linha só, tipo
+// "...?total=45.67&tax=3.20", onde o valor errado (tax) vem depois do certo).
+// Se não encontrar nada perto de "total", assume que o maior valor monetário
+// do texto é o total (heurística menos fiável, mas melhor que nada).
 function extrairValorOCR(texto){
-  const linhas = texto.split('\n');
-  for(const linha of linhas){
-    if(/total/i.test(linha)){
-      const valor = extrairUltimoValorMonetario(linha);
-      if(valor !== null) return valor;
-    }
+  const regexPertoDeTotal = new RegExp('\\btotal\\b[^\\d]{0,20}(' + FONTE_VALOR_MONETARIO + ')', 'i');
+  const pertoDeTotal = texto.match(regexPertoDeTotal);
+  if(pertoDeTotal){
+    const valor = valorMonetarioParaNumero(pertoDeTotal[1]);
+    if(valor !== null) return valor;
   }
   const valores = [...texto.matchAll(REGEX_VALOR_MONETARIO)]
     .map(m => valorMonetarioParaNumero(m[0]))
