@@ -3279,6 +3279,34 @@ function parseFaturaQREPC(texto){
   return { total: null, nifEmitente: null, valido: false };
 }
 
+// Formato EMV/"Merchant Presented QR" (Pix no Brasil, mas a mesma norma é usada
+// por outros sistemas tipo UPI na Índia ou PromptPay na Tailândia): começa
+// sempre por "000201" (TLV: tag "00", tamanho "02", valor "01" — indicador de
+// formato do payload). O valor da transação, quando existe (QR de valor fixo),
+// vem no campo TLV com tag "54". IMPORTANTE: este formato empacota vários
+// campos numéricos (telefone, códigos, hash) sem separadores legíveis — a
+// heurística genérica (maior número monetário do texto) lê isto tudo como um
+// único número gigante sem sentido. Por isso este formato tem de ser
+// interpretado com um parser TLV correto, nunca com a heurística genérica.
+function parseFaturaQREMV(texto){
+  if(!/^000201/.test(texto)) return { total: null, nifEmitente: null, valido: false };
+  let i = 0;
+  while(i + 4 <= texto.length){
+    const tamanho = parseInt(texto.substring(i+2, i+4), 10);
+    if(isNaN(tamanho) || tamanho < 0) break;
+    const tag = texto.substring(i, i+2);
+    const valor = texto.substring(i+4, i+4+tamanho);
+    if(tag === '54'){
+      const total = parseFloat(valor);
+      return { total, nifEmitente: null, valido: !isNaN(total), origem: 'emv' };
+    }
+    i += 4 + tamanho;
+  }
+  // Payload EMV reconhecido mas sem campo de valor fixo (QR dinâmico/sem
+  // valor pré-definido) — não tentar a heurística genérica.
+  return { total: null, nifEmitente: null, valido: false };
+}
+
 // Fallback genérico para QR codes de faturas de outros países sem formato
 // conhecido (ex: URLs de portais de verificação com o total na query string,
 // JSON de faturação eletrónica, etc.) — reaproveita a mesma heurística usada
@@ -3296,6 +3324,11 @@ function parseFaturaQR(texto){
 
   const epc = parseFaturaQREPC(texto);
   if(epc.valido) return epc;
+
+  // Payloads EMV/Pix nunca devem cair no fallback genérico (produz valores
+  // sem sentido, ver comentário em parseFaturaQREMV) — se for reconhecido
+  // como EMV, o resultado (válido ou não) é final.
+  if(/^000201/.test(texto)) return parseFaturaQREMV(texto);
 
   return parseFaturaQRGenerica(texto);
 }

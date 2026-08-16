@@ -393,6 +393,27 @@ poupar tempo de configuração.
     formato europeu quando há vírgula E ponto, usa agora "o separador mais à
     direita é o decimal" — funciona tanto para `1.234,56` (europeu) como
     `1,234.56` (EUA/UK), testado com ambos.
+  - **Testado também com Reino Unido** (sem formato QR fiscal oficial —
+    testado com URL de recibo digital, talão de texto em libras, e o caso
+    honesto de QR sem valor nenhum, só um link/ID de recibo — a app
+    corretamente não inventa um valor nesse caso) **e Brasil**: a maioria
+    dos QR de NFC-e brasileiros (o formato mais comum) só tem a chave de
+    acesso + hash, **sem o valor** (só o formato "offline"/contingência,
+    com o campo `vNF`, inclui o valor) — testado e confirmado que a app não
+    inventa nada quando o valor não está lá.
+  - **Bug sério encontrado e corrigido com o teste do Brasil**: um QR **Pix**
+    (pagamento instantâneo brasileiro, norma EMV "Merchant Presented QR" —
+    a mesma usada por UPI na Índia, PromptPay na Tailândia, etc.) dava um
+    valor **completamente absurdo** (`5.5 × 10³³`) através da heurística
+    genérica, porque este formato concatena vários campos numéricos
+    (telefone, códigos, hash) sem separadores legíveis — a heurística lia
+    tudo isso como um único número gigante. Corrigido com
+    `parseFaturaQREMV()`: deteta o payload pelo prefixo `000201` (indicador
+    de formato do payload EMV) e interpreta corretamente a estrutura TLV
+    (tag+tamanho+valor), extraindo especificamente o campo tag `54`
+    (valor da transação) quando existe. Payloads EMV **nunca** caem na
+    heurística genérica — se não tiverem tag `54` (QR de valor não fixo),
+    o resultado é sempre "sem valor", nunca um número inventado.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
