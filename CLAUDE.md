@@ -457,6 +457,22 @@ poupar tempo de configuração.
     inteiro), usado como último fallback, só depois de as tentativas com
     decimais falharem — evita aumentar o risco de apanhar números que não
     são valores monetários nos outros formatos.
+  - **Bug encontrado e corrigido com o teste do Canadá (Quebec, em
+    francês)**: "Sous-total" (equivalente francês de "Subtotal") tem um
+    hífen antes de "total" — como o hífen é um caractere não-alfanumérico,
+    cria uma fronteira de palavra válida ali, e por isso `\btotal\b`
+    sozinho **não** o excluía (ao contrário de "Subtotal" em inglês, sem
+    separador nenhum). A app apanhava o subtotal em vez do total. O mesmo
+    aconteceria com "Sub-Total"/"Sub Total" em inglês (variante com hífen
+    ou espaço, também comum em talões). Corrigido com dois *lookbehinds*
+    negativos (`(?<!sub[-\s]?)(?<!sous[-\s]?)`) antes do `\btotal\b`, que
+    excluem "total" quando precedido de "sub"/"sous" com ou sem hífen/
+    espaço a separar. Testado que não bloqueia por engano frases legítimas
+    tipo "Subscription Total: 9.99" (aí "total" não vem logo a seguir a
+    "sub", vem depois de "Subscription ").
+  - **Resto do talão canadiano testado sem problemas**: formato com
+    GST/HST + Subtotal + Total (Ontário), URL de recibo digital, e talão
+    simples só com "Total".
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
