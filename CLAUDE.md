@@ -480,6 +480,12 @@ poupar tempo de configuração.
     $12.47, linha "Rounding -$0.02", Total $12.45 — confirmado que a app
     apanha o total final arredondado (12.45), não o subtotal nem a linha
     de arredondamento.
+  - **Testado também com a Nova Zelândia, sem bugs novos**: Subtotal + GST
+    (15%) + Total, fatura fiscal com "GST No: 123-456-789" (número de
+    registo, com hífens, não interfere por não ter formato de valor
+    monetário), arredondamento em dinheiro ao 10 cêntimos mais próximo
+    (Subtotal $24.97, Rounding -$0.07, Total $24.90), e URL de recibo
+    digital.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
