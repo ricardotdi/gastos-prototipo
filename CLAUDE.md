@@ -502,6 +502,16 @@ poupar tempo de configuração.
     com valor típico, e talão simples mexicano com "TOTAL" em espanhol.
     Reconfirmados os 38 casos de teste anteriores de todos os países, sem
     regressões.
+  - **Testado também com Singapura, sem bugs novos**: talão típico com
+    Subtotal + GST(9%) + Total, URL de recibo digital, e o **SGQR/PayNow**
+    (o QR de pagamento unificado de Singapura, construído sobre a mesma
+    norma EMV do Pix brasileiro) — confirmado que `parseFaturaQREMV()`
+    generaliza corretamente: extrai o valor quando existe tag `54` (QR de
+    valor fixo) e devolve "sem valor" (não inventa nada) quando é um QR
+    dinâmico sem valor fixo. Boa confirmação de que a correção do Brasil
+    cobre também outros países com a mesma norma (Índia/UPI, Tailândia/
+    PromptPay, mencionados no comentário do código, ainda não testados
+    isoladamente mas com a mesma base técnica).
 - **Alternar entre gráfico de barras e circular** (`#btnTipoGrafico`, botão
   por baixo do "Menu ▾" no cabeçalho, pedido do utilizador em agosto/2026):
   `renderChart(doMes)` guarda os dados recebidos em `ultimoDoMesGrafico`
