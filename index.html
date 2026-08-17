@@ -414,6 +414,26 @@
     text-decoration:underline;
     cursor:pointer;
   }
+  .chart-type-row{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:8px;
+  }
+  #btnTipoGrafico{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    text-decoration:none;
+    padding:5px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.24);
+    color:rgba(255,255,255,.85);
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
   #btnMenu{
     display:inline-flex;
     align-items:center;
@@ -614,6 +634,9 @@
       <span id="userEmailLabel"></span>
       <button id="btnMenu">Menu ▾</button>
     </div>
+    <div class="chart-type-row">
+      <button id="btnTipoGrafico">🥧 Circular</button>
+    </div>
     <div class="total-card">
       <div class="total-row">
         <div class="total-value" id="totalMes">0,00 €</div>
@@ -797,6 +820,11 @@
       </div>
 
       <div class="ajuda-secao">
+        <h3>📈 Gráfico de categorias</h3>
+        <p>No ecrã principal, o gráfico mostra os teus gastos do mês por categoria. Por baixo do botão "Menu", tens um botão para alternar entre gráfico de barras e gráfico circular (pizza), conforme preferires. A escolha fica guardada neste dispositivo.</p>
+      </div>
+
+      <div class="ajuda-secao">
         <h3>➕ Registar um gasto</h3>
         <p>Toca no botão <strong>"＋"</strong> no ecrã principal e escolhe uma destas opções:</p>
         <ul>
@@ -854,6 +882,11 @@
       <div class="ajuda-secao">
         <h3>💶 What is Fin+ Gastos</h3>
         <p>A free app to track your everyday expenses, alone or together with someone (partner, family). Your data is linked to your Google account and syncs automatically across devices.</p>
+      </div>
+
+      <div class="ajuda-secao">
+        <h3>📈 Category chart</h3>
+        <p>On the main screen, the chart shows your monthly expenses by category. Below the "Menu" button, there's a button to switch between a bar chart and a pie chart, whichever you prefer. The choice is saved on this device.</p>
       </div>
 
       <div class="ajuda-secao">
@@ -1169,6 +1202,8 @@ const T = {
     btn_capturar_foto: '📷 Tirar foto',
     aria_ocultar_total: 'Ocultar valor',
     aria_mostrar_total: 'Mostrar valor',
+    btn_grafico_circular: '🥧 Circular',
+    btn_grafico_barras: '📊 Barras',
     alerta_valor_invalido: 'Introduz um valor válido.',
     alerta_escolher_quem_pagou: 'Escolhe quem pagou esta despesa.',
     alerta_nao_guardado: 'Não foi possível guardar. Tenta novamente.',
@@ -1364,6 +1399,8 @@ const T = {
     btn_capturar_foto: '📷 Take photo',
     aria_ocultar_total: 'Hide amount',
     aria_mostrar_total: 'Show amount',
+    btn_grafico_circular: '🥧 Pie chart',
+    btn_grafico_barras: '📊 Bar chart',
     alerta_valor_invalido: 'Enter a valid amount.',
     alerta_escolher_quem_pagou: 'Choose who paid this expense.',
     alerta_nao_guardado: 'Could not save. Try again.',
@@ -1527,6 +1564,11 @@ let liquidacoes = [];
 let scanMode = 'gasto'; // 'gasto' | 'partilhada'
 let pagoPorPartilhadaEscolhido = null; // 'eu' | 'outro'
 let totalOculto = localStorage.getItem('totalOculto') === '1';
+let tipoGrafico = localStorage.getItem('tipoGrafico') === 'pie' ? 'pie' : 'bar';
+// Paleta para o gráfico circular (uma cor por categoria) — derivada das cores
+// da marca (navy/gold/danger/good) com mais algumas variações complementares,
+// para cobrir o número de categorias por omissão sem repetir demasiado cedo.
+const PALETA_GRAFICO_CIRCULAR = ['#1A3C5E', '#A19276', '#B4543A', '#4C7A5D', '#6B7A99', '#C9A66B', '#8B5E83', '#5C8AA6'];
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -1568,6 +1610,7 @@ function aplicarTraducoes(){
   document.getElementById('btnCapturarOCR').textContent = t('btn_capturar_foto');
   document.getElementById('manualToggle').textContent = t('toggle_manual');
   aplicarEstadoTotalOculto();
+  aplicarEstadoTipoGrafico();
   document.getElementById('labelValorManual').textContent = t('label_valor_moeda', { moeda: moedaAtual().simbolo });
   document.getElementById('labelValorDetetado').textContent = t('label_valor_detetado');
   document.getElementById('labelComerciante').textContent = t('label_comerciante');
@@ -1707,6 +1750,20 @@ document.getElementById('btnOcultarTotal').onclick = () => {
 };
 
 aplicarEstadoTotalOculto();
+
+// O texto do botão descreve para que tipo vai mudar ao tocar (não o tipo atual).
+function aplicarEstadoTipoGrafico(){
+  document.getElementById('btnTipoGrafico').textContent = tipoGrafico === 'pie' ? t('btn_grafico_barras') : t('btn_grafico_circular');
+}
+
+document.getElementById('btnTipoGrafico').onclick = () => {
+  tipoGrafico = tipoGrafico === 'pie' ? 'bar' : 'pie';
+  localStorage.setItem('tipoGrafico', tipoGrafico);
+  aplicarEstadoTipoGrafico();
+  renderChart(ultimoDoMesGrafico);
+};
+
+aplicarEstadoTipoGrafico();
 
 const menuOverlay = document.getElementById('menuOverlay');
 
@@ -3196,7 +3253,10 @@ function renderOrcamentos(doMes){
   }).join('');
 }
 
+let ultimoDoMesGrafico = [];
+
 function renderChart(doMes){
+  ultimoDoMesGrafico = doMes;
   const porCategoria = {};
   doMes.forEach(g=>{
     porCategoria[g.categoria] = (porCategoria[g.categoria] || 0) + g.valor;
@@ -3210,6 +3270,27 @@ function renderChart(doMes){
     ctx.getContext('2d').clearRect(0,0,ctx.width,ctx.height);
     return;
   }
+
+  if(tipoGrafico === 'pie'){
+    chart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [{
+          data: valores,
+          backgroundColor: labels.map((_, i) => PALETA_GRAFICO_CIRCULAR[i % PALETA_GRAFICO_CIRCULAR.length])
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display:true, position:'bottom', labels:{ boxWidth:12, font:{ size:11 } } },
+          tooltip: { callbacks: { label: (item) => `${item.label}: ${formatoEuro(item.parsed)}` } }
+        }
+      }
+    });
+    return;
+  }
+
   chart = new Chart(ctx, {
     type: 'bar',
     data: {

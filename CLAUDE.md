@@ -502,6 +502,20 @@ poupar tempo de configuração.
     com valor típico, e talão simples mexicano com "TOTAL" em espanhol.
     Reconfirmados os 38 casos de teste anteriores de todos os países, sem
     regressões.
+- **Alternar entre gráfico de barras e circular** (`#btnTipoGrafico`, botão
+  por baixo do "Menu ▾" no cabeçalho, pedido do utilizador em agosto/2026):
+  `renderChart(doMes)` guarda os dados recebidos em `ultimoDoMesGrafico`
+  (para o botão poder redesenhar o mesmo período sem recalcular nada), e
+  agora ramifica consoante `tipoGrafico` ('bar' ou 'pie', guardado em
+  `localStorage`, por dispositivo). O texto do botão descreve **para que
+  tipo vai mudar** ao tocar (não o tipo atual) — mesmo padrão já usado no
+  botão do olho do total oculto.
+  - `PALETA_GRAFICO_CIRCULAR`: 8 cores derivadas da paleta da marca
+    (navy/gold/danger/good + 4 tons complementares mais suaves), cicla por
+    módulo se houver mais categorias do que cores.
+  - O gráfico de barras não muda nada do que já existia; só o `pie` é novo,
+    com legenda por baixo (`position:'bottom'`) e tooltip a mostrar o valor
+    formatado em euros por categoria.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
