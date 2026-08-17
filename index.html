@@ -417,7 +417,7 @@
   .chart-type-row{
     display:flex;
     justify-content:flex-end;
-    margin-top:8px;
+    margin-bottom:8px;
   }
   #btnTipoGrafico{
     display:inline-flex;
@@ -426,9 +426,9 @@
     text-decoration:none;
     padding:5px 12px;
     border-radius:999px;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.24);
-    color:rgba(255,255,255,.85);
+    background:#fff;
+    border:1px solid var(--line);
+    color:var(--navy);
     font-family:inherit;
     font-size:11.5px;
     font-weight:600;
@@ -634,9 +634,6 @@
       <span id="userEmailLabel"></span>
       <button id="btnMenu">Menu ▾</button>
     </div>
-    <div class="chart-type-row">
-      <button id="btnTipoGrafico">🥧 Circular</button>
-    </div>
     <div class="total-card">
       <div class="total-row">
         <div class="total-value" id="totalMes">0,00 €</div>
@@ -657,6 +654,9 @@
       </div>
     </div>
 
+    <div class="chart-type-row">
+      <button id="btnTipoGrafico">🥧 Circular</button>
+    </div>
     <div id="chart-wrap">
       <canvas id="catChart" height="160"></canvas>
     </div>
@@ -821,7 +821,7 @@
 
       <div class="ajuda-secao">
         <h3>📈 Gráfico de categorias</h3>
-        <p>No ecrã principal, o gráfico mostra os teus gastos do mês por categoria. Por baixo do botão "Menu", tens um botão para alternar entre gráfico de barras e gráfico circular (pizza), conforme preferires. A escolha fica guardada neste dispositivo.</p>
+        <p>No ecrã principal, o gráfico mostra os teus gastos do mês por categoria. Por cima do gráfico, tens um botão para alternar entre gráfico de barras e gráfico circular (pizza), conforme preferires. A escolha fica guardada neste dispositivo.</p>
       </div>
 
       <div class="ajuda-secao">
@@ -886,7 +886,7 @@
 
       <div class="ajuda-secao">
         <h3>📈 Category chart</h3>
-        <p>On the main screen, the chart shows your monthly expenses by category. Below the "Menu" button, there's a button to switch between a bar chart and a pie chart, whichever you prefer. The choice is saved on this device.</p>
+        <p>On the main screen, the chart shows your monthly expenses by category. Above the chart, there's a button to switch between a bar chart and a pie chart, whichever you prefer. The choice is saved on this device.</p>
       </div>
 
       <div class="ajuda-secao">
