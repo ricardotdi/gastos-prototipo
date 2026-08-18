@@ -563,6 +563,18 @@ poupar tempo de configuração.
     despesas fixas corretamente marcadas, downloads reais via evento
     `download` do Playwright para o PDF e para o Excel, e o esconder/mostrar
     do bloco de botões em modo "Liquidações" continuam corretos.
+  - **Testado também com dados de vários meses** (pedido do utilizador),
+    para validar especificamente `gastosDetalhadosHistorico` — a única
+    parte nova que junta despesas de mais do que um mês (o PDF já fazia
+    isto só para agregados, nunca para listas linha a linha): um trimestre
+    (Jan-Mar 2026) com 6 despesas reais espalhadas pelos 3 meses e uma
+    despesa fixa criada a meio do período (15 de fevereiro) — confirmado
+    que a despesa fixa só aparece nas linhas de fevereiro e março, nunca em
+    janeiro (antes de existir), replicando corretamente a regra `criadoEm`
+    já usada pelos agregados; e um ano completo (12 meses, 13 despesas em 2
+    categorias) — confirmado o total de 686€ correto e a categoria com
+    maior soma (Viagens) a aparecer primeiro na folha "Despesas", tal como
+    na ordenação da folha "Por categoria". Sem bugs encontrados.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
