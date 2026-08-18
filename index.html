@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore-compat.js"></script>
@@ -850,6 +851,7 @@
       <div class="ajuda-secao">
         <h3>📊 Histórico e relatórios</h3>
         <p>Em <strong>Menu → Histórico</strong>, navega os teus gastos por mês, trimestre, semestre ou ano. Podes exportar ou partilhar um relatório em PDF com gráficos e comparação com o período anterior e com o mesmo período do ano passado.</p>
+        <p>Para maior controlo, o botão <strong>"Exportar Excel"</strong> descarrega uma folha de cálculo (.xlsx) com a listagem detalhada de todas as despesas do período, agrupadas por categoria, mais uma folha extra só com os totais por categoria, pronta para analisares, filtrares ou fazeres os teus próprios cálculos.</p>
         <p>Nos primeiros dias de cada mês, a app mostra um aviso no ecrã principal a convidar-te a ver o relatório do mês que acabou de fechar.</p>
       </div>
 
@@ -915,6 +917,7 @@
       <div class="ajuda-secao">
         <h3>📊 History and reports</h3>
         <p>In <strong>Menu → History</strong>, browse your expenses by month, quarter, half-year or year. You can export or share a PDF report with charts and a comparison to the previous period and to the same period last year.</p>
+        <p>For more control, the <strong>"Export Excel"</strong> button downloads a spreadsheet (.xlsx) with the detailed listing of every expense in the period, grouped by category, plus an extra sheet with just the category totals, ready for you to analyze, filter or run your own calculations.</p>
         <p>In the first few days of each month, the app shows a banner on the main screen inviting you to view the report for the month that just closed.</p>
       </div>
 
@@ -1042,9 +1045,12 @@
       <span id="historicoSecaoTituloTexto">Por categoria</span>
     </div>
     <div id="historicoPorCategoria"></div>
-    <div id="historicoAcoesPDF" style="display:flex; gap:10px;">
-      <button class="confirm-btn" id="btnExportarHistorico" style="flex:1;">📄 Exportar PDF</button>
-      <button class="confirm-btn" id="btnPartilharHistorico" style="flex:1; background:var(--gold);">🔗 Partilhar</button>
+    <div id="historicoAcoesPDF">
+      <div style="display:flex; gap:10px;">
+        <button class="confirm-btn" id="btnExportarHistorico" style="flex:1;">📄 Exportar PDF</button>
+        <button class="confirm-btn" id="btnPartilharHistorico" style="flex:1; background:var(--gold);">🔗 Partilhar</button>
+      </div>
+      <button class="confirm-btn" id="btnExportarExcel" style="background:var(--navy-deep);">📊 Exportar Excel</button>
     </div>
   </div>
 </div>
@@ -1262,6 +1268,12 @@ const T = {
     titulo_por_categoria: 'Por categoria',
     link_exportar_pdf: '📄 Exportar PDF',
     btn_partilhar_pdf: '🔗 Partilhar',
+    btn_exportar_excel: '📊 Exportar Excel',
+    excel_col_data: 'Data',
+    excel_col_comerciante: 'Comerciante',
+    excel_col_fixa: 'Despesa fixa',
+    excel_folha_despesas: 'Despesas',
+    txt_total: 'Total',
     msg_sem_gastos_periodo: 'Sem gastos neste período.',
     msg_sem_ninguem_liquidacoes: 'Ainda não tens ninguém junto neste grupo para haver liquidações.',
     msg_sem_liquidacoes_registadas: 'Ainda sem liquidações registadas.',
@@ -1459,6 +1471,12 @@ const T = {
     titulo_por_categoria: 'By category',
     link_exportar_pdf: '📄 Export PDF',
     btn_partilhar_pdf: '🔗 Share',
+    btn_exportar_excel: '📊 Export Excel',
+    excel_col_data: 'Date',
+    excel_col_comerciante: 'Merchant',
+    excel_col_fixa: 'Fixed expense',
+    excel_folha_despesas: 'Expenses',
+    txt_total: 'Total',
     msg_sem_gastos_periodo: 'No expenses in this period.',
     msg_sem_ninguem_liquidacoes: 'You don\'t have anyone in this group yet for there to be settlements.',
     msg_sem_liquidacoes_registadas: 'No settlements recorded yet.',
@@ -1679,6 +1697,7 @@ function aplicarTraducoes(){
   });
   document.getElementById('btnExportarHistorico').textContent = t('link_exportar_pdf');
   document.getElementById('btnPartilharHistorico').textContent = t('btn_partilhar_pdf');
+  document.getElementById('btnExportarExcel').textContent = t('btn_exportar_excel');
 
   document.getElementById('confirmModalTitle').textContent = t('titulo_confirmar');
   document.getElementById('confirmModalNo').textContent = t('btn_cancelar');
@@ -2073,6 +2092,7 @@ document.getElementById('btnHistoricoAnterior').onclick = () => navegarHistorico
 document.getElementById('btnHistoricoSeguinte').onclick = () => navegarHistorico(1);
 document.getElementById('btnExportarHistorico').onclick = () => exportarHistoricoPDF();
 document.getElementById('btnPartilharHistorico').onclick = () => partilharHistoricoPDF();
+document.getElementById('btnExportarExcel').onclick = () => exportarHistoricoExcel();
 
 // Modal de confirmação próprio da app (em vez de confirm() nativo do browser,
 // que mostra sempre o domínio do site no título e não se pode personalizar).
@@ -2732,7 +2752,7 @@ function renderHistorico(){
 
   navWrap.style.display = 'flex';
   secaoTitulo.style.display = 'block';
-  acoesPDF.style.display = 'flex';
+  acoesPDF.style.display = 'block';
   document.getElementById('historicoSecaoTituloTexto').textContent = t('titulo_por_categoria');
 
   document.getElementById('historicoLabel').textContent = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
@@ -2991,6 +3011,97 @@ async function partilharHistoricoPDF(){
     }
   }
   doc.save(nomeFicheiro);
+}
+
+// Lista detalhada (uma linha por despesa) do período do Histórico
+// selecionado — junta despesas reais e despesas fixas (recorrentes) já
+// existentes em cada mês do período, tal como totalDoMes/gastoPorCategoriaDoMes
+// fazem para os totais. Usada pela exportação Excel.
+function gastosDetalhadosHistorico(ano, modo, periodo){
+  const linhas = [];
+  mesesDoPeriodoHistorico(modo, periodo).forEach(mes => {
+    gastos.filter(g => {
+      const d = new Date(g.data);
+      return d.getFullYear() === ano && d.getMonth() === mes;
+    }).forEach(g => linhas.push({
+      data: g.data,
+      categoria: g.categoria,
+      comerciante: g.comerciante || '',
+      valor: g.valor,
+      recorrente: false
+    }));
+
+    const inicioMesSeguinte = new Date(ano, mes + 1, 1);
+    recorrentes.filter(r => {
+      if(!r.criadoEm || !r.criadoEm.toDate) return true;
+      return r.criadoEm.toDate() < inicioMesSeguinte;
+    }).forEach(r => linhas.push({
+      data: new Date(ano, mes, 1).toISOString(),
+      categoria: r.categoria,
+      comerciante: r.descricao || '',
+      valor: r.valor,
+      recorrente: true
+    }));
+  });
+  return linhas;
+}
+
+// Gera o ficheiro Excel (.xlsx) do período do Histórico atualmente
+// selecionado: uma folha "Despesas" com a listagem detalhada (uma linha por
+// despesa, agrupada por categoria) para maior controlo na análise, e uma
+// folha "Por categoria" com os totais, tal como no PDF.
+function gerarWorkbookHistoricoExcel(){
+  const labelPeriodo = labelPeriodoHistorico(historicoAno, historicoModo, historicoPeriodo);
+  const porCategoria = gastoPorCategoriaHistorico(historicoAno, historicoModo, historicoPeriodo);
+  const categoriasOrdenadas = Object.keys(porCategoria).sort((a, b) => porCategoria[b] - porCategoria[a]);
+  const total = totalHistorico(historicoAno, historicoModo, historicoPeriodo);
+
+  const ordemCategoria = {};
+  categoriasOrdenadas.forEach((c, i) => { ordemCategoria[c] = i; });
+  const linhas = gastosDetalhadosHistorico(historicoAno, historicoModo, historicoPeriodo);
+  linhas.sort((a, b) => {
+    const diff = (ordemCategoria[a.categoria] ?? 999) - (ordemCategoria[b.categoria] ?? 999);
+    if(diff !== 0) return diff;
+    return new Date(a.data) - new Date(b.data);
+  });
+
+  const nomeFixo = t('txt_fixo').charAt(0).toUpperCase() + t('txt_fixo').slice(1);
+  const cabecalhoDespesas = [t('excel_col_data'), t('pdf_categoria'), t('excel_col_comerciante'), t('pdf_valor'), t('excel_col_fixa')];
+  const linhasDespesas = linhas.map(l => [
+    new Date(l.data).toLocaleDateString(localeAtual(), { day:'2-digit', month:'short', year:'numeric' }),
+    l.categoria,
+    l.comerciante,
+    l.valor,
+    l.recorrente ? nomeFixo : ''
+  ]);
+  const wsDespesas = XLSX.utils.aoa_to_sheet([cabecalhoDespesas, ...linhasDespesas]);
+  wsDespesas['!cols'] = [{ wch:12 }, { wch:18 }, { wch:24 }, { wch:12 }, { wch:12 }];
+  linhasDespesas.forEach((_, i) => {
+    const celula = wsDespesas[XLSX.utils.encode_cell({ r: i + 1, c: 3 })];
+    if(celula) celula.z = '#,##0.00 €';
+  });
+
+  const linhasCategoria = categoriasOrdenadas.map(c => [c, porCategoria[c]]);
+  linhasCategoria.push([t('txt_total'), total]);
+  const wsCategoria = XLSX.utils.aoa_to_sheet([[t('pdf_categoria'), t('pdf_valor')], ...linhasCategoria]);
+  wsCategoria['!cols'] = [{ wch:24 }, { wch:12 }];
+  linhasCategoria.forEach((_, i) => {
+    const celula = wsCategoria[XLSX.utils.encode_cell({ r: i + 1, c: 1 })];
+    if(celula) celula.z = '#,##0.00 €';
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsDespesas, t('excel_folha_despesas'));
+  XLSX.utils.book_append_sheet(wb, wsCategoria, t('titulo_por_categoria'));
+
+  const nomeFicheiro = 'gastos-' + labelPeriodo.replace(/\s+/g, '-') + '.xlsx';
+  return { wb, nomeFicheiro };
+}
+
+// Botão "Exportar Excel": gera o ficheiro .xlsx e descarrega-o diretamente.
+function exportarHistoricoExcel(){
+  const { wb, nomeFicheiro } = gerarWorkbookHistoricoExcel();
+  XLSX.writeFile(wb, nomeFicheiro);
 }
 
 // Mostra o histórico de liquidações das Contas a Acertar, com o cálculo

@@ -512,8 +512,10 @@ poupar tempo de configuração.
     cobre também outros países com a mesma norma (Índia/UPI, Tailândia/
     PromptPay, mencionados no comentário do código, ainda não testados
     isoladamente mas com a mesma base técnica).
-- **Alternar entre gráfico de barras e circular** (`#btnTipoGrafico`, botão
-  por baixo do "Menu ▾" no cabeçalho, pedido do utilizador em agosto/2026):
+- **Alternar entre gráfico de barras e circular** (`#btnTipoGrafico`, pedido
+  do utilizador em agosto/2026; posição final por cima do próprio gráfico,
+  dentro de `.chart-type-row` — inicialmente tinha sido colocado por baixo
+  do "Menu ▾" no cabeçalho, mas o utilizador pediu para descer o botão):
   `renderChart(doMes)` guarda os dados recebidos em `ultimoDoMesGrafico`
   (para o botão poder redesenhar o mesmo período sem recalcular nada), e
   agora ramifica consoante `tipoGrafico` ('bar' ou 'pie', guardado em
@@ -526,6 +528,41 @@ poupar tempo de configuração.
   - O gráfico de barras não muda nada do que já existia; só o `pie` é novo,
     com legenda por baixo (`position:'bottom'`) e tooltip a mostrar o valor
     formatado em euros por categoria.
+- **Exportação para Excel (.xlsx)** (botão `📊 Exportar Excel` no Histórico,
+  por baixo da linha "Exportar PDF"/"Partilhar", pedido do utilizador em
+  agosto/2026: "preciso que a app exporte para excel... a listagem detalhada
+  com as despesas por categoria para maior controlo"). Usa a biblioteca
+  SheetJS (`XLSX`, `xlsx.full.min.js` via cdnjs, mesmo padrão `<script>` das
+  outras bibliotecas) — client-side, sem custos, sem backend.
+  - `gastosDetalhadosHistorico(ano, modo, periodo)`: nova função que
+    devolve a lista de despesas linha a linha (não só agregados) do período
+    selecionado — junta `gastos` reais com as despesas fixas/recorrentes já
+    existentes em cada mês, seguindo o mesmo critério de `criadoEm` já usado
+    em `totalDoMes`/`gastoPorCategoriaDoMes`. Para despesas fixas em meses
+    passados (histórico de trimestre/semestre/ano), a data de cada linha
+    virtual passou a ser o dia 1 do mês respetivo (não "agora"), para não
+    amontoar tudo na data de hoje num histórico com vários meses.
+  - `gerarWorkbookHistoricoExcel()`: gera o `.xlsx` com duas folhas —
+    "Despesas" (uma linha por despesa: Data, Categoria, Comerciante, Valor,
+    Despesa fixa; agrupada por categoria pela mesma ordem do resumo e, dentro
+    de cada categoria, por data) e "Por categoria" (totais agregados + linha
+    de Total, igual ao que já existe no PDF). Os valores ficam como números
+    reais (não texto), com formato de coluna `#,##0.00 €`, para o utilizador
+    poder filtrar/somar/fazer tabelas dinâmicas no Excel.
+  - **Limitação conhecida e aceite:** a edição SheetJS Community (gratuita,
+    a única usada aqui) não escreve estilos de célula (negrito, cores,
+    fundos) no `.xlsx` — só os dados e o formato numérico. Ficou decidido
+    não perseguir estilo visual aqui porque o PDF já cobre a vertente
+    "relatório bonito"; o Excel serve para análise/dados crus.
+  - Nome do ficheiro segue o mesmo padrão do PDF: `'gastos-' + labelPeriodo
+    + '.xlsx'`.
+  - Testado com Playwright (mock do `xlsx.full.min.js` local, obtido via
+    `npm install xlsx` porque o cdnjs está bloqueado para acesso direto
+    nesta sessão — o pacote npm inclui o mesmo build UMD `dist/xlsx.full.min.js`
+    usado no browser): geração do workbook, conteúdo das duas folhas,
+    despesas fixas corretamente marcadas, downloads reais via evento
+    `download` do Playwright para o PDF e para o Excel, e o esconder/mostrar
+    do bloco de botões em modo "Liquidações" continuam corretos.
 
 ## Regras de segurança do Firestore (versão atual, colar na consola Firebase)
 
@@ -711,7 +748,9 @@ navegável por mês/trimestre/semestre/ano/liquidações, categorias
 personalizáveis (criar/renomear com migração automática/remover), datas
 editáveis nos gastos, deteção de faturas duplicadas (mesmo NIF + valor + dia,
 só faz sentido em gastos vindos de QR), leitura de QR por câmara ao vivo **ou
-foto da galeria**, exportação/partilha em PDF do resumo do Histórico, escolha
+foto da galeria**, exportação/partilha em PDF do resumo do Histórico,
+exportação em Excel (.xlsx) da listagem detalhada de despesas por categoria,
+gráfico de categorias com alternância barras/circular, escolha
 de idioma (PT/EN, cobre toda a interface) e moeda (símbolo apresentado, sem
 conversão cambial), modal de confirmação próprio da app (não usar
 `confirm()`/`alert()` nativos do browser — mostram sempre o domínio do site e
