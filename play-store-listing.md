@@ -20,13 +20,16 @@ Regista gastos por QR Code, controla orçamentos e divide despesas em casal.
 ## Descrição completa (máx. 4000 carateres)
 
 ```
-Fin+ Gastos é uma app gratuita de controlo financeiro pessoal, pensada para o dia a dia em Portugal.
+Fin+ Gastos é uma app gratuita de controlo financeiro pessoal, pensada para o dia a dia, em Portugal e fora dele.
 
 APONTA A CÂMARA E PRONTO
-Lê o QR Code de qualquer fatura portuguesa e o valor fica registado automaticamente, sem escrever nada à mão. Também podes ler o QR a partir de uma foto já tirada, ou inserir o gasto manualmente.
+Lê o QR Code de qualquer fatura portuguesa e o valor fica registado automaticamente, sem escrever nada à mão. Já testada com sucesso também em faturas e talões de Espanha, França, Alemanha, Reino Unido, Suíça, Itália, Brasil, Estados Unidos, Canadá, Austrália, Nova Zelândia, México, Singapura, Índia, China e Japão: podes usar a câmara com confiança nas tuas viagens ou compras fora do país.
+
+SEM QR CODE? A APP LÊ NA MESMA
+Aponta a câmara ao valor total de um talão sem QR Code e a app tenta reconhecer o valor automaticamente por leitura ótica (OCR), pedindo sempre a tua confirmação antes de guardar. Também podes ler o QR a partir de uma foto já tirada, ou inserir o gasto manualmente.
 
 GRÁFICOS E RELATÓRIOS
-Consulta os teus gastos por categoria em gráfico de barras ou circular, à tua escolha, e exporta ou partilha um relatório em PDF ou uma folha Excel com a listagem detalhada de despesas, para maior controlo.
+Consulta os teus gastos por categoria em gráfico de barras ou circular, à tua escolha. Exporta ou partilha um relatório em PDF com gráficos e comparações, ou uma folha Excel com a listagem detalhada de despesas por categoria, para maior controlo e análise.
 
 ORÇAMENTOS COM AVISO
 Define um limite mensal por categoria e recebe um aviso visual quando te aproximas ou ultrapassas o valor definido.
@@ -35,7 +38,7 @@ DESPESAS FIXAS
 Renda, subscrições e seguros: regista uma vez as despesas que se repetem todos os meses e elas contam automaticamente, sem teres de as inserir de novo.
 
 HISTÓRICO COMPLETO
-Consulta os teus gastos por mês, trimestre, semestre ou ano, com comparação automática face ao período anterior.
+Consulta os teus gastos por mês, trimestre, semestre ou ano, com comparação automática face ao período anterior e ao mesmo período do ano passado.
 
 CONTAS A ACERTAR (casal ou família)
 Convida a tua parceira ou parceiro e passem a dividir despesas em conjunto: cada um regista o que pagou, a app calcula quem deve o quê, e quando acertarem contas fica tudo registado com um número de referência.
@@ -43,8 +46,11 @@ Convida a tua parceira ou parceiro e passem a dividir despesas em conjunto: cada
 CATEGORIAS AO TEU GOSTO
 Cria, renomeia ou remove categorias como quiseres: a app adapta-se a ti.
 
-PRIVACIDADE
-Os teus dados ficam associados à tua conta Google, nunca são vendidos, e podes pedir a eliminação completa a qualquer momento. Sem anúncios.
+DISPONÍVEL EM PORTUGUÊS E INGLÊS
+Escolhe o idioma e a moeda apresentada nas Definições.
+
+PRIVACIDADE E SEGURANÇA
+Os teus dados ficam associados à tua conta Google, nunca são vendidos, e podes pedir a eliminação completa a qualquer momento. Ativa o bloqueio por biometria se partilhares o telemóvel com alguém. Sem anúncios.
 
 Fin+ Gastos é a primeira de uma família de apps gratuitas da Fin+, criadas para ajudar as pessoas a organizarem melhor a sua vida financeira no dia a dia.
 ```
