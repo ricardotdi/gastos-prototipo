@@ -23,13 +23,16 @@ Regista gastos por QR Code, controla orçamentos e divide despesas em casal.
 Fin+ Gastos é uma app gratuita de controlo financeiro pessoal, pensada para o dia a dia em Portugal.
 
 APONTA A CÂMARA E PRONTO
-Lê o QR Code de qualquer fatura portuguesa e o valor fica registado automaticamente — sem escrever nada à mão. Também podes ler o QR a partir de uma foto já tirada, ou inserir o gasto manualmente.
+Lê o QR Code de qualquer fatura portuguesa e o valor fica registado automaticamente, sem escrever nada à mão. Também podes ler o QR a partir de uma foto já tirada, ou inserir o gasto manualmente.
+
+GRÁFICOS E RELATÓRIOS
+Consulta os teus gastos por categoria em gráfico de barras ou circular, à tua escolha, e exporta ou partilha um relatório em PDF ou uma folha Excel com a listagem detalhada de despesas, para maior controlo.
 
 ORÇAMENTOS COM AVISO
 Define um limite mensal por categoria e recebe um aviso visual quando te aproximas ou ultrapassas o valor definido.
 
 DESPESAS FIXAS
-Renda, subscrições, seguros — regista uma vez as despesas que se repetem todos os meses e elas contam automaticamente, sem teres de as inserir de novo.
+Renda, subscrições e seguros: regista uma vez as despesas que se repetem todos os meses e elas contam automaticamente, sem teres de as inserir de novo.
 
 HISTÓRICO COMPLETO
 Consulta os teus gastos por mês, trimestre, semestre ou ano, com comparação automática face ao período anterior.
@@ -38,7 +41,7 @@ CONTAS A ACERTAR (casal ou família)
 Convida a tua parceira ou parceiro e passem a dividir despesas em conjunto: cada um regista o que pagou, a app calcula quem deve o quê, e quando acertarem contas fica tudo registado com um número de referência.
 
 CATEGORIAS AO TEU GOSTO
-Cria, renomeia ou remove categorias como quiseres — a app adapta-se a ti.
+Cria, renomeia ou remove categorias como quiseres: a app adapta-se a ti.
 
 PRIVACIDADE
 Os teus dados ficam associados à tua conta Google, nunca são vendidos, e podes pedir a eliminação completa a qualquer momento. Sem anúncios.
