@@ -108,14 +108,21 @@ https://ricardotdi.github.io/gastos-prototipo/privacidade.html
 
 ---
 
-## Capturas de ecrã (tens de tirar tu, no telemóvel)
+## Capturas de ecrã
 
-Mínimo 2, recomendo 4 a 6, tiradas na app real:
+**Já feito** (confirmado em setembro/2026): 6 de 8 capturas carregadas na
+Ficha da loja predefinida, acima do mínimo de 4 exigido para
+elegibilidade de promoção. São de antes do gráfico circular e da
+exportação Excel; substituir não é obrigatório, só se um dia se quiser
+mostrar as funcionalidades mais recentes.
+
+Se um dia quiseres tirar novas, sugestão de conjunto (mínimo 2,
+recomendo 4 a 6, tiradas na app real):
 
 1. Ecrã principal (total do mês + gráfico)
 2. A scanear um QR Code de uma fatura
 3. Orçamentos por categoria (com a barra de aviso)
-4. Histórico (qualquer separador — Mês, Liquidações, etc.)
+4. Histórico (qualquer separador: Mês, Liquidações, etc.)
 5. Contas a Acertar (as duas colunas)
 
 Formato: PNG ou JPEG, entre 320px e 3840px no lado mais pequeno, proporção

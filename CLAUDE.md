@@ -922,10 +922,30 @@ controlo (Play Console): os três requisitos aparecem com ✓ verde e texto
 riscado — "Publique um lançamento de teste fechado", "Tenha, pelo menos, 12
 testadores a participar", "Execute o teste fechado com, pelo menos, 12
 testadores durante, pelo menos, 14 dias". O botão **"Candidatar-se à
-produção"** está ativo e disponível. Falta apenas: confirmar se a Play
-Console pede as capturas de ecrã reais do telemóvel (ainda não tiradas,
-ver `play-store-listing.md`) durante o próprio fluxo de candidatura, e
-depois clicar "Candidatar-se à produção".
+produção"** está ativo e disponível.
+
+**Capturas de ecrã: já estavam feitas (correção à nota anterior, que
+estava errada/desatualizada).** Confirmado na Ficha da loja predefinida
+(Presença na loja → Fichas da loja → Ficha predefinida → Assets de
+telemóvel): **6 de 8** capturas já carregadas, acima do mínimo de 4
+exigido para elegibilidade de promoção. São de antes das últimas
+novidades (gráfico circular, exportação Excel) mas isso não bloqueia nada
+— a Google não exige capturas atualizadas. Não há nada pendente aqui;
+o utilizador pode substituí-las no futuro se quiser mostrar as
+funcionalidades mais recentes, mas não é necessário para avançar.
+
+**Descrição da ficha da loja atualizada (4 setembro 2026)**, ver
+`play-store-listing.md`: título e nome mantidos, mas a descrição curta e
+a descrição completa foram reescritas para refletir o estado atual da
+app (leitura internacional em 18 países, leitura por OCR sem QR Code,
+exportação Excel, gráfico circular, bloqueio por biometria, idioma
+PT/EN) e para remover hífens longos, consistente com a regra já seguida
+no resto da app. Falta o utilizador colar estes textos nos campos da
+Play Console (Nome da aplicação, Breve descrição, Descrição completa).
+
+**Estado geral (4 setembro 2026): pronto para "Candidatar-se à
+produção"**, sem bloqueios conhecidos — só falta o utilizador colar os
+textos atualizados da ficha e clicar no botão.
 
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
