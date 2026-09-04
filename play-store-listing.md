@@ -14,7 +14,7 @@ Fin+ Gastos
 ## Descrição curta (máx. 80 carateres)
 
 ```
-Regista gastos por QR Code, controla orçamentos e divide despesas em casal.
+Regista gastos por QR Code ou OCR, controla orçamentos e exporta Excel.
 ```
 
 ## Descrição completa (máx. 4000 carateres)
