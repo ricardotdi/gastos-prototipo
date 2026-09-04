@@ -947,6 +947,20 @@ Play Console (Nome da aplicação, Breve descrição, Descrição completa).
 produção"**, sem bloqueios conhecidos — só falta o utilizador colar os
 textos atualizados da ficha e clicar no botão.
 
+**Candidatura à produção SUBMETIDA (4 setembro 2026, 17:30).** O
+utilizador preencheu o formulário "Candidate-se ao acesso à produção"
+(3 secções: Acerca do teste fechado, Acerca da sua app, Prontidão para
+a produção — respostas geradas com ajuda do Claude, cobrindo recrutamento
+de testadores via família/amigos/clientes Fin+, feedback de 8 dos 13
+testadores, público-alvo, e alterações feitas com base no teste fechado
+como o gráfico circular e a exportação Excel) e submeteu. Confirmado no
+Painel de controlo: "Temos a sua candidatura para acesso à produção" —
+"Estamos a rever o seu formulário de candidatura. Vamos enviar um email
+com uma atualização ao proprietário da conta." Prazo típico até 7 dias
+(pode demorar mais). **Não há nada pendente da parte do Claude ou do
+utilizador agora — é esperar pela resposta da Google por email.** Depois
+da aprovação, a app fica disponível ao público na Play Store.
+
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
