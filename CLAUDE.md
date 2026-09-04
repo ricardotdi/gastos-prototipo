@@ -916,6 +916,17 @@ uma vez (só assim contam para o requisito); a contagem dos 14 dias
 consecutivos começa a partir do opt-in de cada um. Depois de completos os
 14 dias, "Apply for production access" na Play Console.
 
+**Atualização (4 setembro 2026): teste fechado CONCLUÍDO, elegível para
+produção.** Confirmado pelo utilizador via captura de ecrã do Painel de
+controlo (Play Console): os três requisitos aparecem com ✓ verde e texto
+riscado — "Publique um lançamento de teste fechado", "Tenha, pelo menos, 12
+testadores a participar", "Execute o teste fechado com, pelo menos, 12
+testadores durante, pelo menos, 14 dias". O botão **"Candidatar-se à
+produção"** está ativo e disponível. Falta apenas: confirmar se a Play
+Console pede as capturas de ecrã reais do telemóvel (ainda não tiradas,
+ver `play-store-listing.md`) durante o próprio fluxo de candidatura, e
+depois clicar "Candidatar-se à produção".
+
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
