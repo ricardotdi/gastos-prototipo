@@ -970,6 +970,18 @@ novo lançamento de produção (reaproveitando o `.aab` já aprovado do
 teste fechado, sem gerar um novo), pré-visualizar/confirmar, enviar para
 verificação da Google, e publicar. Em curso.
 
+**Lançamento de produção criado e enviado para revisão (6 setembro
+2026, 14:22).** Países/regiões: mundial (176 países listados + "resto
+do mundo"), enviado e já confirmado nas "Alterações em revisão" da
+Vista geral da publicação. App bundle reaproveitado: versão 2 (1.0.0.0),
+o mesmo já usado e aprovado no teste fechado — não foi preciso gerar um
+novo `.aab`. Notas de lançamento (pt-PT): "Primeira versão pública da
+Fin+ Gastos. Obrigado por experimentares a app!". Este lançamento entrou
+sozinho em revisão ao guardar (sem precisar de um botão extra de envio).
+**Falta só aguardar a aprovação/publicação da Google — não há mais
+nenhuma ação pendente da parte do utilizador ou do Claude.** Quando
+publicar, a app fica disponível ao público em geral, em todo o mundo.
+
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
