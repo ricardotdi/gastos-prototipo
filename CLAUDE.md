@@ -993,6 +993,33 @@ empacotamento Android / Play Store descrito nesta secção, desde a
 criação da conta de developer até aqui. Não há mais nenhum passo de
 publicação pendente.
 
+**BUG novo encontrado logo a seguir à publicação: barra de endereço
+reaparece numa instalação nova a partir da Play Store pública (6
+setembro 2026, ~18:30) — CORRIGIDO.** Causa raiz diferente da saga de
+agosto (que era sobre o `assetlinks.json` não ser servido de todo):
+desta vez o ficheiro estava correto, mas só tinha a fingerprint da
+**chave de carregamento** (upload key, gerada pelo PWABuilder,
+`C8:34:71:...`). A Google Play assina as apps entregues ao público com
+uma chave diferente, a **"chave de assinatura de apps"** (Play App
+Signing, ativo desde 6 agosto 2026 — confirmado em Play Console →
+Protegido com o Google Play → Assinatura de apps → Chave clássica):
+`52:11:1E:54:21:32:F3:90:7A:E0:BE:8A:60:A8:B1:BC:0D:43:F2:8F:B9:B6:68:
+B3:21:CB:35:C5:18:26:64:4B`. Sem esta fingerprint no `assetlinks.json`,
+qualquer instalação feita a partir da Play Store (incluindo instalações
+novas) falha a verificação e mostra sempre a barra de endereço.
+**Corrigido** em `ricardotdi/ricardotdi.github.io` (`.well-known/
+assetlinks.json`): adicionada a fingerprint da chave de assinatura de
+apps, mantendo também a antiga (cobre instalações diretas de `.apk`
+assinado com a chave de carregamento). Deploy do GitHub Pages confirmado
+com sucesso (Actions run concluído). **Lição para o futuro: sempre que
+o "App signing" da Play Store estiver ativo, o `assetlinks.json` tem de
+incluir a fingerprint da CHAVE DE ASSINATURA DE APPS (Play Console →
+Protegido com o Google Play → Assinatura de apps), não só a da chave de
+carregamento/upload key do PWABuilder — são frequentemente diferentes.**
+Propagação da verificação pode voltar a demorar horas/até um dia, como
+da vez anterior (sem forma de forçar a partir daqui); recomendado ao
+utilizador desinstalar e reinstalar a app mais tarde para confirmar.
+
 **Possíveis próximos passos futuros (não urgentes, só se/quando o
 utilizador quiser)**: acompanhar as primeiras instalações reais e
 reviews na Play Console (Estatísticas), considerar o rebrand adiado
