@@ -961,6 +961,15 @@ com uma atualização ao proprietário da conta." Prazo típico até 7 dias
 utilizador agora — é esperar pela resposta da Google por email.** Depois
 da aprovação, a app fica disponível ao público na Play Store.
 
+**ACESSO DE PRODUÇÃO CONCEDIDO (6 setembro 2026, 13:41) — muito mais
+rápido que o prazo típico de 7 dias.** Confirmado no Painel de controlo:
+"Parabéns! Foi concedido acesso de produção do Google Play à sua app."
+Falta só a checklist final para publicar de facto: selecionar países e
+regiões (utilizador escolheu **disponibilizar mundialmente**), criar um
+novo lançamento de produção (reaproveitando o `.aab` já aprovado do
+teste fechado, sem gerar um novo), pré-visualizar/confirmar, enviar para
+verificação da Google, e publicar. Em curso.
+
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
