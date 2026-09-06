@@ -982,6 +982,24 @@ sozinho em revisão ao guardar (sem precisar de um botão extra de envio).
 nenhuma ação pendente da parte do utilizador ou do Claude.** Quando
 publicar, a app fica disponível ao público em geral, em todo o mundo.
 
+## 🎉 APP PUBLICADA NA GOOGLE PLAY STORE (6 setembro 2026, ~14:21)
+
+Confirmado em "Vista geral da publicação → Atividade de envio": o envio
+nº 6 ("Produção", enviado às 14:21) tem estado **"Publicada"**. A
+Fin+ Gastos está **oficialmente disponível ao público em geral**, sem
+necessidade de link de convite/opt-in, pesquisável na Play Store,
+disponível mundialmente. Marca o fim de todo o percurso de
+empacotamento Android / Play Store descrito nesta secção, desde a
+criação da conta de developer até aqui. Não há mais nenhum passo de
+publicação pendente.
+
+**Possíveis próximos passos futuros (não urgentes, só se/quando o
+utilizador quiser)**: acompanhar as primeiras instalações reais e
+reviews na Play Console (Estatísticas), considerar o rebrand adiado
+para "Fin+ Budget" e a expansão de idiomas (ES/FR/DE/IT) se algum dia
+se decidir por expansão internacional a sério, e continuar a adicionar
+funcionalidades por pedido do utilizador como sempre.
+
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
 2. Aires — airesmcmedeiros.bc@gmail.com
