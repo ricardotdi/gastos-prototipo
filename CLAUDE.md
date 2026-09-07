@@ -1020,6 +1020,12 @@ Propagação da verificação pode voltar a demorar horas/até um dia, como
 da vez anterior (sem forma de forçar a partir daqui); recomendado ao
 utilizador desinstalar e reinstalar a app mais tarde para confirmar.
 
+**CONFIRMADO RESOLVIDO pelo utilizador (6 setembro 2026, minutos depois
+do fix)**: desinstalou e reinstalou a app a partir da Play Store nesse
+mesmo telemóvel e já abre sem barra de endereço, como TWA "confiada" a
+sério. Desta vez a propagação foi quase instantânea (ao contrário da
+saga de agosto, que levou até ao dia seguinte).
+
 **Possíveis próximos passos futuros (não urgentes, só se/quando o
 utilizador quiser)**: acompanhar as primeiras instalações reais e
 reviews na Play Console (Estatísticas), considerar o rebrand adiado
