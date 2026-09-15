@@ -623,6 +623,7 @@
       <span id="btnDesbloquearTexto">👆 Desbloquear com biometria</span>
     </button>
     <div class="login-status" id="lockStatus"></div>
+    <p style="margin-top:20px;"><a href="#" id="linkSairBloqueio" style="color:rgba(255,255,255,.55); font-size:12px; text-decoration:underline;"></a></p>
   </div>
 </div>
 
@@ -875,7 +876,7 @@
       <div class="ajuda-secao">
         <h3>⚙️ Idioma, moeda e privacidade</h3>
         <p>Em <strong>Menu → Definições</strong>, escolhe o idioma (Português/English) e a moeda apresentada. Consulta a nossa <a href="privacidade.html" target="_blank" style="color:var(--navy);">Política de Privacidade</a> a qualquer momento a partir das Definições.</p>
-        <p>Se o teu telemóvel tiver impressão digital ou reconhecimento facial, podes ativar o <strong>"Bloqueio por biometria"</strong> aí mesmo, para a app pedir confirmação sempre que a abrires nesse dispositivo (útil se partilhares o telemóvel com alguém).</p>
+        <p>Se o teu telemóvel tiver impressão digital ou reconhecimento facial, podes ativar o <strong>"Bloqueio por biometria"</strong> aí mesmo, para a app pedir confirmação sempre que a abrires nesse dispositivo (útil se partilhares o telemóvel com alguém). Se a biometria alguma vez falhar ou ficar presa a verificar, toca em "Não consegues desbloquear? Sair e voltar a entrar", no ecrã de bloqueio, para desativares o bloqueio nesse dispositivo e entrares outra vez com a tua conta Google.</p>
         <p>Tens também um ícone de olho 👁️ junto ao total do mês, no ecrã principal: toca nele para ocultar o valor (fica desfocado), útil quando estiveres a registar uma despesa em público.</p>
       </div>
     </div>
@@ -941,7 +942,7 @@
       <div class="ajuda-secao">
         <h3>⚙️ Language, currency and privacy</h3>
         <p>In <strong>Menu → Settings</strong>, choose the language (Português/English) and the currency shown. You can check our <a href="privacidade.html" target="_blank" style="color:var(--navy);">Privacy Policy</a> at any time from Settings.</p>
-        <p>If your phone has a fingerprint sensor or face recognition, you can turn on <strong>"Biometric lock"</strong> right there, so the app asks for confirmation every time you open it on that device (handy if you share your phone with someone).</p>
+        <p>If your phone has a fingerprint sensor or face recognition, you can turn on <strong>"Biometric lock"</strong> right there, so the app asks for confirmation every time you open it on that device (handy if you share your phone with someone). If biometrics ever fails or gets stuck verifying, tap "Can't unlock? Sign out and sign back in" on the lock screen to turn off the lock on that device and sign in again with your Google account.</p>
         <p>There's also an eye icon 👁️ next to the monthly total on the main screen: tap it to hide the amount (it gets blurred), handy when you're logging an expense in public.</p>
       </div>
     </div>
@@ -1153,6 +1154,7 @@ const T = {
     btn_desbloquear_biometria: '👆 Desbloquear com biometria',
     status_a_verificar_biometria: 'A verificar…',
     erro_biometria: 'Não foi possível confirmar. Tenta novamente.',
+    link_sair_bloqueio: 'Não consegues desbloquear? Sair e voltar a entrar',
     erro_login_nao_ativado: 'Este método de login ainda não está ativado. Tenta outro por agora.',
     erro_login_conta_existe: 'Já tens conta com outro método de login (ex: Google) associado a este email — usa esse.',
     erro_login_popup_bloqueado: 'O browser bloqueou a janela de login. Permite pop-ups para este site e tenta novamente.',
@@ -1356,6 +1358,7 @@ const T = {
     btn_desbloquear_biometria: '👆 Unlock with biometrics',
     status_a_verificar_biometria: 'Verifying…',
     erro_biometria: 'Could not confirm. Try again.',
+    link_sair_bloqueio: "Can't unlock? Sign out and sign back in",
     erro_login_nao_ativado: 'This login method isn\'t enabled yet. Try another one for now.',
     erro_login_conta_existe: 'You already have an account with another login method (e.g. Google) linked to this email — use that one.',
     erro_login_popup_bloqueado: 'The browser blocked the login window. Allow pop-ups for this site and try again.',
@@ -1611,6 +1614,7 @@ function aplicarTraducoes(){
   document.getElementById('lockTitulo').textContent = t('titulo_app_bloqueada');
   document.getElementById('lockSubtitulo').textContent = t('lock_subtitulo');
   document.getElementById('btnDesbloquearTexto').textContent = t('btn_desbloquear_biometria');
+  document.getElementById('linkSairBloqueio').textContent = t('link_sair_bloqueio');
   document.getElementById('headerEyebrow').textContent = t('login_eyebrow');
   document.getElementById('headerTitulo').textContent = t('titulo_app');
   document.getElementById('tituloOrcamentosMes').textContent = t('titulo_orcamentos_mes');
@@ -2472,6 +2476,17 @@ function desbloquearApp(){
   verificarRelatorioMensal();
 }
 
+// Sai do ecrã de bloqueio quando a biometria falha ou fica presa (ex: "A
+// verificar…" sem nunca resolver, um problema real reportado por um
+// utilizador) — desativa o bloqueio neste dispositivo e termina sessão,
+// para a pessoa poder voltar a entrar com a conta Google normalmente. É a
+// única forma de sair do ecrã de bloqueio caso a biometria não funcione,
+// por isso fica sempre visível, não só depois de um erro.
+function sairDoEcraBloqueio(user){
+  desativarBiometria(user.uid);
+  auth.signOut();
+}
+
 function mostrarEcraBloqueio(user){
   const lockScreen = document.getElementById('lockScreen');
   const status = document.getElementById('lockStatus');
@@ -2490,6 +2505,11 @@ function mostrarEcraBloqueio(user){
     } finally {
       btn.disabled = false;
     }
+  };
+
+  document.getElementById('linkSairBloqueio').onclick = (e) => {
+    e.preventDefault();
+    sairDoEcraBloqueio(user);
   };
 }
 

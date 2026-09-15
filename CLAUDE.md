@@ -1026,6 +1026,43 @@ mesmo telemóvel e já abre sem barra de endereço, como TWA "confiada" a
 sério. Desta vez a propagação foi quase instantânea (ao contrário da
 saga de agosto, que levou até ao dia seguinte).
 
+**Bug pós-publicação: bloqueio por biometria podia ficar preso em "A
+verificar…" para sempre, sem forma de sair (15 setembro 2026) —
+CORRIGIDO.** Utilizador reportou não conseguir abrir a app num
+telemóvel: ficava encravado no ecrã de bloqueio ("Bloqueio por
+biometria"), o botão "Desbloquear com biometria" mostrava "A
+verificar…" indefinidamente. Causa: `pedirDesbloqueioBiometrico()`
+chama `navigator.credentials.get()` (WebAuthn) com `timeout: 60000`,
+mas esse timeout é só uma sugestão ao browser, não uma garantia — se o
+autenticador da plataforma nunca resolver nem rejeitar a promise (ex:
+credencial já não reconhecida pelo dispositivo, problema do próprio
+Android/Chrome), a app ficava presa nesse ecrã sem qualquer forma de o
+utilizador recuperar o acesso aos seus próprios dados (o ecrã de
+bloqueio só tinha o botão de desbloquear, nada mais).
+- **Correção**: novo link sempre visível no ecrã de bloqueio, "Não
+  consegues desbloquear? Sair e voltar a entrar" (`#linkSairBloqueio`,
+  por baixo do botão de biometria) que chama a nova função
+  `sairDoEcraBloqueio(user)`: desativa o bloqueio por biometria nesse
+  dispositivo (`desativarBiometria`, limpa o `localStorage`) e termina
+  sessão (`auth.signOut()`), permitindo voltar a entrar normalmente com
+  a conta Google. Fica sempre visível (não só depois de um erro),
+  porque o cenário problemático é exatamente aquele em que a promise
+  nunca chega a rejeitar para mostrar a mensagem de erro normal.
+- Testado com Playwright simulando os dois cenários: `navigator.
+  credentials.get()` a ficar pendurado para sempre (`new Promise(() =>
+  {})`, nunca resolve) — confirmado que o link de saída funciona e
+  limpa corretamente o `localStorage` mesmo com a verificação ainda
+  "presa"; e o fluxo de erro normal (rejeição rápida) — confirmado sem
+  regressão, comportamento igual ao anterior.
+- Ajuda atualizada (PT+EN) a explicar esta opção de saída.
+- **Solução imediata que foi dada ao utilizador antes da correção**
+  (para referência futura, caso volte a acontecer antes de uma
+  atualização chegar a um dispositivo): limpar os dados/armazenamento
+  da app no telemóvel (Definições → Apps → Fin+ Gastos → Armazenamento
+  → Limpar dados) resolve, porque o bloqueio por biometria vive só no
+  `localStorage` local, por dispositivo — os dados reais da conta estão
+  seguros no Firestore, não se perdem.
+
 **Possíveis próximos passos futuros (não urgentes, só se/quando o
 utilizador quiser)**: acompanhar as primeiras instalações reais e
 reviews na Play Console (Estatísticas), considerar o rebrand adiado
