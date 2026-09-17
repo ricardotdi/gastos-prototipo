@@ -826,11 +826,11 @@
   <div class="sheet">
     <button class="close-btn" id="closeAjudaSheet">✕</button>
     <h2 id="tituloAjuda">Como utilizar a app</h2>
-    <p class="hint" id="hintAjuda">Um resumo rápido de tudo o que a Fin+ Gastos faz e como usar cada funcionalidade.</p>
+    <p class="hint" id="hintAjuda">Um resumo rápido de tudo o que a Bruma Finance Gastos faz e como usar cada funcionalidade.</p>
 
     <div id="ajudaConteudoPT">
       <div class="ajuda-secao">
-        <h3>💶 O que é a Fin+ Gastos</h3>
+        <h3>💶 O que é a Bruma Finance Gastos</h3>
         <p>Uma app gratuita para controlares os teus gastos do dia a dia, sozinho/a ou a par com alguém (parceiro/a, família). Os teus dados ficam associados à tua conta Google e sincronizam automaticamente entre dispositivos.</p>
       </div>
 
@@ -896,7 +896,7 @@
 
     <div id="ajudaConteudoEN" style="display:none;">
       <div class="ajuda-secao">
-        <h3>💶 What is Fin+ Gastos</h3>
+        <h3>💶 What is Bruma Finance Gastos</h3>
         <p>A free app to track your everyday expenses, alone or together with someone (partner, family). Your data is linked to your Google account and syncs automatically across devices.</p>
       </div>
 
@@ -1158,7 +1158,7 @@ const MESES = {
 
 const T = {
   pt: {
-    login_eyebrow: 'Finanças Positivas',
+    login_eyebrow: 'A sua vida financeira num só lugar',
     titulo_app: 'Os meus gastos',
     login_subtitulo: 'Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.',
     btn_entrar_google: 'Entrar com Google',
@@ -1187,7 +1187,7 @@ const T = {
     menu_definicoes: 'Definições',
     menu_sair: 'Sair',
     titulo_ajuda: 'Como utilizar a app',
-    hint_ajuda: 'Um resumo rápido de tudo o que a Fin+ Gastos faz e como usar cada funcionalidade.',
+    hint_ajuda: 'Um resumo rápido de tudo o que a Bruma Finance Gastos faz e como usar cada funcionalidade.',
     titulo_orcamentos_mes: 'Orçamentos do mês',
     link_editar: 'editar',
     titulo_despesas_fixas: 'Despesas fixas',
@@ -1325,12 +1325,12 @@ const T = {
     txt_editar_inline: 'editar',
     txt_fixo: 'fixo',
     txt_vs_mes_passado: 'que o mês passado',
-    pdf_tagline: 'Finanças Positivas',
+    pdf_tagline: 'A sua vida financeira num só lugar',
     pdf_titulo_resumo: 'Resumo de gastos - {periodo}',
     pdf_total: 'Total: ',
     pdf_categoria: 'Categoria',
     pdf_valor: 'Valor',
-    pdf_gerado_em: 'Gerado em {data} · Fin+ Finanças Positivas',
+    pdf_gerado_em: 'Gerado em {data} · Bruma Finance',
     pdf_share_titulo: 'Resumo de gastos',
     pdf_titulo_comparacoes: 'Comparações',
     pdf_periodo_atual: 'Este período ({periodo}): ',
@@ -1362,7 +1362,7 @@ const T = {
     link_privacidade: 'Política de privacidade'
   },
   en: {
-    login_eyebrow: 'Positive Finances',
+    login_eyebrow: 'Your financial life, all in one place',
     titulo_app: 'My expenses',
     login_subtitulo: 'Sign in to save your expenses and sync them across devices.',
     btn_entrar_google: 'Sign in with Google',
@@ -1391,7 +1391,7 @@ const T = {
     menu_definicoes: 'Settings',
     menu_sair: 'Sign out',
     titulo_ajuda: 'How to use the app',
-    hint_ajuda: 'A quick rundown of everything Fin+ Gastos does and how to use each feature.',
+    hint_ajuda: 'A quick rundown of everything Bruma Finance Gastos does and how to use each feature.',
     titulo_orcamentos_mes: 'This month\'s budgets',
     link_editar: 'edit',
     titulo_despesas_fixas: 'Fixed expenses',
@@ -1529,12 +1529,12 @@ const T = {
     txt_editar_inline: 'edit',
     txt_fixo: 'fixed',
     txt_vs_mes_passado: 'vs last month',
-    pdf_tagline: 'Positive Finances',
+    pdf_tagline: 'Your financial life, all in one place',
     pdf_titulo_resumo: 'Expense summary - {periodo}',
     pdf_total: 'Total: ',
     pdf_categoria: 'Category',
     pdf_valor: 'Amount',
-    pdf_gerado_em: 'Generated on {data} · Fin+ Positive Finances',
+    pdf_gerado_em: 'Generated on {data} · Bruma Finance',
     pdf_share_titulo: 'Expense summary',
     pdf_titulo_comparacoes: 'Comparisons',
     pdf_periodo_atual: 'This period ({periodo}): ',
@@ -2449,11 +2449,11 @@ async function ativarBiometria(uid){
   const credential = await navigator.credentials.create({
     publicKey: {
       challenge,
-      rp: { name: 'Fin+ Gastos' },
+      rp: { name: 'Bruma Finance Gastos' },
       user: {
         id: new TextEncoder().encode(uid),
         name: uid,
-        displayName: 'Fin+ Gastos'
+        displayName: 'Bruma Finance Gastos'
       },
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
       authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
