@@ -4,9 +4,10 @@
 
 Protótipo de app de controlo de gastos pessoais, com leitura de QR Code de
 faturas portuguesas (formato AT). Primeira de uma **família de apps utilitárias
-gratuitas sob a marca Fin+** — a estratégia é usar apps bem feitas e úteis no
-dia a dia para gerar afinidade com a marca Fin+ (intermediário de crédito de
-Ricardo Vagner Paiva Custódio), não apps para vender diretamente.
+gratuitas sob a marca Bruma Finance** (rebrand de setembro/2026, antes
+"Fin+") — a estratégia é usar apps bem feitas e úteis no dia a dia para gerar
+afinidade com a marca Bruma Finance (intermediário de crédito de Ricardo
+Vagner Paiva Custódio), não apps para vender diretamente.
 
 Sempre que se criar uma nova app desta família, o objetivo é repetir o mesmo
 padrão técnico e visual descrito abaixo, para consistência entre apps e para
@@ -163,8 +164,10 @@ poupar tempo de configuração.
     **gráfico de barras agrupadas por categoria com 3 séries** (atual/
     anterior/homólogo — navy/azul-claro `#8FA6BC`/dourado). Pagina
     automaticamente (`garantirEspaco()`) se o conteúdo não couber numa
-    página A4. Rodapé com "Gerado em {data} · Fin+ Finanças Positivas" e
-    "www.finmais.pt" centrado.
+    página A4. Rodapé com "Gerado em {data} · Bruma Finance" (desde o
+    rebrand de setembro/2026 — antes "Fin+ Finanças Positivas"; a linha
+    "www.finmais.pt" foi removida, domínio antigo sem substituto
+    confirmado ainda).
   - `exportarHistoricoPDF()` (botão "Exportar PDF"): gera o documento e
     `doc.save()` — download direto, sem tentar partilhar.
   - `partilharHistoricoPDF()` (botão "Partilhar"): gera o documento e tenta
@@ -637,34 +640,64 @@ funcionalidade de partilha (antes de virar "Contas a Acertar" separado) — sem
 regras próprias, sem código a usá-la, inofensiva mas pode ser ignorada ou
 limpa manualmente na consola se algum dia incomodar.
 
-## Identidade visual Fin+ (repetir nas próximas apps)
+## Identidade visual Bruma Finance (repetir nas próximas apps)
 
-- **Logótipo**: `Fin_plus_logo_euro.png` (wordmark "Fin+" em gradiente
-  cobre/dourado-rosado, com símbolo de euro por cima, fundo transparente).
-  Fica no topo do ecrã de login e no cabeçalho principal, acima do eyebrow.
-- **Ícone da app** (`icons/icon-192.png`, `icons/icon-512.png`): gerado a
-  partir do símbolo "€" recortado do logótipo (bounding box aproximado
-  x:342–555, y:25–229 em `Fin_plus_logo_euro.png`), centrado sobre um fundo
-  navy sólido (`#1A3C5E`, sem transparência — necessário para o ícone da
-  Play Store). Gerado com a biblioteca `jimp` (script ad-hoc, não fica no
-  repo). Se for preciso regenerar ou fazer variantes, repetir o recorte do
-  símbolo "€" (a wordmark "Fin+" completa é larga demais para um ícone
-  quadrado legível a tamanhos pequenos).
-- **Tagline**: "Finanças Positivas" — texto eyebrow no topo, por cima do
-  título da app.
-- **Paleta de cores** (definida em `:root` no CSS):
-  - `--ink:#12202E` (texto principal)
-  - `--navy:#1A3C5E` / `--navy-deep:#0E2740` (fundo do cabeçalho, gradiente)
-  - `--gold:#A19276` / `--gold-soft:#C9BFA8` (acento, textos secundários sobre navy)
-  - `--paper:#F6F4EF` (fundo geral da página)
-  - `--line:#DAD4C6` (bordas subtis)
-  - `--danger:#B4543A` (erro/remover/acima do orçamento)
-  - `--good:#4C7A5D` (dentro do orçamento, estado positivo)
+**Rebranding de setembro/2026** (Fin+ → Bruma Finance, a acompanhar o
+rebranding do negócio de intermediação de crédito do utilizador, novo site
+bruma-finance.pages.dev). Preparado na branch `rebrand-bruma-finance`,
+merge para `main` agendado para 24/10/2026 (ver secção própria mais abaixo
+sobre o lançamento da app publicada — este rebrand ainda não estava em
+produção à data desta escrita).
+
+- **Logótipo**: dois ficheiros entregues pelo utilizador via upload direto
+  no GitHub — `bruma-emblem.png` (emblema autónomo, 512×512 com cantos
+  transparentes à volta de um crachá circular/hexagonal opaco: "B" prateado,
+  diamante dourado, "F" em verde escuro; usado em código) e `Logotipo 2.png`
+  (composição completa em pilha: emblema + "BRUMA" + "FINANCE" +
+  "INTERMEDIÁRIO DE CRÉDITO", fundo quase preto; guardado só como referência,
+  não usado em código — o emblema sozinho + texto HTML vivo dá mais
+  flexibilidade de tamanho/cor do que a composição fixa). Lockup usado em
+  toda a app: `<img src="bruma-emblem.png">` + `<span>Bruma Finance</span>`
+  lado a lado (flex row), no ecrã de login, cabeçalho principal e ecrã de
+  bloqueio (aqui substituiu o emoji 🔒 antigo), e em `privacidade.html`.
+- **Ícone da app** (`icons/icon-192.png`, `icons/icon-512.png`): gerado por
+  `scripts/generate-icons.py` (Pillow) — centra `bruma-emblem.png` a 80% do
+  canvas (zona segura para ícones "maskable" do Android) sobre fundo sólido
+  `--brand-dark` (`#1A1A1A`, sem transparência, necessário para o ícone da
+  Play Store). Ao contrário do processo antigo (crop ad-hoc do símbolo "€",
+  nunca commitado), este script fica no repo — basta correr
+  `python3 scripts/generate-icons.py` a partir da raiz para regenerar.
+- **Tagline**: "A sua vida financeira num só lugar" (PT) / "Your financial
+  life, all in one place" (EN) — texto eyebrow no topo, por cima do título
+  da app. Substitui "Finanças Positivas"/"Positive Finances".
+- **Paleta de cores** (definida em `:root` no CSS, extraída diretamente do
+  emblema — o site bruma-finance.pages.dev não pôde ser acedido a partir do
+  ambiente de desenvolvimento remoto para confirmar cores exatas, o
+  utilizador optou por avançar com as cores do logótipo):
+  - `--ink:#151515` (texto principal)
+  - `--brand-dark:#1A1A1A` / `--brand-darker:#0D0D0D` (fundo escuro —
+    login/bloqueio, banner de relatório mensal, gradiente)
+  - `--accent:#C9A227` (dourado do emblema, acento)
+  - `--accent-soft:#B0B0B0` (prateado do emblema, secundário)
+  - `--paper:#F6F4EF` (fundo geral da página, inalterado)
+  - `--line:#DAD4C6` (bordas subtis, inalterado)
+  - `--danger:#B4543A` (erro/remover/acima do orçamento, inalterado)
+  - `--good:#1F4A3D` (verde escuro do emblema, dentro do orçamento/positivo)
+- **Cabeçalho "flutuante"** (pedido explícito do utilizador, setembro/2026):
+  a barra navy sólida do cabeçalho principal foi removida
+  (`header{background:transparent}`); o total do mês passou a ser um cartão
+  branco com sombra (`.total-card`, primeira sombra da app além do FAB),
+  flutuando sobre o fundo `--paper` em vez de texto branco sobre uma faixa
+  escura. Ecrã de login/bloqueio (`.login-screen`) e o banner de relatório
+  mensal (`#relatorioMensalBanner`) mantiveram-se escuros de propósito —
+  fazem sentido como elementos isolados/de destaque, ao contrário do
+  cabeçalho principal que convivia com o resto da página.
 - **Tipografia**: `'Segoe UI', system-ui, -apple-system, sans-serif` — sem
   webfonts externas (mantém tudo self-contained, sem pedidos a CDNs de fontes).
 - **Tom**: sóbrio, "banca privada"/consultoria financeira — não é uma app
   gamificada ou colorida. Cantos arredondados moderados, sem gradientes
-  berrantes, sem emojis na UI (só nos ícones de estado tipo ✕ e ✓).
+  berrantes, sem emojis na UI (só nos ícones de estado tipo ✕ e ✓). Reforçado
+  pela tagline "INTERMEDIÁRIO DE CRÉDITO" do logótipo Bruma Finance.
 - **Links clicáveis vs. botões** (decisão de agosto/2026, a pedido do
   utilizador): opções clicáveis importantes — ex: os 4 caminhos para
   registar um gasto ("ler QR de galeria", "ler valor por câmara", "ler
@@ -766,7 +799,7 @@ gráfico de categorias com alternância barras/circular, escolha
 de idioma (PT/EN, cobre toda a interface) e moeda (símbolo apresentado, sem
 conversão cambial), modal de confirmação próprio da app (não usar
 `confirm()`/`alert()` nativos do browser — mostram sempre o domínio do site e
-não são personalizáveis), logótipo/identidade Fin+, e **Contas a Acertar**
+não são personalizáveis), logótipo/identidade Bruma Finance, e **Contas a Acertar**
 (divisão de despesas entre casal, ver secção própria acima) com liquidação
 numerada nº/ano.
 
@@ -1067,10 +1100,13 @@ bloqueio só tinha o botão de desbloquear, nada mais).
 
 **Possíveis próximos passos futuros (não urgentes, só se/quando o
 utilizador quiser)**: acompanhar as primeiras instalações reais e
-reviews na Play Console (Estatísticas), considerar o rebrand adiado
-para "Fin+ Budget" e a expansão de idiomas (ES/FR/DE/IT) se algum dia
-se decidir por expansão internacional a sério, e continuar a adicionar
-funcionalidades por pedido do utilizador como sempre.
+reviews na Play Console (Estatísticas), a expansão de idiomas (ES/FR/DE/IT)
+se algum dia se decidir por expansão internacional a sério, e continuar a
+adicionar funcionalidades por pedido do utilizador como sempre. (A ideia
+antiga de rebrand para "Fin+ Budget" ficou superada pelo rebrand real
+para Bruma Finance — ver secção "Identidade visual Bruma Finance" acima;
+branch `rebrand-bruma-finance`, merge para produção agendado para
+24/10/2026.)
 
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
@@ -1105,4 +1141,4 @@ abrirem o link, tocarem em "Tornar-me testador", instalarem e abrirem a app.
 - Se algum dia se quiser melhorar a entrega de emails da Firebase (ex: reset de
   password, se for reintroduzido), a causa da entrega em spam é a falta de
   domínio próprio verificado — resolver isso implicaria o utilizador ter um
-  domínio (ex: para a marca Fin+) e configurá-lo na Firebase.
+  domínio (ex: para a marca Bruma Finance) e configurá-lo na Firebase.
