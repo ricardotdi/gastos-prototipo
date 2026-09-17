@@ -1062,6 +1062,8 @@ bloqueio só tinha o botão de desbloquear, nada mais).
   → Limpar dados) resolve, porque o bloqueio por biometria vive só no
   `localStorage` local, por dispositivo — os dados reais da conta estão
   seguros no Firestore, não se perdem.
+- **CONFIRMADO RESOLVIDO pelo utilizador (15 setembro 2026)**: voltou a
+  entrar na app com sucesso depois da correção.
 
 **Possíveis próximos passos futuros (não urgentes, só se/quando o
 utilizador quiser)**: acompanhar as primeiras instalações reais e
