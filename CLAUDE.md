@@ -660,6 +660,12 @@ produção à data desta escrita).
   toda a app: `<img src="bruma-emblem.png">` + `<span>Bruma Finance</span>`
   lado a lado (flex row), no ecrã de login, cabeçalho principal e ecrã de
   bloqueio (aqui substituiu o emoji 🔒 antigo), e em `privacidade.html`.
+  Também gerados `bruma-logo-texto-branco.png` e `bruma-logo-texto-escuro.png`
+  (por `scripts/gerar-logo-transparente.py`, Pillow + fonte
+  `LiberationSans-Bold`): o mesmo lockup emblema + "Bruma Finance", mas como
+  ficheiro PNG único com fundo transparente, para uso fora da app
+  (documentos, site bruma-finance.pages.dev, redes sociais) — não usados em
+  código, só disponibilizados como assets de marca.
 - **Ícone da app** (`icons/icon-192.png`, `icons/icon-512.png`): gerado por
   `scripts/generate-icons.py` (Pillow) — centra `bruma-emblem.png` a 80% do
   canvas (zona segura para ícones "maskable" do Android) sobre fundo sólido
