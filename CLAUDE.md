@@ -1168,21 +1168,32 @@ abrirem o link, tocarem em "Tornar-me testador", instalarem e abrirem a app.
 
 ## Próximos passos identificados (backlog)
 
-- **PENDENTE (desde o merge do rebrand, 24/10/2026): atualizar o ícone da
-  app Android/Play Store para o Bruma Finance.** O `manifest.json` e
-  `icons/icon-192.png`/`icons/icon-512.png` já estão corretos no
-  repositório, mas isso não basta — o ícone do launcher Android fica
-  gravado dentro do `.aab` no momento do empacotamento via PWABuilder, não
-  é lido em runtime do manifest. Faltam dois passos manuais do utilizador
-  (fora deste repositório, exigem login na conta Google/Play Console):
-  1. Gerar novo `.aab` no PWABuilder.com (site já mostra o ícone/manifest
-     novos) e publicar como nova versão na Play Console (incrementa
-     `versionCode`) — só isto atualiza o ícone em telemóveis que já têm a
-     app instalada.
-  2. Re-fazer upload do ícone 512×512 novo (`icons/icon-512.png` /
-     `bruma-emblem.png`, já entregues ao utilizador) no campo "Ícone da
-     app" em Presença na loja → Elementos gráficos — isto é o ícone
-     mostrado na ficha pública da Play Store, independente do `.aab`.
+- **CONCLUÍDO (24/10/2026): ícone/nome Bruma Finance atualizados em todo o
+  lado, incluindo quem já tinha a app instalada.** Depois do merge do
+  rebrand, o ícone do launcher Android e da ficha da Play Store ainda
+  mostravam o antigo (Fin+), porque o ícone nativo do TWA fica gravado
+  dentro do `.aab` no momento do empacotamento via PWABuilder, não é lido
+  em runtime do `manifest.json`. O emblema foi trocado duas vezes a pedido
+  do utilizador (primeiro fundo branco, depois fundo escuro `--brand-dark`
+  — versão final, recortada e colocada sobre fundo contínuo/sem retângulo
+  visível, a 80% de escala para a zona segura maskable). Passos manuais
+  feitos pelo utilizador, guiados passo a passo nesta sessão:
+  1. Ficha da Play Store: nome mudado para "Bruma Finance", ícone, descrição
+     completa e gráfico de funcionalidades (1024×500) atualizados em
+     Presença na loja → Ficha predefinida. Envio 7, estado "Publicada".
+  2. Novo `.aab` gerado no PWABuilder.com (Package ID `io.github.ricardotdi.
+     twa` mantido, assinado com a chave de assinatura original do Dropbox —
+     `signing.keystore`, alias `my-key-alias` — opção "Use mine", nunca
+     "Create new", para não gerar um certificado diferente do já associado
+     à app). Version `1.1.0.0`, Version code `3` (o anterior, `2`, já
+     estava em uso desde 6/set). Submetido em Produção → Criar novo
+     lançamento; um aviso sobre perda de compatibilidade com ~1133
+     dispositivos mais antigos (~7% dos telemóveis) foi aceite
+     conscientemente, dado o reduzido número de instalações ativas (13).
+     Envio 8, estado "Publicada".
+  Com isto, fecha-se por completo o ciclo do rebrand Bruma Finance: código,
+  site, ficha da loja e app nativa instalada estão todos alinhados.
+
 - Concluir o empacotamento Android/Play Store (ver secção própria acima).
 - Se algum dia se quiser melhorar a entrega de emails da Firebase (ex: reset de
   password, se for reintroduzido), a causa da entrega em spam é a falta de
