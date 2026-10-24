@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gastos — Protótipo</title>
+<title>Bruma Finance Gastos</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1A3C5E">
+<meta name="theme-color" content="#1A1A1A">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -18,45 +18,50 @@
 <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
-    --ink:#12202E;
-    --navy:#1A3C5E;
-    --navy-deep:#0E2740;
-    --gold:#A19276;
-    --gold-soft:#C9BFA8;
+    --ink:#151515;
+    --brand-dark:#1A1A1A;
+    --brand-darker:#0D0D0D;
+    --accent:#C9A227;
+    --accent-soft:#B0B0B0;
     --paper:#F6F4EF;
     --line:#DAD4C6;
     --danger:#B4543A;
-    --good:#4C7A5D;
+    --good:#1F4A3D;
   }
   *{box-sizing:border-box;}
+  html{
+    min-height:100%;
+    background:linear-gradient(135deg, #F6F8F7 0%, #EFF3F0 55%, #F1EAD5 100%);
+    background-attachment:fixed;
+  }
   body{
     margin:0;
     font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-    background:var(--paper);
+    background:transparent;
     color:var(--ink);
     padding-bottom:90px;
   }
   header{
-    background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);
-    color:#fff;
-    padding:22px 20px 26px;
-    border-radius:0 0 22px 22px;
+    background:transparent;
+    color:var(--ink);
+    padding:20px 20px 4px;
   }
   header .eyebrow{
     font-size:11px;
     letter-spacing:.14em;
     text-transform:uppercase;
-    color:var(--gold-soft);
+    color:var(--accent);
     margin-bottom:6px;
   }
   header h1{
     margin:0;
     font-size:15px;
     font-weight:600;
-    opacity:.85;
+    color:var(--ink);
+    opacity:.7;
   }
   .total-card{
-    margin-top:14px;
+    margin-top:16px;
   }
   .total-row{
     display:flex;
@@ -64,6 +69,8 @@
     gap:8px;
   }
   .total-value{
+    color:var(--ink);
+    opacity:.7;
     font-size:40px;
     font-weight:700;
     font-variant-numeric:tabular-nums;
@@ -88,12 +95,12 @@
   }
   .total-label{
     font-size:12px;
-    color:var(--gold-soft);
+    color:var(--accent);
     margin-top:2px;
   }
   .comparacao-mensal{
     font-size:12px;
-    color:rgba(255,255,255,.7);
+    color:rgba(21,21,21,.6);
     margin-top:6px;
     transition:filter .15s ease;
   }
@@ -114,7 +121,7 @@
     font-size:12px;
     letter-spacing:.08em;
     text-transform:uppercase;
-    color:var(--navy);
+    color:var(--brand-dark);
     opacity:.6;
     margin:22px 2px 10px;
   }
@@ -125,11 +132,12 @@
     padding:14px;
   }
   #relatorioMensalBanner{
-    background:linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+    background:linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-darker) 100%);
     color:#fff;
     border-radius:14px;
     padding:16px;
     margin-bottom:16px;
+    box-shadow:0 6px 18px rgba(20,20,20,.12);
   }
   #relatorioMensalBanner .rel-titulo{
     font-weight:700;
@@ -142,7 +150,7 @@
     line-height:1.4;
   }
   #btnVerRelatorioMensal{
-    background:var(--gold);
+    background:var(--accent);
     color:#fff;
     border:none;
     border-radius:10px;
@@ -170,7 +178,7 @@
   .entry .meta{display:flex;flex-direction:column;gap:2px;}
   .entry .cat{
     font-size:12px;
-    color:var(--navy);
+    color:var(--brand-dark);
     font-weight:600;
   }
   .entry .date{
@@ -203,14 +211,14 @@
     bottom:22px;
     left:50%;
     transform:translateX(-50%);
-    background:var(--gold);
+    background:var(--accent);
     color:#fff;
     border:none;
     width:64px;
     height:64px;
     border-radius:50%;
     font-size:26px;
-    box-shadow:0 8px 20px rgba(161,146,118,.45);
+    box-shadow:0 8px 20px rgba(201,162,39,.45);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -221,7 +229,7 @@
   /* modal */
   .overlay{
     position:fixed;inset:0;
-    background:rgba(14,39,64,.55);
+    background:rgba(13,13,13,.55);
     display:none;
     align-items:flex-end;
     z-index:50;
@@ -241,7 +249,7 @@
   .sheet h2{
     margin:0 0 4px;
     font-size:16px;
-    color:var(--navy);
+    color:var(--brand-dark);
   }
   .sheet p.hint{
     margin:0 0 14px;
@@ -265,7 +273,7 @@
     text-align:center;
     margin-top:12px;
     font-size:12px;
-    color:var(--navy);
+    color:var(--brand-dark);
     text-decoration:underline;
     cursor:pointer;
   }
@@ -276,7 +284,7 @@
     padding:12px;
     border:none;
     border-radius:12px;
-    background:var(--navy);
+    background:var(--brand-dark);
     color:#fff;
     font-size:13.5px;
     font-weight:600;
@@ -318,9 +326,9 @@
     cursor:pointer;
   }
   .cat-chip.active{
-    background:var(--navy);
+    background:var(--brand-dark);
     color:#fff;
-    border-color:var(--navy);
+    border-color:var(--brand-dark);
   }
   .confirm-btn{
     width:100%;
@@ -328,7 +336,7 @@
     padding:14px;
     border:none;
     border-radius:12px;
-    background:var(--navy);
+    background:var(--brand-dark);
     color:#fff;
     font-size:15px;
     font-weight:600;
@@ -346,13 +354,13 @@
     font-size:12px;
     text-align:center;
     margin-top:10px;
-    color:var(--navy);
+    color:var(--brand-dark);
     min-height:16px;
   }
 
   .login-screen{
     position:fixed;inset:0;
-    background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);
+    background:linear-gradient(160deg,var(--brand-dark) 0%,var(--brand-darker) 100%);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -365,7 +373,7 @@
     color:#fff;
   }
   .login-card .eyebrow{
-    color:var(--gold-soft);
+    color:var(--accent-soft);
     margin-bottom:8px;
   }
   .login-title{
@@ -408,10 +416,10 @@
     justify-content:space-between;
     margin-top:2px;
     font-size:12px;
-    color:rgba(255,255,255,.65);
+    color:rgba(21,21,21,.65);
   }
   .user-bar .sair-link{
-    color:var(--gold-soft);
+    color:var(--accent);
     text-decoration:underline;
     cursor:pointer;
   }
@@ -429,7 +437,7 @@
     border-radius:999px;
     background:#fff;
     border:1px solid var(--line);
-    color:var(--navy);
+    color:var(--brand-dark);
     font-family:inherit;
     font-size:11.5px;
     font-weight:600;
@@ -442,9 +450,9 @@
     text-decoration:none;
     padding:7px 14px;
     border-radius:999px;
-    background:rgba(255,255,255,.14);
-    border:1px solid rgba(255,255,255,.32);
-    color:#fff;
+    background:#fff;
+    border:1px solid var(--line);
+    color:var(--ink);
     font-family:inherit;
     font-size:12.5px;
     font-weight:700;
@@ -465,7 +473,7 @@
   .ajuda-secao:last-child{ margin-bottom:0; }
   .ajuda-secao h3{
     font-size:14px;
-    color:var(--navy);
+    color:var(--brand-dark);
     margin:0 0 6px;
     display:flex;
     align-items:center;
@@ -486,7 +494,7 @@
   }
   .ajuda-secao li{ margin-bottom:4px; }
   .menu-item-highlight{
-    background:var(--navy);
+    background:var(--brand-dark);
     color:#fff;
     border:none;
     border-radius:12px;
@@ -506,7 +514,7 @@
   }
   .budget-cat{
     font-weight:600;
-    color:var(--navy);
+    color:var(--brand-dark);
   }
   .budget-values{
     font-variant-numeric:tabular-nums;
@@ -531,7 +539,7 @@
   .contas-col-header{
     font-size:12px;
     font-weight:700;
-    color:var(--navy);
+    color:var(--brand-dark);
     text-align:center;
     margin-bottom:8px;
     padding-bottom:6px;
@@ -586,7 +594,7 @@
   }
   .liquidacao-row .liquidacao-numero{
     font-weight:700;
-    color:var(--navy);
+    color:var(--brand-dark);
   }
 </style>
 </head>
@@ -594,8 +602,14 @@
 
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <img src="Fin_plus_logo_euro.png" alt="Fin+" style="height:64px; margin-bottom:16px;">
-    <div class="eyebrow" id="loginEyebrow">Finanças Positivas</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:16px;">
+      <img src="bruma-emblem.png" alt="Bruma Finance" style="height:64px; display:block;">
+      <div style="display:flex; flex-direction:column; justify-content:center; line-height:1.15;">
+        <span style="font-size:22px; font-weight:700; color:#fff; letter-spacing:-0.01em;">BRUMA</span>
+        <span style="font-size:12px; font-weight:600; color:rgba(255,255,255,.75); letter-spacing:.08em;">FINANCE</span>
+      </div>
+    </div>
+    <div class="eyebrow" id="loginEyebrow">A sua vida financeira num só lugar</div>
     <h1 class="login-title" id="loginTitulo">Os meus gastos</h1>
     <p class="login-sub" id="loginSubtitulo">Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.</p>
     <button class="oauth-btn" id="btnEntrarGoogle">
@@ -615,8 +629,8 @@
 
 <div class="login-screen" id="lockScreen" style="display:none;">
   <div class="login-card">
-    <div style="font-size:52px; margin-bottom:12px;">🔒</div>
-    <div class="eyebrow" id="lockEyebrow">Finanças Positivas</div>
+    <img src="bruma-emblem.png" alt="Bruma Finance" style="height:52px; display:block; margin:0 auto 12px;">
+    <div class="eyebrow" id="lockEyebrow">A sua vida financeira num só lugar</div>
     <h1 class="login-title" id="lockTitulo">App bloqueada</h1>
     <p class="login-sub" id="lockSubtitulo">Confirma a tua identidade para continuares.</p>
     <button class="oauth-btn" id="btnDesbloquear">
@@ -629,8 +643,14 @@
 
 <div id="appShell" style="display:none">
   <header>
-    <img src="Fin_plus_logo_euro.png" alt="Fin+" style="height:40px; display:block; margin-bottom:8px;">
-    <div class="eyebrow" id="headerEyebrow">Finanças Positivas</div>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+      <img src="bruma-emblem.png" alt="Bruma Finance" style="height:40px; display:block;">
+      <div style="display:flex; flex-direction:column; justify-content:center; line-height:1.15;">
+        <span style="font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-0.01em;">BRUMA</span>
+        <span style="font-size:9.5px; font-weight:600; color:var(--ink); opacity:.6; letter-spacing:.08em;">FINANCE</span>
+      </div>
+    </div>
+    <div class="eyebrow" id="headerEyebrow">A sua vida financeira num só lugar</div>
     <h1 id="headerTitulo">Os meus gastos</h1>
     <div class="user-bar">
       <span id="userEmailLabel"></span>
@@ -666,14 +686,14 @@
     <div id="orcamentosSection" style="display:none;">
       <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
         <span id="tituloOrcamentosMes">Orçamentos do mês</span>
-        <span class="sair-link" id="btnEditarOrcamentos" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">editar</span>
+        <span class="sair-link" id="btnEditarOrcamentos" style="color:var(--brand-dark); text-transform:none; letter-spacing:0; font-size:12.5px;">editar</span>
       </div>
       <div id="listaOrcamentos" style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px;"></div>
     </div>
 
     <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
       <span id="tituloDespesasFixas">Despesas fixas</span>
-      <span class="sair-link" id="btnAddRecorrente" style="color:var(--navy); text-transform:none; letter-spacing:0; font-size:12.5px;">+ adicionar</span>
+      <span class="sair-link" id="btnAddRecorrente" style="color:var(--brand-dark); text-transform:none; letter-spacing:0; font-size:12.5px;">+ adicionar</span>
     </div>
     <div id="listaRecorrentes"></div>
 
@@ -813,11 +833,11 @@
   <div class="sheet">
     <button class="close-btn" id="closeAjudaSheet">✕</button>
     <h2 id="tituloAjuda">Como utilizar a app</h2>
-    <p class="hint" id="hintAjuda">Um resumo rápido de tudo o que a Fin+ Gastos faz e como usar cada funcionalidade.</p>
+    <p class="hint" id="hintAjuda">Um resumo rápido de tudo o que a Bruma Finance Gastos faz e como usar cada funcionalidade.</p>
 
     <div id="ajudaConteudoPT">
       <div class="ajuda-secao">
-        <h3>💶 O que é a Fin+ Gastos</h3>
+        <h3>💶 O que é a Bruma Finance Gastos</h3>
         <p>Uma app gratuita para controlares os teus gastos do dia a dia, sozinho/a ou a par com alguém (parceiro/a, família). Os teus dados ficam associados à tua conta Google e sincronizam automaticamente entre dispositivos.</p>
       </div>
 
@@ -875,7 +895,7 @@
 
       <div class="ajuda-secao">
         <h3>⚙️ Idioma, moeda e privacidade</h3>
-        <p>Em <strong>Menu → Definições</strong>, escolhe o idioma (Português/English) e a moeda apresentada. Consulta a nossa <a href="privacidade.html" target="_blank" style="color:var(--navy);">Política de Privacidade</a> a qualquer momento a partir das Definições.</p>
+        <p>Em <strong>Menu → Definições</strong>, escolhe o idioma (Português/English) e a moeda apresentada. Consulta a nossa <a href="privacidade.html" target="_blank" style="color:var(--brand-dark);">Política de Privacidade</a> a qualquer momento a partir das Definições.</p>
         <p>Se o teu telemóvel tiver impressão digital ou reconhecimento facial, podes ativar o <strong>"Bloqueio por biometria"</strong> aí mesmo, para a app pedir confirmação sempre que a abrires nesse dispositivo (útil se partilhares o telemóvel com alguém). Se a biometria alguma vez falhar ou ficar presa a verificar, toca em "Não consegues desbloquear? Sair e voltar a entrar", no ecrã de bloqueio, para desativares o bloqueio nesse dispositivo e entrares outra vez com a tua conta Google.</p>
         <p>Tens também um ícone de olho 👁️ junto ao total do mês, no ecrã principal: toca nele para ocultar o valor (fica desfocado), útil quando estiveres a registar uma despesa em público.</p>
       </div>
@@ -883,7 +903,7 @@
 
     <div id="ajudaConteudoEN" style="display:none;">
       <div class="ajuda-secao">
-        <h3>💶 What is Fin+ Gastos</h3>
+        <h3>💶 What is Bruma Finance Gastos</h3>
         <p>A free app to track your everyday expenses, alone or together with someone (partner, family). Your data is linked to your Google account and syncs automatically across devices.</p>
       </div>
 
@@ -941,7 +961,7 @@
 
       <div class="ajuda-secao">
         <h3>⚙️ Language, currency and privacy</h3>
-        <p>In <strong>Menu → Settings</strong>, choose the language (Português/English) and the currency shown. You can check our <a href="privacidade.html" target="_blank" style="color:var(--navy);">Privacy Policy</a> at any time from Settings.</p>
+        <p>In <strong>Menu → Settings</strong>, choose the language (Português/English) and the currency shown. You can check our <a href="privacidade.html" target="_blank" style="color:var(--brand-dark);">Privacy Policy</a> at any time from Settings.</p>
         <p>If your phone has a fingerprint sensor or face recognition, you can turn on <strong>"Biometric lock"</strong> right there, so the app asks for confirmation every time you open it on that device (handy if you share your phone with someone). If biometrics ever fails or gets stuck verifying, tap "Can't unlock? Sign out and sign back in" on the lock screen to turn off the lock on that device and sign in again with your Google account.</p>
         <p>There's also an eye icon 👁️ next to the monthly total on the main screen: tap it to hide the amount (it gets blurred), handy when you're logging an expense in public.</p>
       </div>
@@ -1016,7 +1036,7 @@
 
     <button class="confirm-btn" id="btnGuardarDefinicoes">Guardar</button>
     <div class="scan-status" id="definicoesStatus"></div>
-    <p class="hint" style="text-align:center; margin-top:18px; margin-bottom:0;"><a href="privacidade.html" id="linkPrivacidadeDefinicoes" target="_blank" rel="noopener" style="color:var(--navy);">Política de privacidade</a></p>
+    <p class="hint" style="text-align:center; margin-top:18px; margin-bottom:0;"><a href="privacidade.html" id="linkPrivacidadeDefinicoes" target="_blank" rel="noopener" style="color:var(--brand-dark);">Política de privacidade</a></p>
   </div>
 </div>
 
@@ -1036,7 +1056,7 @@
     <div id="historicoNavWrap" style="display:flex; align-items:center; justify-content:space-between; margin-top:20px;">
       <button class="close-btn" id="btnHistoricoAnterior" style="position:static; font-size:26px; padding:0 10px;">‹</button>
       <div style="text-align:center;">
-        <div id="historicoLabel" style="font-size:13px; color:var(--navy); font-weight:600; text-transform:capitalize;"></div>
+        <div id="historicoLabel" style="font-size:13px; color:var(--brand-dark); font-weight:600; text-transform:capitalize;"></div>
         <div id="historicoTotal" style="font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink);"></div>
       </div>
       <button class="close-btn" id="btnHistoricoSeguinte" style="position:static; font-size:26px; padding:0 10px;">›</button>
@@ -1049,9 +1069,9 @@
     <div id="historicoAcoesPDF">
       <div style="display:flex; gap:10px;">
         <button class="confirm-btn" id="btnExportarHistorico" style="flex:1;">📄 Exportar PDF</button>
-        <button class="confirm-btn" id="btnPartilharHistorico" style="flex:1; background:var(--gold);">🔗 Partilhar</button>
+        <button class="confirm-btn" id="btnPartilharHistorico" style="flex:1; background:var(--accent);">🔗 Partilhar</button>
       </div>
-      <button class="confirm-btn" id="btnExportarExcel" style="background:var(--navy-deep);">📊 Exportar Excel</button>
+      <button class="confirm-btn" id="btnExportarExcel" style="background:var(--brand-darker);">📊 Exportar Excel</button>
     </div>
   </div>
 </div>
@@ -1093,7 +1113,7 @@
 
       <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">
         <span id="tituloLiquidacoesAnteriores">Liquidações anteriores</span>
-        <button class="confirm-btn" id="btnLiquidacoesHistorico" style="width:auto; margin:0; padding:8px 16px; font-size:13px; background:var(--gold);">Liquidações</button>
+        <button class="confirm-btn" id="btnLiquidacoesHistorico" style="width:auto; margin:0; padding:8px 16px; font-size:13px; background:var(--accent);">Liquidações</button>
       </div>
       <div id="listaLiquidacoes"></div>
     </div>
@@ -1145,7 +1165,7 @@ const MESES = {
 
 const T = {
   pt: {
-    login_eyebrow: 'Finanças Positivas',
+    login_eyebrow: 'A sua vida financeira num só lugar',
     titulo_app: 'Os meus gastos',
     login_subtitulo: 'Inicia sessão para guardares os teus gastos e os sincronizares entre dispositivos.',
     btn_entrar_google: 'Entrar com Google',
@@ -1174,7 +1194,7 @@ const T = {
     menu_definicoes: 'Definições',
     menu_sair: 'Sair',
     titulo_ajuda: 'Como utilizar a app',
-    hint_ajuda: 'Um resumo rápido de tudo o que a Fin+ Gastos faz e como usar cada funcionalidade.',
+    hint_ajuda: 'Um resumo rápido de tudo o que a Bruma Finance Gastos faz e como usar cada funcionalidade.',
     titulo_orcamentos_mes: 'Orçamentos do mês',
     link_editar: 'editar',
     titulo_despesas_fixas: 'Despesas fixas',
@@ -1312,12 +1332,12 @@ const T = {
     txt_editar_inline: 'editar',
     txt_fixo: 'fixo',
     txt_vs_mes_passado: 'que o mês passado',
-    pdf_tagline: 'Finanças Positivas',
+    pdf_tagline: 'A sua vida financeira num só lugar',
     pdf_titulo_resumo: 'Resumo de gastos - {periodo}',
     pdf_total: 'Total: ',
     pdf_categoria: 'Categoria',
     pdf_valor: 'Valor',
-    pdf_gerado_em: 'Gerado em {data} · Fin+ Finanças Positivas',
+    pdf_gerado_em: 'Gerado em {data} · Bruma Finance',
     pdf_share_titulo: 'Resumo de gastos',
     pdf_titulo_comparacoes: 'Comparações',
     pdf_periodo_atual: 'Este período ({periodo}): ',
@@ -1349,7 +1369,7 @@ const T = {
     link_privacidade: 'Política de privacidade'
   },
   en: {
-    login_eyebrow: 'Positive Finances',
+    login_eyebrow: 'Your financial life, all in one place',
     titulo_app: 'My expenses',
     login_subtitulo: 'Sign in to save your expenses and sync them across devices.',
     btn_entrar_google: 'Sign in with Google',
@@ -1378,7 +1398,7 @@ const T = {
     menu_definicoes: 'Settings',
     menu_sair: 'Sign out',
     titulo_ajuda: 'How to use the app',
-    hint_ajuda: 'A quick rundown of everything Fin+ Gastos does and how to use each feature.',
+    hint_ajuda: 'A quick rundown of everything Bruma Finance Gastos does and how to use each feature.',
     titulo_orcamentos_mes: 'This month\'s budgets',
     link_editar: 'edit',
     titulo_despesas_fixas: 'Fixed expenses',
@@ -1516,12 +1536,12 @@ const T = {
     txt_editar_inline: 'edit',
     txt_fixo: 'fixed',
     txt_vs_mes_passado: 'vs last month',
-    pdf_tagline: 'Positive Finances',
+    pdf_tagline: 'Your financial life, all in one place',
     pdf_titulo_resumo: 'Expense summary - {periodo}',
     pdf_total: 'Total: ',
     pdf_categoria: 'Category',
     pdf_valor: 'Amount',
-    pdf_gerado_em: 'Generated on {data} · Fin+ Positive Finances',
+    pdf_gerado_em: 'Generated on {data} · Bruma Finance',
     pdf_share_titulo: 'Expense summary',
     pdf_titulo_comparacoes: 'Comparisons',
     pdf_periodo_atual: 'This period ({periodo}): ',
@@ -1589,7 +1609,7 @@ let tipoGrafico = localStorage.getItem('tipoGrafico') === 'pie' ? 'pie' : 'bar';
 // Paleta para o gráfico circular (uma cor por categoria) — derivada das cores
 // da marca (navy/gold/danger/good) com mais algumas variações complementares,
 // para cobrir o número de categorias por omissão sem repetir demasiado cedo.
-const PALETA_GRAFICO_CIRCULAR = ['#1A3C5E', '#A19276', '#B4543A', '#4C7A5D', '#6B7A99', '#C9A66B', '#8B5E83', '#5C8AA6'];
+const PALETA_GRAFICO_CIRCULAR = ['#1A1A1A', '#C9A227', '#B4543A', '#1F4A3D', '#6B7A99', '#C9A66B', '#8B5E83', '#5C8AA6'];
 
 const overlay = document.getElementById('overlay');
 const scanStatus = document.getElementById('scanStatus');
@@ -2436,11 +2456,11 @@ async function ativarBiometria(uid){
   const credential = await navigator.credentials.create({
     publicKey: {
       challenge,
-      rp: { name: 'Fin+ Gastos' },
+      rp: { name: 'Bruma Finance Gastos' },
       user: {
         id: new TextEncoder().encode(uid),
         name: uid,
-        displayName: 'Fin+ Gastos'
+        displayName: 'Bruma Finance Gastos'
       },
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
       authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
@@ -2877,15 +2897,15 @@ async function gerarDocumentoHistoricoPDF(){
     doc.addImage(logoImg, 'PNG', 20, 15, 24, 10.5, undefined, 'FAST');
   } catch(e){ /* segue sem logótipo se a imagem ainda não estiver pronta */ }
 
-  doc.setTextColor('#A19276');
+  doc.setTextColor('#C9A227');
   doc.setFontSize(10);
   doc.text(t('pdf_tagline'), 20, 34);
 
-  doc.setTextColor('#12202E');
+  doc.setTextColor('#151515');
   doc.setFontSize(18);
   doc.text(t('pdf_titulo_resumo', { periodo: labelCapitalizado }), 20, 46);
 
-  doc.setTextColor('#1A3C5E');
+  doc.setTextColor('#1A1A1A');
   doc.setFontSize(24);
   doc.text(t('pdf_total') + formatoEuroPDF(total), 20, 58);
 
@@ -2900,7 +2920,7 @@ async function gerarDocumentoHistoricoPDF(){
       type: 'bar',
       data: {
         labels: categoriasOrdenadas,
-        datasets: [{ data: categoriasOrdenadas.map(c => porCategoria[c]), backgroundColor: '#1A3C5E', borderRadius: 6 }]
+        datasets: [{ data: categoriasOrdenadas.map(c => porCategoria[c]), backgroundColor: '#1A1A1A', borderRadius: 6 }]
       },
       options: { plugins: { legend: { display:false } }, scales: { y: { beginAtZero:true } } }
     }, 860, 360);
@@ -2912,7 +2932,7 @@ async function gerarDocumentoHistoricoPDF(){
   // ---- Tabela por categoria ----
   garantirEspaco(20);
   doc.setFontSize(11);
-  doc.setTextColor('#12202E');
+  doc.setTextColor('#151515');
   doc.text(t('pdf_categoria'), 20, y);
   doc.text(t('pdf_valor'), 190, y, { align: 'right' });
   y += 3;
@@ -2936,12 +2956,12 @@ async function gerarDocumentoHistoricoPDF(){
   garantirEspaco(56);
   y += 8;
   doc.setFontSize(14);
-  doc.setTextColor('#1A3C5E');
+  doc.setTextColor('#1A1A1A');
   doc.text(t('pdf_titulo_comparacoes'), 20, y);
   y += 10;
 
   doc.setFontSize(11);
-  doc.setTextColor('#12202E');
+  doc.setTextColor('#151515');
   doc.text(t('pdf_periodo_atual', { periodo: labelCapitalizado }) + formatoEuroPDF(total), 20, y);
   y += 7;
 
@@ -2952,13 +2972,13 @@ async function gerarDocumentoHistoricoPDF(){
     const desceu = diferencaAnterior < 0;
     const sinal = subiu ? '+' : (desceu ? '-' : '');
     const textoVariacao = `${sinal}${formatoEuroPDF(Math.abs(diferencaAnterior))} (${sinal}${Math.abs(percentagemAnterior).toFixed(1)}%)`;
-    doc.setTextColor(subiu ? '#C0392B' : (desceu ? '#2E8B57' : '#12202E'));
+    doc.setTextColor(subiu ? '#C0392B' : (desceu ? '#2E8B57' : '#151515'));
     doc.text(t('pdf_variacao_anterior') + textoVariacao, 20, y);
   } else {
     doc.setTextColor('#8a8478');
     doc.text(t('pdf_variacao_anterior') + t('pdf_sem_dados_anterior'), 20, y);
   }
-  doc.setTextColor('#12202E');
+  doc.setTextColor('#151515');
   y += 9;
 
   doc.text(t('pdf_periodo_homologo', { periodo: labelHomologoCap }) + formatoEuroPDF(totalHomologo), 20, y);
@@ -2968,13 +2988,13 @@ async function gerarDocumentoHistoricoPDF(){
     const desceu = diferenca < 0;
     const sinal = subiu ? '+' : (desceu ? '-' : '');
     const textoVariacao = `${sinal}${formatoEuroPDF(Math.abs(diferenca))} (${sinal}${Math.abs(percentagem).toFixed(1)}%)`;
-    doc.setTextColor(subiu ? '#C0392B' : (desceu ? '#2E8B57' : '#12202E'));
+    doc.setTextColor(subiu ? '#C0392B' : (desceu ? '#2E8B57' : '#151515'));
     doc.text(t('pdf_variacao_homologa') + textoVariacao, 20, y);
   } else {
     doc.setTextColor('#8a8478');
     doc.text(t('pdf_variacao_homologa') + t('pdf_sem_dados_homologo'), 20, y);
   }
-  doc.setTextColor('#12202E');
+  doc.setTextColor('#151515');
   y += 10;
 
   const categoriasUniao = Array.from(new Set([...categoriasOrdenadas, ...Object.keys(porCategoriaAnterior), ...Object.keys(porCategoriaHomologo)]))
@@ -2986,9 +3006,9 @@ async function gerarDocumentoHistoricoPDF(){
       data: {
         labels: categoriasUniao,
         datasets: [
-          { label: labelCapitalizado, data: categoriasUniao.map(c => porCategoria[c] || 0), backgroundColor: '#1A3C5E', borderRadius: 6 },
+          { label: labelCapitalizado, data: categoriasUniao.map(c => porCategoria[c] || 0), backgroundColor: '#1A1A1A', borderRadius: 6 },
           { label: labelAnteriorCap, data: categoriasUniao.map(c => porCategoriaAnterior[c] || 0), backgroundColor: '#8FA6BC', borderRadius: 6 },
-          { label: labelHomologoCap, data: categoriasUniao.map(c => porCategoriaHomologo[c] || 0), backgroundColor: '#A19276', borderRadius: 6 }
+          { label: labelHomologoCap, data: categoriasUniao.map(c => porCategoriaHomologo[c] || 0), backgroundColor: '#C9A227', borderRadius: 6 }
         ]
       },
       options: { plugins: { legend: { display:true, position:'bottom' } }, scales: { y: { beginAtZero:true } } }
@@ -3001,7 +3021,6 @@ async function gerarDocumentoHistoricoPDF(){
   doc.setFontSize(8);
   doc.setTextColor('#8a8478');
   doc.text(t('pdf_gerado_em', { data: new Date().toLocaleDateString(localeAtual()) }), 20, 285);
-  doc.text('www.finmais.pt', 105, 291, { align: 'center' });
 
   const nomeFicheiro = 'gastos-' + labelPeriodo.replace(/\s+/g, '-') + '.pdf';
   return { doc, nomeFicheiro, labelCapitalizado };
@@ -3199,7 +3218,7 @@ function textoComparacaoMensal(atual, anterior, corSubiu, corDesceu, corIgual){
 function renderComparacaoMensal(totalAtual){
   const el = document.getElementById('comparacaoMensal');
   const totalAnterior = totalMesAnterior();
-  const texto = textoComparacaoMensal(totalAtual, totalAnterior, '#E8A695', '#8FCBAA', 'rgba(255,255,255,.6)');
+  const texto = textoComparacaoMensal(totalAtual, totalAnterior, 'var(--danger)', 'var(--good)', '#8a8478');
   el.innerHTML = texto ? `${texto} (${formatoEuro(totalAnterior)})` : '';
 }
 
@@ -3240,7 +3259,7 @@ function render(){
       const dataStr = d.toLocaleDateString(localeAtual(),{day:'2-digit',month:'short'});
       return `<div class="entry">
         <div class="meta">
-          <span class="cat">${g.categoria}${g.comerciante ? ' · '+g.comerciante : ''}${g.recorrente ? ' · <span style="color:var(--gold);">'+t('txt_fixo')+'</span>' : ''}</span>
+          <span class="cat">${g.categoria}${g.comerciante ? ' · '+g.comerciante : ''}${g.recorrente ? ' · <span style="color:var(--accent);">'+t('txt_fixo')+'</span>' : ''}</span>
           <span class="date">${dataStr}${g.recorrente ? '' : ` · <span style="text-decoration:underline; cursor:pointer;" onclick="abrirEditarData('${g.id}', '${g.data}')">${t('txt_editar_inline')}</span>`}</span>
         </div>
         <div style="display:flex;align-items:center;">
@@ -3317,7 +3336,7 @@ function renderContas(){
   if(Math.abs(diferenca) < 0.005){
     resumo.innerHTML = `<div style="font-size:15px; color:var(--good); font-weight:600;">${t('contas_em_dia')}</div>`;
   } else if(diferenca > 0){
-    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${t('deve_te', { nome: nomeOutro })}</div><div style="font-size:26px; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums;">${formatoEuro(diferenca)}</div>`;
+    resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${t('deve_te', { nome: nomeOutro })}</div><div style="font-size:26px; font-weight:700; color:var(--brand-dark); font-variant-numeric:tabular-nums;">${formatoEuro(diferenca)}</div>`;
   } else {
     resumo.innerHTML = `<div style="font-size:13px; color:#8a8478;">${t('deves_a', { nome: nomeOutro })}</div><div style="font-size:26px; font-weight:700; color:var(--danger); font-variant-numeric:tabular-nums;">${formatoEuro(Math.abs(diferenca))}</div>`;
   }
@@ -3368,7 +3387,7 @@ function renderOrcamentos(doMes){
     const ratio = Math.min(gasto / limite, 1);
     let cor = 'var(--good)';
     if(gasto / limite >= 1) cor = 'var(--danger)';
-    else if(gasto / limite >= 0.7) cor = 'var(--gold)';
+    else if(gasto / limite >= 0.7) cor = 'var(--accent)';
 
     const anteriorCat = gastoPorCategoriaAnterior[cat] || 0;
     const textoComparacao = textoComparacaoMensal(gasto, anteriorCat, 'var(--danger)', 'var(--good)', '#8a8478');
@@ -3428,7 +3447,7 @@ function renderChart(doMes){
       labels,
       datasets: [{
         data: valores,
-        backgroundColor: '#1A3C5E',
+        backgroundColor: '#1A1A1A',
         borderRadius: 6,
         maxBarThickness: 34
       }]
