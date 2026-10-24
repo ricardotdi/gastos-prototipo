@@ -644,10 +644,10 @@ limpa manualmente na consola se algum dia incomodar.
 
 **Rebranding de setembro/2026** (Fin+ → Bruma Finance, a acompanhar o
 rebranding do negócio de intermediação de crédito do utilizador, novo site
-bruma-finance.pages.dev). Preparado na branch `rebrand-bruma-finance`,
-merge para `main` agendado para 24/10/2026 (ver secção própria mais abaixo
-sobre o lançamento da app publicada — este rebrand ainda não estava em
-produção à data desta escrita).
+bruma-finance.pages.dev). Preparado na branch `rebrand-bruma-finance` e
+**fundido em produção em 24/10/2026** (commit `7ad23bc` em `main`, deploy do
+GitHub Pages confirmado com sucesso — ver nota no fim desta secção com o
+que correu mal no merge automático agendado e como foi corrigido).
 
 - **Logótipo**: dois ficheiros entregues pelo utilizador via upload direto
   no GitHub — `bruma-emblem.png` (emblema autónomo, 512×512 com cantos
@@ -716,6 +716,31 @@ produção à data desta escrita).
   "gerir categorias" dentro de Orçamentos). Ao adicionar uma opção nova que
   seja um caminho de ação principal (não um "cancelar" ou link acessório),
   preferir `.toggle-btn`.
+
+**Incidente no dia do lançamento (24/10/2026) e correção**: tinha sido
+criado um trigger agendado (Claude Code Remote Routine) para fazer o merge
+automático da branch `rebrand-bruma-finance` para `main` às 09:00 de
+24/10/2026. O trigger disparou e reportou `SUCCEEDED`, mas **não chegou a
+fazer o merge** — `main` continuou no commit antigo (`2c4be6f`, de
+17/09/2026) e não havia nenhum PR nem execução nova do GitHub Pages.
+Diagnosticado nessa manhã (o utilizador reparou que a app não tinha
+mudado) e corrigido manualmente: `git merge --allow-unrelated-histories`
+(a branch `rebrand-bruma-finance` tinha sido criada a partir de um ponto
+anterior a um reset de histórico em `main` ocorrido a 17/09 — "Add files
+via upload" tinha substituído todo o histórico de `main` por um único
+commit órfão — por isso os históricos das duas branches não tinham
+ancestral comum). Resolvidos os 6 conflitos add/add (`CLAUDE.md`,
+`icons/icon-192.png`, `icons/icon-512.png`, `index.html`, `manifest.json`,
+`privacidade.html`) sempre a favor da versão da branch do rebrand (eram os
+mesmos ficheiros, só divergentes por falta de ancestral comum — sem perda
+de conteúdo real). Confirmado que `.well-known/assetlinks.json` (crítico
+para a verificação do TWA/Play Store) se manteve intacto. Merge pushado
+como commit `7ad23bc`, deployment do GitHub Pages confirmado com sucesso
+(run #129). **Lição**: o estado `SUCCEEDED` de uma Routine agendada só
+confirma que a sessão foi acordada/entregue, não que a tarefa em si foi
+executada — para ações críticas (deploy em produção) vale sempre a pena
+confirmar depois pelo estado real do repositório/Actions, não só pelo
+status da Routine.
 
 ## Ambiente de desenvolvimento (contexto da sessão Claude Code)
 
@@ -1112,8 +1137,7 @@ se algum dia se decidir por expansão internacional a sério, e continuar a
 adicionar funcionalidades por pedido do utilizador como sempre. (A ideia
 antiga de rebrand para "Fin+ Budget" ficou superada pelo rebrand real
 para Bruma Finance — ver secção "Identidade visual Bruma Finance" acima;
-branch `rebrand-bruma-finance`, merge para produção agendado para
-24/10/2026.)
+branch `rebrand-bruma-finance`, fundida em produção em 24/10/2026.)
 
 **Os 12 testers escolhidos — lista de emails completa** (agosto/2026):
 1. André — andfbcoelho@gmail.com
