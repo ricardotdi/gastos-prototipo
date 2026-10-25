@@ -861,7 +861,7 @@ Decisões já tomadas (respostas do utilizador, agosto 2026):
 
 Já preparado no repo para a instalabilidade PWA (pré-requisito do
 PWABuilder):
-- `manifest.json` (nome "Fin+ Gastos", cores da marca, ícones 192/512).
+- `manifest.json` (nome "Bruma Finance Gastos", cores da marca, ícones 192/512).
 - `icons/icon-192.png`, `icons/icon-512.png` (ver secção "Identidade visual"
   acima para como foram gerados).
 - `<link rel="manifest">` + `<meta name="theme-color">` no `<head>` do

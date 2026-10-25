@@ -1,14 +1,18 @@
-# Ficha da Play Store — Fin+ Gastos
+# Ficha da Play Store — Bruma Finance Gastos
 
 Copia e cola estes textos diretamente nos campos da Play Console
 (Grow → Store presence → Main store listing).
+
+> Actualizado no rebrand de Outubro/2026. A ficha que está publicada é a
+> fonte verdadeira: além destes textos, leva um parágrafo de abertura a
+> explicar que a Fin+ Gastos passou a Bruma Finance Gastos.
 
 ---
 
 ## Título da app (máx. 30 carateres)
 
 ```
-Fin+ Gastos
+Bruma Finance Gastos
 ```
 
 ## Descrição curta (máx. 80 carateres)
@@ -20,7 +24,7 @@ Regista gastos por QR Code ou OCR, controla orçamentos e exporta Excel.
 ## Descrição completa (máx. 4000 carateres)
 
 ```
-Fin+ Gastos é uma app gratuita de controlo financeiro pessoal, pensada para o dia a dia, em Portugal e fora dele.
+Bruma Finance Gastos é uma app gratuita de controlo financeiro pessoal, pensada para o dia a dia, em Portugal e fora dele.
 
 APONTA A CÂMARA E PRONTO
 Lê o QR Code de qualquer fatura portuguesa e o valor fica registado automaticamente, sem escrever nada à mão. Já testada com sucesso também em faturas e talões de Espanha, França, Alemanha, Reino Unido, Suíça, Itália, Brasil, Estados Unidos, Canadá, Austrália, Nova Zelândia, México, Singapura, Índia, China e Japão: podes usar a câmara com confiança nas tuas viagens ou compras fora do país.
@@ -52,7 +56,7 @@ Escolhe o idioma e a moeda apresentada nas Definições.
 PRIVACIDADE E SEGURANÇA
 Os teus dados ficam associados à tua conta Google, nunca são vendidos, e podes pedir a eliminação completa a qualquer momento. Ativa o bloqueio por biometria se partilhares o telemóvel com alguém. Sem anúncios.
 
-Fin+ Gastos é a primeira de uma família de apps gratuitas da Fin+, criadas para ajudar as pessoas a organizarem melhor a sua vida financeira no dia a dia.
+Bruma Finance Gastos é a primeira de uma família de apps gratuitas da Bruma Finance, criadas para ajudar as pessoas a organizarem melhor a sua vida financeira no dia a dia.
 ```
 
 ---
@@ -94,7 +98,7 @@ Responde de acordo com o que a política de privacidade já publicada
 **Os dados são encriptados em trânsito?** Sim (Firebase usa HTTPS/TLS)
 
 **Podes pedir para os teus dados serem eliminados?** Sim — através de
-`geral.finmais@gmail.com` (como consta na política de privacidade)
+`geral@brumafinance.pt` (como consta na política de privacidade)
 
 **A app usa publicidade ou analítica de terceiros?** Não
 
