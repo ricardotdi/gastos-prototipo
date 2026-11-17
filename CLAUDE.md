@@ -1130,6 +1130,40 @@ bloqueio só tinha o botão de desbloquear, nada mais).
 - **CONFIRMADO RESOLVIDO pelo utilizador (15 setembro 2026)**: voltou a
   entrar na app com sucesso depois da correção.
 
+**Bug: login Google podia ficar preso em "A abrir sessão…" para sempre
+(reportado 17 novembro 2026) — CORRIGIDO.** Mesmo padrão de bug que o da
+biometria acima, agora no ecrã de login: `entrarComProvider()` usava
+`auth.signInWithPopup(provider)`, cujo único tratamento era um `.catch()`
+que mapeia `err.code` para uma mensagem — sem `.finally()`, sem timeout,
+sem qualquer forma de recuperação se a promise nunca resolvesse nem
+rejeitasse. `signInWithPopup` é conhecido por ser pouco fiável dentro de
+TWAs: o fluxo OAuth abre-se num Custom Tab (coerente com o "Fallback
+behavior: Custom Tabs" configurado no PWABuilder desta app) e, se esse
+Custom Tab não devolver o controlo corretamente ao TWA, a promise fica
+pendente para sempre. O utilizador confirmou ter usado a app com sucesso
+em 24/10/2026, pelo que não foi uma regressão de código — é a
+intermitência característica do `signInWithPopup` em TWA, que calhou de
+se manifestar agora.
+- **Correção**: substituído `signInWithPopup` por `signInWithRedirect` em
+  `entrarComProvider()` (linha ~1770) — é a recomendação oficial da
+  Firebase para contextos TWA, ataca a causa raiz em vez de só mascarar o
+  sintoma. Adicionada a chamada `auth.getRedirectResult().catch(...)`
+  junto ao `auth.onAuthStateChanged(...)` para apanhar erros do fluxo de
+  redirect com a mesma `mensagemErroLogin(err.code)` já existente. Como
+  rede de segurança adicional (mesma filosofia do link de saída da
+  biometria): `entrarComProvider()` arma agora um `setTimeout` de 20s que,
+  se `loginStatus` continuar exatamente no texto "A abrir sessão…" sem
+  nunca ter mudado, repõe uma mensagem de erro genérica (convite a tentar
+  de novo) — para nunca mais deixar o utilizador preso sem saída, mesmo
+  que o redirect falhe de forma imprevista.
+- Testado com Playwright (stub próprio do Firebase compat, sem depender
+  de rede real): carregamento normal sem erro; `getRedirectResult()` a
+  rejeitar com um código mapeado → mensagem de erro correta mostrada;
+  clique no botão com `signInWithRedirect` pendurado para sempre → depois
+  de 20s (relógio simulado do Playwright) a mensagem repõe-se, nunca fica
+  presa; `onAuthStateChanged` com utilizador válido → ecrã de login
+  escondido normalmente. Sem regressão nos fluxos normais.
+
 **Possíveis próximos passos futuros (não urgentes, só se/quando o
 utilizador quiser)**: acompanhar as primeiras instalações reais e
 reviews na Play Console (Estatísticas), a expansão de idiomas (ES/FR/DE/IT)

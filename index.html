@@ -1768,8 +1768,15 @@ function mensagemErroLogin(codigo){
 }
 
 function entrarComProvider(provider){
-  loginStatus.textContent = t('status_abrindo_sessao');
-  auth.signInWithPopup(provider).catch(err => {
+  const mensagemPendente = t('status_abrindo_sessao');
+  loginStatus.textContent = mensagemPendente;
+  const timeoutSeguranca = setTimeout(() => {
+    if(loginStatus.textContent === mensagemPendente){
+      loginStatus.textContent = t('erro_login_generico');
+    }
+  }, 20000);
+  auth.signInWithRedirect(provider).catch(err => {
+    clearTimeout(timeoutSeguranca);
     console.error(err);
     loginStatus.textContent = mensagemErroLogin(err.code);
   });
@@ -2532,6 +2539,11 @@ function mostrarEcraBloqueio(user){
     sairDoEcraBloqueio(user);
   };
 }
+
+auth.getRedirectResult().catch(err => {
+  console.error(err);
+  loginStatus.textContent = mensagemErroLogin(err.code);
+});
 
 auth.onAuthStateChanged(async (user) => {
   currentUser = user;
